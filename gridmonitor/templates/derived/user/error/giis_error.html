@@ -1,0 +1,21 @@
+<%inherit file="/base/user.html"/>
+
+<h2> Error: GIIS List Missing in Deployed Service Configuration</h2>
+<p> The service started with a configuration  that did not 
+specify any Grid Index Information System (GIIS) servers to be querried. The GIIS
+server(s) provide a 'bootstrapping'  of the monitoring system and are therefore 
+crucial.
+
+<h2> Remedy </h2>
+
+Open your configuration file (most likely called  <code> YOUR_APPLICATION_PATH/GridMonitor/production.ini
+</code> and enter the following lines in the <code> [app:main]</code> section:<br/><br/>
+
+<code> giis = giis_server_1[:port] </code> <br/><br/>
+
+or if you have several giis_servers: <br/><br/>
+
+<code> giis = giis_server_1[:port] , giis_server_2[:port] , ...  </code>
+
+
+

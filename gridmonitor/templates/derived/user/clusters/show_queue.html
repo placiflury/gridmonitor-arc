@@ -1,0 +1,58 @@
+<%inherit file="/base/user.html"/>
+
+<p> Displaying status information about the queue '${c.queue_name}' on cluster '${c.cluster_display_name}'. </p>
+
+<div id="${c.cluster_hostname}_queuecontainer">
+<table id="${c.cluster_hostname}_queuetable">
+    <thead>
+        <tr>
+          <th> Queue Parameter</th>
+          <th> Value(s)</th>
+        </tr>
+    </thead>
+    <tbody>
+    % for param in c.queue_obj.get_attribute_names():
+        %for value in c.queue_obj.get_attribute_values(param):
+        <tr>
+            <td >${param} </td>
+            <td> ${value} </td>
+        </tr>
+     %endfor
+    %endfor
+    </tbody>
+</table>
+</div>
+
+
+<script type="text/javascript">
+YAHOO.util.Event.addListener(window, "load",function(){
+    var myColumnDefs = [
+        {key:"Queue Parameter", sortable:true},
+        {key:"Value(s)", sortable:true, resizeable:true}
+    ];
+    var myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("${c.cluster_hostname}_queuetable"));
+    
+    myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+    
+    myDataSource.responseSchema = {
+        fields: [{key:"Queue Parameter"}, {key:"Value(s)"}]
+        };
+
+    var myDataTable = new YAHOO.widget.DataTable("${c.cluster_hostname}_queuecontainer", myColumnDefs, myDataSource,
+    {caption:"Queue Info for ${c.queue_name} on cluster ${c.cluster_display_name}", 
+    summary: "GRIS Information about queue ${c.queue_name} on  cluster ${c.cluster_display_name}"});
+});
+</script>
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/yui/datatable/assets/skins/sam/datatable.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+   <script type="text/javascript" src="/js/yui/drag-drop-min.js"></script>
+   <script type="text/javascript" src="/js/yui/element-beta-min.js"></script>
+   <script type="text/javascript" src="/js/yui/datasource-min.js"></script>
+   <script type="text/javascript" src="/js/yui/datatable-min.js"></script>
+</%def>

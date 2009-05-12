@@ -1,0 +1,24 @@
+<%inherit file="/base/user.html"/>
+<%namespace name="votable" file="/components/votable.mako"/>
+
+<h3> Following VOs are known to the monitored  Grid </h3>
+<ul>
+% for vo in c.vo_list:
+    <li> ${vo}</li>
+%endfor
+</ul>
+
+<h3>You are Member of the following VOs </h3>
+ 
+%if c.user_client_dn:
+    <% type = 'Browser' %>
+    ${votable.vo_table(c.user_client_dn, c.user_client_ca,c.vo_list,c.voms_connector,type)}
+%endif
+
+${votable.vo_table(c.user_slcs_obj.get_dn(), c.user_slcs_obj.get_ca(),c.vo_list,c.voms_connector)}
+
+
+
+
+
+

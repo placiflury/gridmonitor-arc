@@ -1,0 +1,83 @@
+/* @group Nav Bar */
+/* taken from pylons website and adapted slightly*/
+ul#navlist {
+	position: absolute;
+	bottom: 0px;
+	left: 20px;
+    	margin: 0;
+	padding: 0;
+    	color: #eee;
+    	line-height: 34px;
+}
+ul#navlist li {
+    display: inline; 
+}
+ul#navlist li a {
+    border: 0px;
+    border-left: 1px solid #000;
+    border-top: 1px solid #000080;
+    border-right:1px solid #000080;
+    padding: 0px 14px 8px 14px;
+    font-size: 85%;
+    color: #fff;
+    margin-right: 9px;
+    text-decoration: none;
+    height: 20px;
+    float: left;
+    background: #4682B4
+}
+ul#navlist li a#highlight , ul#navlist li a#highlight:hover {
+    color: #fff;
+    padding-right: 33px;
+}
+ul#navlist li a:hover {
+    background: #E0FFFF; 
+    color: #203781;
+}
+ul#navlist li.active a.active,  ul#main-nav li.active a.active:hover {
+    background: #fff;
+    color: #203781;
+}
+/* @end */
+
+div#nav-bar {
+   position: absolute;
+   bottom: 0px;
+   left: 0px;
+    text-align: center;
+    border-top: 0px solid #fff;
+    width: 100%;
+    clear: both;
+    padding: 0;
+    margin: 0;
+    height: 40px;
+    background: #4682B4;
+}
+#custom-doc {width: 100%; min-width: 750px;}
+#hd {
+	position: relative;
+	height: 120px;
+	padding: 0;
+	margin: 0;
+    	background: #055670 url('/img/korn_bg.jpg') top repeat-x; 
+    	font-family: Verdana;
+    	font-size: 120%;
+    	color: #000;
+}
+#logo {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: 175px;
+    height: 52px;
+    background: url('/img/logo.png');
+}
+
+.invisible {
+    visibility: hidden;
+    font-size: 1px;
+    padding: 0px;
+    line-height: 0px;
+    margin: 0px;
+}
+

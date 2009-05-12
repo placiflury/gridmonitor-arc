@@ -1,0 +1,114 @@
+<%inherit file="/base/user.html"/>
+<p>
+According to the grid information system your grid consists of following clusters, providing in total
+${c.tot_cpus} CPUs.
+<ul>
+% for cluster in c.cluster_menu:
+<% hostname= cluster[1].split('/')[-1]
+cpus=g.get_cluster_stats(hostname,'stats_cpus')
+%>
+<li> ${h.link(cluster[1], cluster[0])} (${cpus} CPUs)</li>
+%endfor
+</ul>
+You can click on the links for more information about the clusters.
+</p>
+<p>
+<img src="http://chart.apis.google.com/chart?
+chs=650x150
+&amp;chds=0,${c.max_cpus}
+&amp;chd=${c.cl_pie_chart_data}
+&amp;chl=${c.cl_pie_chart_labels}
+&amp;cht=p3"
+alt="Clusters Chart"/>
+</p>
+
+
+TODO (following is just mocking stuff):
+
+<table width="600">
+<tr class="table_head"><th colspan="2"> Load on Clusters</th></tr>
+<tr> <td>Cluster</td><td>Queues</td></tr>
+
+<!-- 
+cluster[0]: hostname
+cluster[1]: grid_running
+cluster[2]: running
+cluster[3]: # of cpus 
+-->
+%for cluster in c.cl_bar_chart:
+<% 
+cluster_name = cluster[0] 
+grid_running = cluster[1]
+running = cluster[2]
+num_cpus = cluster[3]
+q_data = c.cl_qbar_chart[cluster_name][0]
+q_scaling=c.cl_qbar_chart[cluster_name][1]}
+q_labels=c.cl_qbar_chart[cluster_name][2]}
+%>
+
+
+<tr>
+<td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x100
+&amp;cht=bhs
+&amp;chco=FF9000,5D7CBA,95B9C7
+&amp;chd=t:${cluster_running}|${running}|${num_cpus}&chds=0,${num_cpus}
+&amp;chdh=20
+&amp;chxt=x,x
+&amp;chxr=0,0,${num_cpus}
+&amp;chxl=
+1:|gridrunning|running|cpus
+&amp;chxp=50,${num_cpus}
+&amp;chtt='${cluster_name}'"
+alt="Number of (grid) jobs on ${cluster_name}"/>
+    </td>
+    <td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x140
+&amp;cht=bhs
+&amp;chco=FF9000,5D7CBA,95B9C7
+&amp;chd=${q_data}
+&amp;chds=0,${q_scaling}
+&amp;chdh=20
+&amp;chxt=x,x,y
+&amp;chxr=0,0,80
+&amp;chxl=${q_labels}"
+alt="Queue(s) status for ${cluster_name}"/>
+</td></tr>
+%endfor
+
+<tr>
+    <td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x100
+&amp;cht=bhs
+&amp;chco=FF9000,FFC77F,FFE3BF
+&amp;chd=t:10|67|400&chds=0,400
+&amp;chdh=20
+&amp;chxt=x,x
+&amp;chxr=0,0,400
+&amp;chxl=
+1:|gridrunning|running
+&amp;chxp=50,400
+&amp;chtt=Cluster+XY"
+alt="Running and Grid Running Jobs"/>
+    </td>
+    <td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x120
+&amp;cht=bhs
+&amp;chco=4D89F9,C6D9FD,AFEEEE
+&amp;chd=t:25,45|45,35|7,12
+&amp;chds=0,90
+&amp;chdh=20
+&amp;chxt=x,x,y
+&amp;chxr=0,0,100
+&amp;chxl=
+1:|gridqueued|localqueued|lrmsqueued|
+2:|big_Q|fast"
+alt="Running and Grid Running Jobs"/>
+</td> </tr>
+
+</table>
+

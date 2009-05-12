@@ -1,0 +1,92 @@
+<%inherit file="/base/user.html"/>
+<p>
+According to the grid information system your grid consists of following clusters:
+The total number of CPUs is ${c.tot_cpus}.
+<ul>
+% for cluster in c.cluster_menu:
+<li> ${h.link(cluster[1], cluster[0])} (CPUs: ${c.clusters_stats[cluster[0]]['cpus']})</li>
+%endfor
+</ul>
+
+You can click on the links for more information about the clusters.
+</p>
+<p>
+<img src="http://chart.apis.google.com/chart?
+chs=650x150
+&amp;chds=1,${c.max_cpus}
+&amp;chd=${c.cl_chart_data}
+&amp;chl=${c.cl_chart_labels}
+&amp;cht=p3"
+alt="Clusters Chart"/>
+</p>
+
+<table width="600">
+<tr class="table_head"><th colspan="2"> Load on Clusters</th></tr>
+<tr> <td>Cluster</td><td>Queues</td></tr>
+<tr>
+    <td> 
+<img src="http://chart.apis.google.com/chart?
+chs=250x100
+&amp;cht=bhs
+&amp;chco=4D89F9,C6D9FD
+&amp;chd=t:10|400&chds=0,400
+&amp;chdh=20
+&amp;chxt=x,x
+&amp;chxr=0,0,400
+&amp;chxl=
+1:|gridrunning|running
+&amp;chxp=50,400
+&amp;chtt=Cluster+XY"
+alt="Running and Grid Running Jobs"/>
+    </td>
+    <td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x140
+&amp;cht=bhs
+&amp;chco=4D89F9,C6D9FD,AFEEEE
+&amp;chd=t:10,25,45|50,45,35|5,7,2
+&amp;chds=0,90
+&amp;chdh=20
+&amp;chxt=x,x,y
+&amp;chxr=0,0,80
+&amp;chxl=
+1:|gridqueued|localqueued|lrmsqueued|
+2:|q1|q2|q3"
+alt="Running and Grid Running Jobs"/>
+</td></tr>
+
+<tr>
+    <td> 
+<img src="http://chart.apis.google.com/chart?
+chs=250x100
+&amp;cht=bhs
+&amp;chco=4D89F9,C6D9FD
+&amp;chd=t:10|400&chds=0,400
+&amp;chdh=20
+&amp;chxt=x,x
+&amp;chxr=0,0,400
+&amp;chxl=
+1:|gridrunning|running
+&amp;chxp=50,400
+&amp;chtt=Cluster+XY"
+alt="Running and Grid Running Jobs"/>
+    </td>
+    <td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x120
+&amp;cht=bhs
+&amp;chco=4D89F9,C6D9FD,AFEEEE
+&amp;chd=t:25,45|45,35|7,12
+&amp;chds=0,90
+&amp;chdh=20
+&amp;chxt=x,x,y
+&amp;chxr=0,0,100
+&amp;chxl=
+1:|gridqueued|localqueued|lrmsqueued|
+2:|big_Q|fast"
+alt="Running and Grid Running Jobs"/>
+</td> </tr>
+
+</table>
+
+

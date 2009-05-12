@@ -1,0 +1,29 @@
+<%inherit file="/base/index.html"/>
+<%namespace name="menu_nav" file="/components/menu.mako"/>
+
+<script type="text/javascript">
+    YAHOO.util.Event.onContentReady("usermenu", function () {
+    var oMenu = new YAHOO.widget.Menu("usermenu",{
+		position: "static",
+		hidedelay: 750,
+		lazyload: true});
+    oMenu.render();
+    oMenu.show();});
+</script>
+${next.body()}
+<%def name="top_nav()">
+  ${menu_nav.top_nav(c.top_nav, c.top_nav_active)}
+</%def>
+
+<%def name="user_info()">
+  ${c.user_name} ${c.user_surname}
+</%def>
+
+<%def name="menu()">
+    ${menu_nav.menu(c.menu,c.menu_active,'usermenu')}
+</%def> 
+
+<%def name="css()">
+  ${parent.css()}
+</%def>
+

@@ -1,0 +1,83 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <% self.seen_css = set() %>
+    <title>${self.title(c.title)}</title>
+    ${self.css()}
+    ${self.js()}
+</head>
+<body class="yui-skin-sam">
+
+<div id="custom-doc" class="yui-t1" > 
+   <div id="hd"> 
+	 <div id="logo"><h1 class="invisible">Grid Monioring (SMSCG AAA/SWITCH)</h1></div>
+	 <div id="nav-items">
+     	     <div id="nav-bar">
+		        ${self.top_nav()}
+                <div id="user-info">
+                ${self.user_info()} 
+            </div>
+      	     </div>
+    	</div>
+   </div>
+ <!--  <style type ="text/css">
+  div{ border:1px solid #888;}
+   </style> --> 
+   <div id="bd">
+	<div id="yui-main">
+		 ${self.breadcrumbs()}
+	    <div class="yui-b">
+	        ${self.heading()}
+		${next.body()}
+	    </div>
+	</div>
+	<div class="yui-b">
+	    <h1></h1> <!-- just some quick and dirty padding -->
+	    ${self.menu()} 
+	</div>
+   </div>
+   <div id = "ft">
+     ${self.footer()}
+   </div>
+</div>
+</body>
+</html>
+
+<%def name="title(arg)">${arg or 'Grid Monitoring (AAA/SWITCH)'}</%def>
+<%def name="css_link(path,media='')">
+	## making sure each css only gets included once 
+	% if path not in self.seen_css:
+	    <link rel="stylesheet" type="text/css" href="${path|h}" media="${media}"></link>\
+	% endif
+	<% self.seen_css.add(path) %>\
+</%def>
+
+<%def name="css()">	
+   ${css_link('/css/yui/reset/reset.css','screen')}
+   ${css_link('/css/yui/fonts/fonts.css','screen')}
+   ${css_link('/css/yui/grids/grids.css','screen')}
+   ${css_link('/css/yui/base/base.css','screen')}
+   ${css_link('/css/yui/menu/menu.css','screen')}
+   ${css_link('/css/yui/fonts/fonts-min.css','screen')}
+   ${css_link('/css/nav.css','screen')}
+   ${css_link('/css/menu.css','screen')}
+   ${css_link('/css/monitor.css','screen')}
+</%def>
+
+<%def name="js()">
+    <script type="text/javascript" src="/js/yui/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/container_core-min.js"></script>
+    <script type="text/javascript" src="/js/yui/menu-min.js"></script>
+    <script type="text/javascript" src="/js/yui/event-min.js"></script>
+    <script type="text/javascript" src="/js/wz_jsgraphics.js"></script>
+</%def>
+
+<%def name="top_nav()"></%def>
+<%def name="user_info()"></%def>
+<%def name="menu()"></%def>
+<%def name="heading()"><h1>${c.heading or 'No Title'}</h1><a name="top"></a></%def>
+<%def name="breadcrumbs()"></%def>
+<%def name="footer()"></%def>
+
