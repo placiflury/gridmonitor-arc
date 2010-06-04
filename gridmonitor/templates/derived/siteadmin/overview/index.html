@@ -1,3 +1,111 @@
 <%inherit file="/base/siteadmin.html"/>
 
-<p> A short overview on the last occurences on the SMSCG Grid </p>
+<% color_map={0: '#ffffff', 1: '#FFFBBF', 2:'#FF5000', 3: '#809DAA'} %>
+
+<p>You are visiting the Grid Monitor of the SMSCG project.
+On this page you find a the <span class="emph"> tactical overview </span> for your site. If you'd like to have 
+more specific details please, click on the 'details' links on the right.
+</p>
+
+<% state_map={0: 'ok', 1: 'warn', 2:'critical', 3: 'unknown'} %>
+
+<table width="600">
+    <caption>Tactical Overview</caption>
+    <tr class="table_head3"> 
+        <th>Service/Performance</th> 
+        <th>(Services) Status</th>
+        <th>Details</th> 
+    </tr>
+    % if c.cores_admin or (c.core_hosts_down > 0) :
+    <tr>
+        <td> Core Services</td>
+        <td> 
+         <!-- check/report if any host is down -->
+        % if c.core_hosts_down > 0:
+        <span class='error'> ${c.core_hosts_down} Host(s) down. </span>
+        % endif
+        %for state, value in c.core_stats_summary.items():
+        %if value > 0:
+        <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
+        %endif
+        %endfor  
+        </td>
+        <td> ${h.link('/siteadmin/overview/core#core','details')}</td>
+    </tr>
+    % endif
+   <!-- check whether all CEs admin is administering have been displayed --> 
+    % for core_name in c.missing_cores:
+        <tr>
+            <td> ${core_name} </td>
+            <td colspan=2> No Nagios info available. (missing)</td>
+        </tr>
+    %endfor
+    
+    % if c.ce_admin or (c.ce_hosts_down > 0) :
+    <tr>
+        <td> Computing Elements (Services)</td>
+        <td>
+         <!-- check/report if any host is down -->
+        % if c.ce_hosts_down > 0:
+        <span class='error'> ${c.ce_hosts_down} Host(s) down. </span>
+        % endif
+        %for state, value in c.ces_stats_summary.items():
+        %if value > 0:
+            <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
+        %endif
+        %endfor
+        </td>
+        <td> ${h.link('/siteadmin/overview/core#ces','details')}</td>
+    </tr>
+    %endif
+    
+    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here-->
+    %if c.no_queue_clusters:
+    <tr>
+        <td>Cluster(s) with Queue problem</td>
+        <td colspan=2>
+            % for (display_name, hostname) in c.no_queue_clusters:
+                <% cpath =  '/siteadmin/clusters/show/' +  hostname %>
+                ${h.link(cpath, display_name)} <span class="error"> (NO QUEUE)</span><br/>
+            %endfor
+        </td>
+    </tr>
+    %endif    
+    <!--VOs supported resp. Pool account usage  on: -->
+    % for cluster_name in  c.admin_ces.keys():
+        % for service_name in c.admin_ces[cluster_name].keys():
+        <tr>
+            <td>${service_name} (${cluster_name})</td>
+            <%bg_color=color_map[c.admin_ces[cluster_name][service_name]['current_state']]%>
+            <td BGCOLOR="${bg_color}" colspan=2>
+             ${c.admin_ces[cluster_name][service_name]['output']}</td> 
+        </tr>
+        %endfor
+    %endfor
+   <!-- check whether all CEs admin is administering have been displayed --> 
+    % for cluster_name in c.missing_clusters:
+        <tr>
+            <td> ${cluster_name} </td>
+            <td colspan=2> No (Nagios) info available. (missing)</td>
+        </tr>
+    %endfor
+
+    <!--Usage of pool-accounts --> 
+</table>
+
+<h3> Mocking Page </h3>
+
+<ul>
+<li>Tactical Overview: </li>
+    <ul>
+    <li>local services (CE and locally hosted central services) if any</li>
+    <li> # jobs at site</li>
+    <li> # jobs per VO (if possible)</li>
+    <li> Pool account usage (%) -> Plot would be fine</li>
+    </ul>
+<li> GRIS response time(s): avg/current</li>
+<li> Age of current displayed data</li>
+</ul>
+
+
+

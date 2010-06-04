@@ -1,0 +1,125 @@
+<%inherit file="/base/gridadmin.html"/>
+<script type="text/javascript">
+            var newwindow;
+            function poptastic(url)
+            {
+                newwindow=window.open(url,'name', 'height= 800, width=750');
+                if (window.focus) {newwindow.focus()}
+            }
+</script>
+
+% if not c.suffix:
+    <p>
+    Below you find a table with the time it took to query the GIIS'es for the list 
+    of clusters (GRIS'es).</br>
+    If the GIIS'es returned cluster's that are not reacheable anymore, these 
+    clusters (GRIS'es) get blacklisted.  
+    </p>
+    <table width="500">
+        <tr  class="table_row_emph"> 
+        <th colspan=2> GIIS'es -- Queried at ${c.query_time} (UTC)</th>
+        <th> Details</th>
+        <% count=0 %>
+        </tr> 
+        %for giis in c.giises:
+            <% count +=1 %>
+            %if ((count%2) == 1):
+                <tr>
+            %else:
+                <tr class"table_row_odd"> 
+            %endif
+            <td>${giis.hostname}</td>
+            <td>${giis.processing_time} </td>
+            <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${giis.hostname}');"> details (history) </a></td>
+            </tr>
+        %endfor
+        %if c.blacklisted:
+            <tr style="border-top-style: double;" class="table_row_emph"> 
+            <th colspan=2> Blacklisted GRIS'es </th>
+            <th> Details </th>
+            <% count=0 %>
+            </tr>
+            %for gris in c.blacklisted:
+                <% count +=1 %>
+                %if ((count%2) == 1):
+                    <tr>
+                %else:
+                    <tr class="table_row_odd"> 
+                %endif
+                <td>${gris.hostname}</td>
+                <td> --</td>
+                <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${gris.hostname}');"> details (history) </a></td>
+                </tr>
+            %endfor
+        %endif     
+        %if c.db_inactive_clusters:
+            <tr style="border-top-style: double;" class="table_row_emph"> 
+            <th colspan=2> Inactive GRIS'es </th>
+            <th> Details </th>
+            <% count=0 %>
+            </tr>
+            %for gris in c.db_inactive_clusters:
+                <% count +=1 %>
+                %if ((count%2) == 1):
+                    <tr>
+                %else:
+                    <tr class="table_row_odd"> 
+                %endif
+                <td>${gris.hostname}</td>
+                <td>since: ${gris.db_lastmodified} (UTC)</td>
+                <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${gris.hostname}');"> details (history) </a></td>
+                </tr>
+            %endfor
+        %endif     
+    </table>
+<!-- 
+<h3> RRD plots of Infosys processing times of the: </h3>
+<ul>
+<li><a href="./infosys/show/h6">last six hours</a></li>
+<li><a href="./infosys/show/w1">last week</a></li>
+<li><a href="./infosys/show/y1">last year</a></li>
+</ul>
+-->
+
+<!-- PLOT RRD GRAPHS -->
+%else:  
+    <table>
+    <% count=0 %>
+    % for giis in c.giises:
+        <% name = giis.hostname + c.suffix%>
+        <% count +=1 %>
+            %if ((count%2) == 1):
+                <tr>
+                <td>
+                    <img src="/rrd/${name}" alt="response time of GIIS: ${giis.hostname}">    
+                </td>
+            %else:
+                <td>
+                    <img src="/rrd/${name}" alt="response time of GIIS: ${giis.hostname}">    
+                </td>
+                </tr>
+            %endif
+    %endfor
+    % for gris in c.dbclusters:
+        <% name = gris.hostname + c.suffix%>
+        <% count +=1 %>
+            %if ((count%2) == 1):
+                <tr>
+                <td>
+                    <img src="/rrd/${name}" alt="response time of cluster ${gris.hostname}">    
+                </td>
+            %else:
+                <td>
+                    <img src="/rrd/${name}" alt="response time of cluster ${gris.hostname}">    
+                </td>
+                </tr>
+            %endif
+    %endfor
+    %if ((count%2) == 1):
+        </tr>
+    %endif
+
+    </table>
+%endif
+
+

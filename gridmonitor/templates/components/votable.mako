@@ -1,7 +1,7 @@
 <%def name="vo_table(dn, ca, vo_list, voms_connector, type='SLCS')">
     <% voms_connector.reset_dn_ca(dn, ca)%>
 
-    <table width="660">
+    <table width="860">
     <% entries = False %>
     <tr class="table_head"> <th colspan="2"> VO membership associated with your ${type} certificate </th> </tr>
 

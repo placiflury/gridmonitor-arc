@@ -1,0 +1,16 @@
+<%inherit file="/base/gridadmin.html"/>
+<% suffixes = ['_h6.png', '_w1.png', '_y1.png'] %>
+<!-- PLOT RRD GRAPHS -->
+<table>
+<% count=0 %>
+% for suffix in suffixes:
+    <% name = c.cluster_name + suffix %>
+            <tr>
+            <td>
+                <img src="/rrd/${name}" alt="response time of GRIS/GIIS: ${c.cluster_name}">    
+            </td>
+            </tr>
+%endfor
+
+</table>
+

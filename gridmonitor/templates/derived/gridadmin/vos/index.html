@@ -1,0 +1,49 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<!--
+chs=450x240                     # size
+&amp;cht=bhg                    # chart type     
+&amp;chco=FF9000,5D7CBA         # colors
+&amp;chxt=x,t,r                 # axis_1, axis_2 
+&amp;chxl=2:|'crypto'|'earth','life','smscg'|'life,smscg'    # axis_num:|<label_1>|<label_2>
+&amp;chd=t:30,90,60|400,800,2000   # data sets
+&amp;chds=0,100,0,2000             # data set scaling  (normalizes things to size 100)
+&amp;chxr=0,0,2000|1,0,100         # range: axis_index,start_range,end_range, interval| 
+&amp;chdl=jobs|walltime[s]         # data set label
+&amp;chdlp=t                       # data set label position
+&amp;chm=N-*c0*,FF9000,0,-1,11|N-*c0*,5D7CBA,1,-1,11   # data point labels
+-->
+<p>
+Below table shows a snapshot on the Grid usage of the last 24 hours. The usage numbers, i.e. the numbers of jobs and the
+walltime usage, have been assigned to the VOs based on the VO membership of the users that submitted the jobs. If a user is member of multiple VOs, his/her assignment cannot be tracked down to the exact VO, which was used to submit the job. In such cases we do list all potential VOs of the user.
+</p>
+
+<%num = len(c.walltime_data) %>
+</p>
+<table width='550' border="1">
+<tr class="table_head"><th> Overall 'current' Usage/VO </th>
+</tr>
+<tr><td>
+<! -- notice there is a limitation in the size a picture can take ... -->
+<%
+if c.walltime_max ==0:
+    c.walltime_max = 1
+if c.job_max == 0:
+    c.job_max = 1
+%>
+<img src="http://chart.apis.google.com/chart?
+chs=450x${c.num_vos*55 + 80}
+&amp;cht=bhg
+&amp;chco=FF9000,5D7CBA
+&amp;chxt=x,t,r
+&amp;chxl=2:${c.vo_labels}
+&amp;chd=t:${c.jobs_data}|${c.walltime_data}
+&amp;chds=0,${c.job_max*1.1},0,${c.walltime_max * 1.2}
+&amp;chxr=0,0,${c.walltime_max * 1.2}|1,0,${c.job_max*1.1}
+&amp;chdl=jobs|walltime[s]
+&amp;chdlp=t
+&amp;chm=N&nbsp;*c0*,FF9000,0,-1,11|N&nbsp;&nbsp;*c0*,5D7CBA,1,-1,11
+&amp;alt="Number of jobs and duration per VO."/>
+</td>
+</tr>
+</table>

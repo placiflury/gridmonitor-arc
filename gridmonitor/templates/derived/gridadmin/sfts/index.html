@@ -1,0 +1,53 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<table width="700">
+    <caption>Site Functional Tests (SFTs)</caption>
+    <tr class="table_head2"> 
+        <th>Cluster</th> 
+        <th>SFT name</th>
+        <th>Status'</th> 
+        <th>Last Executed</th> 
+        <th>Test details</th> 
+    </tr>
+    <% state_map={'OK': 'ok', 'FAILED': 'critical', 'OTHER': 'unknown', 'INLRMS': 'ok', 'DELETED': 'unknown'} %>
+    <% count=0 %>
+    % for cluster_name in c.ordered_cluster_names:
+        <% sft_test_names = c.sft_jobs_summary[cluster_name].keys() %>
+        <% n_entries = len(sft_test_names) %>
+        <% sft_test_names.sort() %> 
+        
+        <% count += 1 %>
+        
+        % if ((count%2) == 1):
+            <tr>
+        % else:
+            <tr class="table_row_odd">
+        % endif
+            <td rowspan = ${n_entries} style="background-color:#FFFFFF" >${cluster_name}</td>
+            <% flag = False %> 
+            % for sft_test_name in sft_test_names:   
+                % if flag:
+                    <% count += 1 %>
+                    % if ((count%2) == 1):
+                        <tr>
+                    % else:
+                        <tr class="table_row_odd">
+                    % endif
+                % endif
+                <% flag = True %>
+                <td>${h.link('/gridadmin/sfts/show_details/' + sft_test_name, sft_test_name)}</td> 
+                <td>
+                    %for status, value in  c.sft_jobs_summary[cluster_name][sft_test_name]['status'].items():
+                            
+                        <span class='${state_map[status]}'> ${status}: ${value}</span>
+                        
+                    %endfor
+                </td> 
+                <td>${c.sft_jobs_summary[cluster_name][sft_test_name]['sub_time']}</td> 
+                <td>${h.link('/gridadmin/sfts/show/' + sft_test_name +'/' + cluster_name, 'details')}</td> 
+            </tr>
+            % endfor
+%endfor
+ 
+</table>
+

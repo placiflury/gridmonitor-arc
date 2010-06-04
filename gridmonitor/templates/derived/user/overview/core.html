@@ -1,11 +1,181 @@
 <%inherit file="/base/user.html"/>
+
+<% state_map={0: 'ok', 1: 'warn', 2:'critical', 3: 'unknown'} %>
+
+<% color_map={0: '#A8EDB4', 1: '#FFFBBF', 2:'#FF5000', 3: '#809DAA'} %>
+
+
+% if c.status_core:
+<h2> <a name="core">Core Services </a></h2>
+
+<table width="920">
+    <caption>Core Services</caption>
+    <tr class="table_head3"> 
+        <th>Host</th> 
+        <th>Services</th>
+        <th>Check Time</th> 
+        <th>Plugin Output</th>
+        <th>Performance Data </th>
+    </tr>
+
+    <% count=1 %>
+    % for host  in c.status_core:
+        <%span_size = len(host['services_q'])%>
+        % if ((count%2) == 1):
+        <tr>
+        % else:
+        <tr class="table_row_odd">
+        % endif
+            <%bg_color=color_map[host['hoststatus_object'].current_state]%>
+            <td BGCOLOR="${bg_color}" ROWSPAN=${span_size}> <!--HOST  -->
+                %if host['display_name']:
+                    ${host['display_name']}
+                %else:
+                    ${host['alias']}
+                %endif
+                % if host['hoststatus_object'].current_state != 0:
+                    <br/>(${host['hoststatus_object'].output})
+                % endif
+            </td>
+            <% first_flg=True %> 
+            % for service in host['services_q']: 
+                % if not first_flg :
+                    % if ((count%2) == 1):
+                    <tr>
+                    % else:
+                    <tr class="table_row_odd">
+                    % endif
+                %else:
+                  <% first_flg = False %>
+                % endif
+
+                %if service.status:
+                    <%bg_color=color_map[service.status[0].current_state]%>
+                    <td BGCOLOR="${bg_color}"> <!--SERVICES  -->
+                    ${service.display_name} </td>
+                    <% record_age = h.get_sqldatetime_age(service.status[0].last_check).days %>
+                    % if record_age >=  c.nagios_check_crit_days: 
+                        <%bg_color=color_map[2]%> 
+                    % elif record_age >= c.nagios_check_warn_days:  
+                        <%bg_color=color_map[1]%> 
+                    %else:
+                        <%bg_color=''%> 
+                    %endif
+                    <td BGCOLOR="${bg_color}"> 
+                     (${service.status[0].last_check})</td> 
+                    <td>${service.status[0].output} </td> 
+                    <td> ${service.status[0].perfdata} </td>
+                %else:
+                    <td> ${service.display_name} </td>
+                    <td colspan=3> No Information available</td>
+                %endif                    
+            
+                </tr>
+                 <% count += 1 %>
+            %endfor
+        
+%endfor
+
+</table>
+
+%endif
+
+
+<h2> <a name="ces">Computing Elements </a></h2>
+<table width="920">
+    <caption>Computing Elements at sites</caption>
+    <tr class="table_head3"> 
+        <th>Host</th> 
+        <th>Services</th>
+        <th>Check Time</th> 
+        <th>Plugin Output</th>
+        <th>Performance Data </th>
+    </tr>
+    
+    <% count=1 %>
+    % for host  in c.status_ces:
+        <%span_size = len(host['services_q'])%>
+        % if ((count%2) == 1):
+        <tr>
+        % else:
+        <tr class="table_row_odd">
+        % endif
+            <%bg_color=color_map[host['hoststatus_object'].current_state]%>
+            <td BGCOLOR="${bg_color}" ROWSPAN=${span_size}> <!--HOST  -->
+            %if host['display_name']:
+                ${host['display_name']}
+            %else:
+                ${host['alias']}
+            %endif
+            % if host['hoststatus_object'].current_state != 0:
+                <br/>(${host['hoststatus_object'].output})
+            % endif
+            </td>
+            <% first_flg=True %> 
+            % for service in host['services_q']: 
+                % if not first_flg :
+                    % if ((count%2) == 1):
+                    <tr>
+                    % else:
+                    <tr class="table_row_odd">
+                    % endif
+                %else:
+                  <% first_flg = False %>
+                % endif
+
+                % if service.status:
+                    %if h.is_epoch_time(service.status[0].last_check):
+                        <%bg_color=color_map[3]%> <!-- hack -->
+                    %else:
+                        <%bg_color=color_map[service.status[0].current_state]%>
+                    %endif
+                    <td BGCOLOR="${bg_color}"> <!--SERVICES  -->
+                        ${service.display_name}
+                    </td>
+                     <!--CHECK TIME  -->
+                    <% record_age = h.get_sqldatetime_age(service.status[0].last_check).days %>
+                    % if record_age >=  c.nagios_check_crit_days: 
+                        <%bg_color=color_map[2]%> 
+                    % elif record_age >= c.nagios_check_warn_days:  
+                        <%bg_color=color_map[1]%> 
+                    %else:
+                        <%bg_color=''%> 
+                    %endif
+                    <td BGCOLOR="${bg_color}"> 
+                    (${service.status[0].last_check})
+                    </td>
+                    <td> <!-- Plugin Output --> 
+                    ${service.status[0].output}
+                    </td>
+                    <td> <!-- Perfdata -->
+                    ${service.status[0].perfdata}
+                    </td>
+                 %else:
+                    <td> ${service.display_name} </td>
+                    <td colspan=3> No Information available </td>
+                 %endif
+                </tr>
+                <% count += 1 %>
+        %endfor
+    %endfor
+
+</table>
+
 <h3> MOCKING PAGE: </h3>
 <p>
 Things we could present here:
 <ul>
-<li>status of core services (SLCS, VOMS, VASH, GIIS)</li>
+<li> Service details</li>
+<li> editor for tag/annotations</li>
+<li>possibilty to activly probe grid...</li>
 </ul>
 
 </p>
+
+
+
+
+
+
 
 

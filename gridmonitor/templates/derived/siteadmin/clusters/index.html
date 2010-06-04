@@ -1,0 +1,129 @@
+<%inherit file="/base/siteadmin.html"/>
+
+<table width="900">
+<tr class="table_head"><th colspan="3"> Load on Your Clusters</th></tr>
+<tr class="table_head"> <td>Cluster</td><td>Queues</td><td>Details</td> </tr>
+
+%for cluster in c.cl_bar_chart:
+<% 
+cluster_name = cluster[0] 
+grid_running = cluster[1]
+running = cluster[2]
+num_cpus = cluster[3]
+total_jobs = cluster[4]
+used_cpus = cluster[5]
+
+queue_stats=c.cl_detailstats[cluster_name]
+
+if c.cl_qbar_chart.has_key(cluster_name):
+    q_data = c.cl_qbar_chart[cluster_name][0]
+    q_scaling=c.cl_qbar_chart[cluster_name][1]
+    if q_scaling < 10:
+        q_scaling = 10
+
+    q_labels=c.cl_qbar_chart[cluster_name][2]
+    num_queues =c.cl_qbar_chart[cluster_name][3]
+else:
+    continue
+%>
+
+<tr>
+<td>
+<img src="http://chart.apis.google.com/chart?
+chs=250x90
+&amp;cht=bhs
+&amp;chco=FF9000,5D7CBA,95B9C7
+&amp;chd=t:${grid_running}|${running}|${num_cpus}&chds=0,${num_cpus}
+&amp;chdh=20
+&amp;chxt=x,x
+&amp;chxr=0,0,${num_cpus}
+&amp;chxl=
+1:|gridrunning|running|cpus
+&amp;chxp=50,${num_cpus}
+&amp;chtt='${cluster_name}'"
+alt="Number of (grid) jobs on ${cluster_name}"/>
+    </td>
+
+<td>
+<img src="http://chart.apis.google.com/chart?
+%if num_queues == 1:
+chs=250x80
+%elif num_queues == 2:
+chs=250x110
+%elif num_queues == 3:
+chs=250x140
+%elif num_queues == 4:
+chs=250x170
+%elif num_queues == 5:
+chs=250x190
+%else:
+chs=250x220
+%endif
+&amp;cht=bhs
+&amp;chco=FF9000,5D7CBA,95B9C7
+&amp;chd=${q_data}
+&amp;chds=0,${q_scaling}
+&amp;chdh=20
+&amp;chxt=x,x,y
+&amp;chxr=0,0,${q_scaling}
+&amp;chxl=${q_labels}"
+alt="Queue(s) status for ${cluster_name}"/>
+</td>
+<td>
+<a name="${h.str_cannonize(cluster_name)}"> </a>
+<!-- DETAILS -->
+<table width="350"> 
+<tr class="table_head3">
+<td>Name</td><td>Gridrun</td> <td>Run</td><td>Gridq</td><td>Localq</td><td>Lrmsq</td>
+</tr>
+%for qname in queue_stats.keys():
+    <tr>
+    <td>
+    <!-- queue name-->
+    ${qname}
+    </td>
+    <!-- Gridrunning-->
+    <td> ${queue_stats[qname][0]}</td>
+    <!-- running-->
+    <td> ${queue_stats[qname][1]}</td>
+    <!-- queued-->
+    <td> ${queue_stats[qname][2]}</td>
+    <!-- localqueued-->
+    <td> ${queue_stats[qname][3]}</td>
+    <!-- lrmsqueued-->
+    <td> ${queue_stats[qname][4]}</td>
+</tr>
+%endfor
+<tr style="border-top-style:double">
+<td colspan="3">running: ${running}</td>
+<td colspan="3">gridrunning: ${grid_running}</td>
+</tr>
+<tr> 
+<td colspan="3"> total jobs: ${running + grid_running}/${total_jobs} </td>
+<td colspan="3"> used cpus: ${used_cpus}/${num_cpus} </td>
+</tr>
+</table>
+<!-- END DETAILS -->
+</td></tr>
+%endfor
+
+
+%for cluster in c.cluster_menu:
+<% hostname = cluster[1].split('/')[-1] %>
+
+<tr>
+ <td colspan=3>
+    <img src="/rrd/${hostname}stats_ch24.png" alt="${cluster[1]} (}${hostname}) CPU load (last 24 hours)">
+    </td>
+</tr>
+<tr>
+ <td colspan=3>
+    <img src="/rrd/${hostname}stats_qh24.png" alt="${cluster[1]} (${hostname}) Queue backog (last 24 hours)">
+    </td>
+</tr>
+
+
+%endfor
+
+</table>
+

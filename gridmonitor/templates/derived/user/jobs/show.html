@@ -1,75 +1,49 @@
 <%inherit file="/base/user.html"/>
+<%namespace name="jobtable" file="/components/jobstable.mako"/>
 
-%if c.job_status != 'all':
+%if c.job_status not in ['all','orphans']:
     <p> Listing of all user jobs in state '${c.job_status}', with pagination. </p>
+%elif c.job_status == 'orphans':
+    <p> Listing of all of your 'orphaned' jobs. Orphaned jobs are jobs that have
+    been submited to a queue you do not have access anymore. This may have happend because
+    your VO membership expired or the site implemented a local policy denying you access.</p>
 %else:
-<p> Listing of all jobs of that user in any current job status </p>
+<p> Listing of all of your jobs. </p>
+%endif
+
+%if c.user_client_dn and (len(c.job_list[1]) >= 1):
+    ${jobtable.job_table(c.user_client_dn, c.user_client_ca,c.job_list[1])}
+    % if len(c.job_list[0]) >= 1:
+        ${jobtable.job_table(c.user_slcs_obj.get_dn(), c.user_slcs_obj.get_ca(),c.job_list[0])}
+    % endif
+%else:
+    % if len(c.job_list[0]) >= 1:
+        ${jobtable.job_table(c.user_slcs_obj.get_dn(), c.user_slcs_obj.get_ca(),c.job_list[0])}
+    % else:
+        <p> Apparently you don't have any jobs in the state: '${c.job_status}' </p>
+    % endif
 %endif
 
 
-<div id="${c.userDN}_jobscontainer">
-<table id="${c.userDN}_jobstable">
-    <thead>
-        <tr>
-          <th>Cluster</th>
-          <th>Queue</th>
-          <th>Status</th>
-          <th>Job</th>
-          <th>Id</th>
-           <th>Exit Code<th>
-        </tr>
-    </thead>
-    <tbody>
-    % for job in c.job_list:
-        <tr>
-        <td >${job.get_cluster_name()} </td>
-        <td> ${job.get_queue_name()}</td>
-        <td> ${job.get_status()}</td>
-        <td> ${job.get_jobname()}</td>
-        <td> ${job.get_globalid()}</td>
-        <td> ${job.get_exitcode()}</td>
-        </tr>
-    %endfor
-    </tbody>
-</table>
-</div>
 
 
-<script type="text/javascript">
-YAHOO.util.Event.addListener(window, "load",function(){
-    var myColumnDefs = [
-        {key:"Cluster", sortable:true},
-        {key:"Queue", resizeable:true},
-        {key:"Status", sortable:true},
-        {key:"Job", sortable:true},
-        {key:"Id", sortable:true},
-        {key:"Exit Code", sortable:true}
-    ];
-    var myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("${c.userDN}_jobstable"));
-    
-    myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-    
-    myDataSource.responseSchema = {
-        fields: [{key:"Cluster"}, {key:"Queue"},{key:"Status"},{key:"Job"},{key:"Id"},{key:"Exit Code"}]
-        };
 
-    var myDataTable = new YAHOO.widget.DataTable("${c.userDN}_jobscontainer", myColumnDefs, myDataSource,
-    {caption:"Job of user with DN ${c.userDN}", 
-    summary: "Listing of jobs of user with DN  ${c.userDN} that could be found in the Grid Information System."});
-});
-</script>
+<%def name="css()"> 
+    ${parent.css()} 
+    ${self.css_link('/css/yui/build/datatable/assets/skins/sam/datatable.css', 'screen')} 
+    ${self.css_link('/css/yui/build/container/assets/skins/sam/container.css', 'screen')} 
+</%def> 
+ 
+<%def name="js()"> 
+    ${parent.js()} 
+    <script type="text/javascript" src="/js/yui/build/dragdrop/dragdrop-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/element/element-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datatable/datatable-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
+</%def> 
 
 
-<%def name="css()">
-    ${parent.css()}
-    ${self.css_link('/css/yui/datatable/assets/skins/sam/datatable.css', 'screen')}
-</%def>
 
-<%def name="js()">
-    ${parent.js()}
-   <script type="text/javascript" src="/js/yui/drag-drop-min.js"></script>
-   <script type="text/javascript" src="/js/yui/element-beta-min.js"></script>
-   <script type="text/javascript" src="/js/yui/datasource-min.js"></script>
-   <script type="text/javascript" src="/js/yui/datatable-min.js"></script>
-</%def>
-         
+
+

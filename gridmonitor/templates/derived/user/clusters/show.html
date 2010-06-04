@@ -1,7 +1,20 @@
 <%inherit file="/base/user.html"/>
 
-<p> Displaying general information about cluster ${c.cluster_display_name}. All available paramters
-about this cluster are:</p>
+<p> Displaying general information about cluster ${c.cluster_display_name}. The cluster
+has following queue(s):
+<ul>
+% if not c.queues_names:
+<li class="error"> NO QUEUE AVAILABLE</li>
+%else:
+    %for queue in c.queues_names:
+        <%id = c.cluster_hostname + '/' + queue %>
+    <li> ${h.link(h.url_for(action='show', id=id), queue)}</li>
+    %endfor
+%endif
+</ul>
+All available paramters about this cluster are:</p>
+
+
 
 <div id="${c.cluster_hostname}_container">
 <table id="${c.cluster_hostname}_table">
@@ -46,13 +59,13 @@ YAHOO.util.Event.addListener(window, "load",function(){
 
 <%def name="css()">
     ${parent.css()}
-    ${self.css_link('/css/yui/datatable/assets/skins/sam/datatable.css', 'screen')}
+    ${self.css_link('/css/yui/build/datatable/assets/skins/sam/datatable.css', 'screen')}
 </%def>
 
 <%def name="js()">
     ${parent.js()}
-   <script type="text/javascript" src="/js/yui/drag-drop-min.js"></script>
-   <script type="text/javascript" src="/js/yui/element-beta-min.js"></script>
-   <script type="text/javascript" src="/js/yui/datasource-min.js"></script>
-   <script type="text/javascript" src="/js/yui/datatable-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/dragdrop/dragdrop-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/element/element-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datatable/datatable-min.js"></script>
 </%def>

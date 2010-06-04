@@ -1,0 +1,66 @@
+<%inherit file="/base/siteadmin.html"/>
+
+<% clusters_bag_keys = c.clusters_bag.keys() %>  
+<% cbk_len = len(clusters_bag_keys) %>
+<% no_queue_clusters =[ y for (x,y) in c.no_queue_clusters] %>
+%if cbk_len > 0:
+    %if clusters_bag_keys[0] in no_queue_clusters:
+        <h2 class="error" id="h2_name_0" style="display:''"> No Users list available for ${clusters_bag_keys[0]} (no queue)</h2>
+    %else:
+        <h2  id="h2_name_0" style="display:''"> Users allowed  on ${clusters_bag_keys[0]}</h2>
+    %endif
+    <% count=1 %>
+    %for cluster in clusters_bag_keys[1:]:
+        %if clusters_bag_keys[count] in no_queue_clusters:
+        <h2 class="error" id="h2_name_${count}" style="display:none">No User list available for ${clusters_bag_keys[count]} (no queue)</h2> \
+        %else:
+        <h2 id="h2_name_${count}" style="display:none">Users allowed on ${clusters_bag_keys[count]}</h2> \
+        %endif 
+        <% count +=1 %>
+    %endfor
+%else:
+<h2>No Cluster(s) available.  </h2>
+
+%endif
+
+% if cbk_len > 1:
+<form action="/siteadmin/jobs">
+  <p>
+     <select name="cluster" size="${cbk_len}" onchange="showCluster(${cbk_len},this.form.cluster.options[this.form.cluster.selectedIndex].value)">
+    
+    <option value="cluster_0">${clusters_bag_keys[0]}</option>\
+    <% count= 1 %>
+     %for cl in clusters_bag_keys[1:]:  
+        <option value="cluster_${count}">${cl}</option>\
+        <% count +=1 %>
+     %endfor
+    </select>
+  </p>
+</form>
+%endif
+
+
+
+<% cluster_count=0 %>
+%for cluster_hostname in clusters_bag_keys:
+
+    %if cluster_count == 0:    
+        <div id="cluster_${cluster_count}" style="display:''">   
+    %else:
+        <div id="cluster_${cluster_count}" style="display:none">   
+    %endif 
+    <ol>
+        % for dn in c.clusters_bag[cluster_hostname]:
+            <li> ${dn} </li>\
+        %endfor
+    </ol>
+    <% cluster_count+=1 %>
+    </div>
+%endfor
+
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/select.js"></script>
+</%def>
+

@@ -1,0 +1,136 @@
+<style type="text/css">
+.submitted{color:#039487}
+.lok{color:#00690D}
+.lerror{color:#FF0000}
+</style>
+
+<%inherit file="/base/gridadmin.html"/>
+
+        <div id="${c.sft_name}_container">
+        <table id="${c.sft_name}_table" width=600>
+            <thead>
+            <tr>
+                <th>Submission Time</th>
+                <th>VO</th>
+                <th>Cluster</th>
+                <th>Test</th>
+                <th>Status</th>
+                <th>Error (type) </th>
+                <th>Test Output details</th>
+             </tr>
+            </thead>
+            <tbody>
+            %for job in c.sft_jobs:
+                <tr>
+                % if job.status in ['failed','FAILED','fetched_failed']:
+                <% stat='lerror'%>
+                % elif job.status == 'fetched':
+                <% stat='lok'%>
+                %else:
+                <% stat='submitted'%>
+                %endif
+                <td> <span class='${stat}'>${job.submissiontime}<span></td>
+                <td> <span class='${stat}'>${job.vo_name}<span></td>
+                <td> 
+                    %if job.cluster_name:
+                    <span class='${stat}'>${job.cluster_name}<span>
+                    %endif
+                </td>
+                <td> 
+                   % if job.test_name:
+                    <span class='${stat}'>${job.test_name}<span>
+                    %endif
+                </td>
+                <td> <span class='${stat}'>${job.status}</span></td>
+                <td>
+                     %if job.error_type:
+                     <span class='${stat}'>${job.error_msg}(${job.error_type})<span>
+                    %endif
+                    </td>
+                <td> 
+                    %if job.outputdir:
+                    <span class='${stat}'><a href="javascript:poptastic('${job.outputdir}');">${job.outputdir}</a><span></td>
+                    % endif
+                </tr>
+            %endfor
+            </tbody>
+        </table>
+        </div>
+
+<script type="text/javascript">
+var newwindow;
+function poptastic(url)
+{
+    newwindow=window.open(url,'name', 'height= 800, width=850, toolbar=1');
+    if (window.focus) {newwindow.focus()}
+}
+</script>
+
+
+        <script type="text/javascript">
+        YAHOO.util.Event.addListener(window, "load",function(){
+            var myColumnDefs = [
+                {key:"Submissiontime",sortable:true},
+                {key:"VO", sortable:true, resizeable:true},
+                {key:"Cluster", sortable:true, resizeable:true},
+                {key:"Test", sortable:true, resizeable:true},
+                {key:"Status", sortable:true, resizeable:true},
+                {key:"Error", sortable:true, resizeable:true},
+                {key:"Output"}
+            ];
+
+            var myConfigs = {
+                paginator : new YAHOO.widget.Paginator({
+                    rowsPerPage: 20, // REQUIRED
+
+                    // use a custom layout for pagination controls
+                    template: "{PageLinks} Show {RowsPerPageDropdown} per page",
+
+                    // show all links
+                    pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,
+
+                    // use these in the rows-per-page dropdown
+                    rowsPerPageOptions: [10, 20, 40, 80],
+
+                    // use custom page link labels
+                    pageLabelBuilder: function (page,paginator) {
+                        var recs = paginator.getPageRecords(page);
+                        return (recs[0] + 1) + ' - ' + (recs[1] + 1 + ' | ');
+                    }
+                })
+            };
+
+
+
+
+            var myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("${c.sft_name}_table"));
+            
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+            
+            myDataSource.responseSchema = {
+                fields: [{key:"Submissiontime"}, {key:"VO"}, 
+                    {key:"Cluster"},{key:"Test"}, {key:"Status"},{key:"Error"},{key:"Output"}]
+                };
+
+            var myDataTable = new YAHOO.widget.DataTable("${c.sft_name}_container", myColumnDefs, myDataSource, myConfigs);
+        });
+        </script>
+
+
+
+<%def name="css()">
+ ${parent.css()}
+ ${self.css_link('/css/yui/build/datatable/assets/skins/sam/datatable.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/yui/build/dragdrop/dragdrop-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/element/element-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datatable/datatable-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator.js"></script>
+</%def>
+                    
+
+

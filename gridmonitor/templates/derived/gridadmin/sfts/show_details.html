@@ -1,0 +1,100 @@
+<%inherit file="/base/gridadmin.html"/>
+
+
+<table width='700'>
+<caption>Details of <span class="emph">${c.sft.name}</span> Site Functional Test</caption>
+<% rowcount = -1  %>
+<tr class = "table_head2">
+    <th colspan=2>Groups/Suits </th>
+    <th colspan=1>Details </th>
+</tr>
+
+    <tr class="table_row_emph">
+    <td colspan=2> Execution Time: </td>
+    <td> crontab-like syntax and semantics</td> 
+    </tr>
+<tr>
+    <td colspan=2> </td>
+    <td >  ${c.sft.minute}, ${c.sft.hour}, ${c.sft.day}, 
+        ${c.sft.month}, ${c.sft.day_of_week} &nbsp; &nbsp;(min,hour,day,month,day_of_week) 
+     </td>
+</tr>
+<% rowcount += 1 %>
+<tr class="table_row_emph">
+    <td>VO-Group: <span class="emph">${c.sft_vo_group.name} </span></td>
+    <td>VO </td>
+    <td>VO test users</td>
+</tr>
+
+%for vo in c.sft_vo_group.vos:
+    <% count = 0 %>
+    <% rowcount += 1 %>
+     % if ((rowcount%2) == 1):
+        <tr>
+     % else:
+        <tr class="table_row_odd">
+    % endif
+    <td style="background-color: #FFFFFF"> </td>
+    <td style="background-color: #FFFFFF"> ${vo.name}</td>
+    % for user in vo.users:
+        %if count > 0:
+            <% rowcount += 1 %>
+             % if ((rowcount%2) == 1):
+                <tr>
+             % else:
+                <tr class="table_row_odd">
+            % endif
+            <td style="background-color: #FFFFFF"> </td>
+            <td style="background-color: #FFFFFF"> </td>
+        % endif
+        <% count = 1 %>
+        <td> ${user.DN}</td> 
+    </tr>
+    % endfor
+    %if count == 0:
+        <td></td></tr>
+    %endif
+%endfor
+
+
+<tr class="table_row_emph">
+    <td colspan=2> Cluster-Group: <span class="emph">${c.sft_cluster_group.name}</span> </td>
+    <td> Cluster(s) </td>
+</tr>
+
+% for cluster in c.sft_cluster_group.clusters:
+        <% rowcount += 1 %>
+         % if ((rowcount%2) == 1):
+            <tr>
+        % else:
+            <tr class="table_row_odd">
+        % endif
+        <td colspan=2 style="background-color: #FFFFFF"> </td>
+    <td > ${cluster.hostname}</td>
+    </tr>
+%endfor
+
+
+<tr class="table_row_emph">
+    <td colspan=1>Test Suit:<span class='emph'> ${c.sft_test_suit.name}</span>  </td>
+    <td> Test </td>
+    <td> XRSL  </td>
+</tr>
+
+%for test in c.sft_test_suit.tests:
+    <% rowcount += 1 %>
+     % if ((rowcount%2) == 1):
+        <tr>
+    % else:
+        <tr class="table_row_odd">
+    % endif
+    <td style="background-color: #FFFFFF"> </td>
+    <td> ${test.name}</td>
+    <td> ${test.xrsl}</td>
+    </tr>
+%endfor
+
+</table>
+
+
+ 

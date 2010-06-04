@@ -1,16 +1,107 @@
 <%inherit file="/base/user.html"/>
+<table style="border-collapse:collapse; border:none;">
+<tr><td>
+    <table width="500">
+    <tr class="table_head2"> 
+        <th> Cluster\Jobstatus</th>
+        <th> FIN'ED</th>
+        <th> FAILED </th>
+        <th> KIL'ED </th>
+        <th> DEL'ED</th>
+        <th> FTCH'D</th>
+        <th> other </th>
+        <th> orphans </th>
+        <th> total </th>
+    </tr>
+    <% count=0 %>
+    % for cname in c.cluster_bag.keys():
+        <% count += 1 %>
+        % if ((count%2) == 1):
+        <tr>
+        % else:
+        <tr class="table_row_odd">
+        % endif
+        <td>${cname}</td>    
+        <td>${c.cluster_bag[cname]['FINISHED']}</td>
+        <td>${c.cluster_bag[cname]['FAILED']}</td>
+        <td>${c.cluster_bag[cname]['KILLED']}</td>
+        <td>${c.cluster_bag[cname]['DELETED']}</td>
+        <td>${c.cluster_bag[cname]['FETCHED']}</td>
+        <td>${c.cluster_bag[cname]['other']}</td>
+    %if (c.cluster_bag[cname]['orphans'] == 0):
+        <td>${c.cluster_bag[cname]['orphans']}</td>
+    % else:
+        <td> <span class="warn"> ${c.cluster_bag[cname]['orphans']}</span></td>
+    %endif
+        <td class="table_cell_emph">${c.cluster_bag[cname]['total']}</td>
+    </tr>
+    %endfor
+    <!-- SUMMARY -->
+        <tr style="border-top-style: double;" class="table_row_emph">
+        <td>total</td>    
+        <td>${c.job_stat_summary[0]}</td>
+        <td>${c.job_stat_summary[1]}</td>
+        <td>${c.job_stat_summary[2]}</td>
+        <td>${c.job_stat_summary[3]}</td>
+        <td>${c.job_stat_summary[4]}</td>
+        <td>${c.job_stat_summary[5]}</td>
 
-<h3> MOCKING PAGE: </h3>
-<p>
-Things we could present here (same as in my statistics):
+    %if (c.job_stat_summary[6] == 0):
+        <td>${c.job_stat_summary[6]}</td>
+    % else:
+        <td> <span class="warn"> ${c.job_stat_summary[6]}</span></td>
+    %endif
+        <td >${c.job_stat_summary[7]}</td>
+    </tr>
+    </table>
+</td><td>
+<%chart_height = len(c.cluster_bag) *30 + 35 %>
+<img src="http://chart.apis.google.com/chart?
+chs=320x${chart_height}
+&amp;chco=FF9000
+&amp;chxt=x,t,y
+&amp;chxl=${c.cluster_bar_chxl}
+&amp;chds=0,${c.max_tot_jobs}
+&amp;chd=${c.cluster_bar_chd}
+&amp;cht=bhs"
+alt="Jobs per Cluster"/>
+</td>
+</tr>
+<tr>
+<td align="center">
+<% mxst = c.max_status_value %>
+<% mxst2 = c.max_status_value/2 %>
+<img src="http://chart.apis.google.com/chart?
+chs=250x150
+&amp;chco=FF9000
+&amp;chxt=x,t,y,r
+&amp;chxl=0:|FINISHED||KILLED||FETCHED||orphans|1:||FAILED||DELETED||other|2:||${mxst2}|${mxst}|3:|0|${mxst2}|${mxst}
+&amp;chds=0,${mxst}
+&amp;chd=${c.job_bar_chd}
+&amp;cht=bvs"
+alt="Job Status'"/>
+</td>
+<td>
+<h3> Jobs Details: </h3>
 <ul>
-<li>summary on jobs</li>
-<li>pie-chart of current jobs (status)</li>
-<li>warning in case orphaned jobs got detected</li>
-<li>history of job submissions (mrtg-graph) </li>
-<li></li>
+<li>${h.link('/user/jobs/show/FINISHED','FINISHED')}</li>
+<li>${h.link('/user/jobs/show/FAILED','FAILED')}</li>
+<li>${h.link('/user/jobs/show/KILLED','KILLED')}</li>
+<li>${h.link('/user/jobs/show/DELETED','DELETED')}</li>
+<li>${h.link('/user/jobs/show/FETCHED','FETCHED')}</li>
+<li>${h.link('/user/jobs/show/orphans','orphans')}</li>
 </ul>
+</td></tr>
+</table>
+<!--
+<img src="http://chart.apis.google.com/chart?
+chs=610x150
+&amp;chds=0,${c.max_cpus}
+&amp;chd=${c.cl_pie_chart_data}
+&amp;chl=${c.cl_pie_chart_labels}
+&amp;cht=p3"
+alt="Clusters Chart"/>
+-->
 
-</p>
 
 

@@ -1,31 +1,85 @@
 <%inherit file="/base/user.html"/>
 <p>
-According to the grid information system your grid consists of following clusters, providing in total
-${c.tot_cpus} CPUs.
-<ul>
+According to the grid information system the entire Grid consists of following clusters, providing in total
+${c.tot_cpus} CPUs. Notice, you might not have access to the entire CPU pool.</p>
+
+<table width="900">
+<tr><td>
+    View: [<a href="javascript:showUserClusters('all')">all</a> | 
+          <a href="javascript:showUserClusters('slcs')">SLCS</a> | 
+          <a href="javascript:showUserClusters('browser_cert')">browser cert</a>]
+    <ul>
 % for cluster in c.cluster_menu:
-<% hostname= cluster[1].split('/')[-1]
-cpus=g.get_cluster_stats(hostname,'stats_cpus')
+<% 
+hostname= cluster[1].split('/')[-1]
+cpus=g.get_cluster_stats(hostname,'stats_cpus') 
 %>
-<li> ${h.link(cluster[1], cluster[0])} (${cpus} CPUs)</li>
-%endfor
-</ul>
-You can click on the links for more information about the clusters.
-</p>
-<p>
+        % if hostname in c.allowed_clusters['slcs_browser']: 
+            <div class="slcs_browser_access" style="display:''">
+        % elif hostname in c.allowed_clusters[c.user_slcs_obj.get_dn()]:
+          <div class="slcs_access" style="display:inline">
+        %elif hostname in c.allowed_clusters[c.user_client_dn]:
+            <div class="browser_dn_access" style="display:''">
+        % else:
+            <div class="no_access"style="display:''">
+        %endif
+        <li>
+            ${h.link(cluster[1], cluster[0])} 
+             % if cpus == 0:
+               <% cpus = g.get_cluster_stats(hostname,'stats_totalcpus') %>
+               % if cpus == 0: 
+                  <span class="error"> (${cpus} CPUs)</span>
+               % else:
+                 <span class="warn"> (${cpus} CPUs)</span>
+               % endif
+            %else:
+                   (${cpus} CPUs) 
+            % endif
+        </li>
+        </div>
+    %endfor
+    </ul>
+    </td>
+
+<td>
+<div id="pie_slcs_browser_access" style="display:none">
+% if c.user_client_dn:
 <img src="http://chart.apis.google.com/chart?
-chs=650x150
+chs=610x150
 &amp;chds=0,${c.max_cpus}
-&amp;chd=${c.cl_pie_chart_data}
-&amp;chl=${c.cl_pie_chart_labels}
+&amp;chd=${c.cl_pie_chart_data[c.user_client_dn]}
+&amp;chl=${c.cl_pie_chart_labels[c.user_client_dn]}
 &amp;cht=p3"
 alt="Clusters Chart"/>
-</p>
+%endif
+</div>
+<div id="pie_slcs_access" style="display:none">
+<img src="http://chart.apis.google.com/chart?
+chs=610x150
+&amp;chds=0,${c.max_cpus}
+&amp;chd=${c.cl_pie_chart_data[c.user_slcs_obj.get_dn()]}
+&amp;chl=${c.cl_pie_chart_labels[c.user_slcs_obj.get_dn()]}
+&amp;cht=p3"
+alt="Clusters Chart"/>
+</div>
+<div id="pie_all"style="display:''">
+<img src="http://chart.apis.google.com/chart?
+chs=610x150
+&amp;chds=0,${c.max_cpus}
+&amp;chd=${c.cl_pie_chart_data['all']}
+&amp;chl=${c.cl_pie_chart_labels['all']}
+&amp;cht=p3"
+alt="Clusters Chart"/>
+</div>
+    </td></tr>
+</table>
 
 
-<table width="600">
-<tr class="table_head"><th colspan="2"> Load on Clusters</th></tr>
-<tr> <td>Cluster</td><td>Queues</td></tr>
+<table width="900">
+    <tr class="table_head">
+        <th colspan="3"> Load on Clusters</th>
+    </tr>
+    <tr class="table_head"><td>Cluster</td><td>Queues</td><td>Details</td> </tr>
 
 %for cluster in c.cl_bar_chart:
 <% 
@@ -33,6 +87,12 @@ cluster_name = cluster[0]
 grid_running = cluster[1]
 running = cluster[2]
 num_cpus = cluster[3]
+total_jobs = cluster[4]
+used_cpus = cluster[5]
+hostname = cluster[6]
+
+queue_stats=c.cl_detailstats[cluster_name]
+
 if c.cl_qbar_chart.has_key(cluster_name):
     q_data = c.cl_qbar_chart[cluster_name][0]
     q_scaling=c.cl_qbar_chart[cluster_name][1]
@@ -45,13 +105,21 @@ else:
     continue
 %>
 
-<tr>
+% if hostname in c.allowed_clusters['slcs_browser']: 
+    <tr  class="slcs_browser_access" > 
+% elif hostname in c.allowed_clusters[c.user_slcs_obj.get_dn()]:
+    <tr class="slcs_access" >
+%elif hostname in c.allowed_clusters[c.user_client_dn]:
+    <tr class="browser_dn_access">
+% else:
+    <tr class="no_access">
+%endif
 <td>
 <img src="http://chart.apis.google.com/chart?
 chs=250x90
 &amp;cht=bhs
 &amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=t:${grid_running}|${running}|${num_cpus}&chds=0,${num_cpus}
+&amp;chd=t:${grid_running}|${running-grid_running}|${num_cpus}&chds=0,${num_cpus}
 &amp;chdh=20
 &amp;chxt=x,x
 &amp;chxr=0,0,${num_cpus}
@@ -60,9 +128,9 @@ chs=250x90
 &amp;chxp=50,${num_cpus}
 &amp;chtt='${cluster_name}'"
 alt="Number of (grid) jobs on ${cluster_name}"/>
-    </td>
+        </td>
 
-<td>
+        <td>
 <img src="http://chart.apis.google.com/chart?
 %if num_queues == 1:
 chs=250x80
@@ -86,8 +154,51 @@ chs=250x220
 &amp;chxr=0,0,${q_scaling}
 &amp;chxl=${q_labels}"
 alt="Queue(s) status for ${cluster_name}"/>
-</td></tr>
-%endfor
+</td>
+<td>
+<a name="${h.str_cannonize(cluster_name)}"> </a>
 
+<!-- DETAILS -->
+<table width="350">
+    <tr class="table_head3">
+    <td>Name</td><td>Gridrun</td> <td>Run</td><td>Gridq</td><td>Localq</td><td>Lrmsq</td>
+    </tr>
+    %for qname in queue_stats.keys():
+        <tr>
+        <td>
+        <!-- queue name-->
+        ${qname}
+        </td>
+        <!-- Gridrunning-->
+        <td> ${queue_stats[qname][0]}</td>
+        <!-- running-->
+        <td> ${queue_stats[qname][1]}</td>
+        <!-- queued-->
+        <td> ${queue_stats[qname][2]}</td>
+        <!-- localqueued-->
+        <td> ${queue_stats[qname][3]}</td>
+        <!-- lrmsqueued-->
+        <td> ${queue_stats[qname][4]}</td>
+    </tr>
+    %endfor
+    <tr style="border-top-style:double">
+    <td colspan="3">running: ${running}</td>
+    <td colspan="3">gridrunning: ${grid_running}</td>
+    </tr>
+    <tr> 
+    <td colspan="3"> total jobs: ${running}/${total_jobs} </td>
+    <td colspan="3"> used cpus: ${used_cpus}/${num_cpus} </td>
+    </tr>
 </table>
+<!-- END DETAILS -->
+</td>
+</tr>
+%endfor
+</table>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/select.js"></script>
+</%def>
+
 

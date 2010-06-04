@@ -1,0 +1,11 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<h1> Changes </h1>
+<ul>
+% if c.browser_msg:
+<li> ${c.browser_msg}</li>
+% endif
+% if c.slcs_msg:
+<li> ${c.slcs_msg}</li>
+% endif
+</ul>

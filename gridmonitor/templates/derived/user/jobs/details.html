@@ -1,0 +1,102 @@
+## -*- coding: utf-8 -*-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <% self.seen_css = set() %>
+    <title>${self.title(c.title)}</title>
+    ${self.css()}
+    ${self.js()}
+</head>
+
+
+<body class="yui-skin-sam">
+<div id="doc3">
+
+
+
+% if c.job:
+        <%job_name=c.job.get_globalid()%>
+        <h1 align=center>Job Details</h1>
+
+        <div id="${job_name}_container">
+        <table id="${job_name}_table">
+            <thead>
+                <tr>
+                  <th> Job Parameter</th>
+                  <th> Value(s)</th>
+                </tr>
+            </thead>
+            <tbody>
+            %for param in c.job.get_attribute_names():
+                %for value in c.job.get_attribute_values(param):
+                <tr>
+                    <td >${param} </td>
+                    <td> ${value} </td>
+                </tr>
+             %endfor
+            %endfor
+            </tbody>
+        </table>
+        </div>
+
+        <script type="text/javascript">
+        YAHOO.util.Event.addListener(window, "load",function(){
+            var myColumnDefs = [
+                {key:"Job Parameter", sortable:true},
+                {key:"Value(s)", sortable:true, resizeable:true}
+            ];
+            var myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("${job_name}_table"));
+            
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+            
+            myDataSource.responseSchema = {
+                fields: [{key:"Job Parameter"}, {key:"Value(s)"}]
+                };
+
+            var myDataTable = new YAHOO.widget.DataTable("${job_name}_container", myColumnDefs, myDataSource,
+            {caption:"Job Info for ${job_name}", summary: "GRIS Information about job ${job_name}"});
+        });
+        </script>
+
+% else:
+    JOB MUST HAVE BEEN REMOVED. No information available anymore.
+%endif
+</div>
+</body>
+</html>
+
+
+<%def name="title(arg)">${arg or 'Grid Monitoring (AAA/SWITCH)'}</%def>
+<%def name="css_link(path,media='')">
+    ## making sure each css only gets included once
+    % if path not in self.seen_css:
+        <link rel="stylesheet" type="text/css" href="${path|h}" media="${media}"></link>\
+    % endif
+    <% self.seen_css.add(path) %>\
+</%def>
+
+<%def name="css()">
+   ${css_link('/css/yui/build/reset/reset.css','screen')}
+   ${css_link('/css/yui/build/fonts/fonts.css','screen')}
+   ${css_link('/css/yui/build/grids/grids.css','screen')}
+   ${css_link('/css/yui/build/base/base.css','screen')}
+   ${css_link('/css/yui/build/menu/assets/skins/sam/menu.css','screen')}
+   ${css_link('/css/yui/build/fonts/fonts-min.css','screen')}
+   ${css_link('/css/yui/build/datatable/assets/skins/sam/datatable.css', 'screen')}
+   ${css_link('/css/yui/build/container/assets/skins/sam/container.css', 'screen')}
+   ${css_link('/css/nav.css','screen')}
+   ${css_link('/css/menu.css','screen')}
+   ${css_link('/css/monitor.css','screen')}
+</%def>
+
+<%def name="js()">
+    <script type="text/javascript" src="/js/yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/build/container/container_core-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/dragdrop/dragdrop-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/element/element-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="/js/yui/build/datatable/datatable-min.js"></script>
+</%def>
+
+

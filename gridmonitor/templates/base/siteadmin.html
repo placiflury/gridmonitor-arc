@@ -20,8 +20,11 @@ ${next.body()}
 
 <%def name="menu()">
     ${menu_nav.menu(c.menu,c.menu_active,'siteadminmenu')}
-</%def> 
-
+</%def>
+ 
+<%def name="user_info()">
+  ${c.user_name} ${c.user_surname}
+</%def>
 
 
 <%def name="css()">

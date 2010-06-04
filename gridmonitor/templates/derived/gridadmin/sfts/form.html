@@ -1,0 +1,71 @@
+<%inherit file="/base/gridadmin.html"/>
+<p>
+If there are Site Functional Tests that are executed with your user identity, you have
+here the opportunity to enter the password with which your credentials can be fetched
+from the MyProxy server.
+</p>
+
+%if c.form_error:
+    <p>
+    <b style='color:red;'> Form error: ${c.form_error}</b></br>
+    </p>
+%endif
+
+<form name="reset_passwd" method="post" action="/gridadmin/sfts/submit">
+    <table width='800'>
+    <tr>
+        <th> DN</th>
+        <th> New Passwd </th>
+        <th> Retype Passwd </th>
+    <tr>
+    %if c.user_client_dn:
+    <tr> <td>
+            <input type="checkbox" name="CB_browser_dn" value="${c.user_client_dn}">
+            ${c.user_client_dn} 
+         </td>
+        <td> <input type="password" name="browser_dn_pwd"/> </td>
+        <td> <input type="password" name="browser_dn_pwd2"/> </td>
+    </tr>
+    %endif
+    <tr> <td>
+            <input type="checkbox" name="CB_slcs_dn" value="${c.user_slcs_dn}">
+            ${c.user_slcs_dn} 
+         </td>
+        <td> <input type="password" name="slcs_dn_pwd"/> </td>
+        <td> <input type="password" name="slcs_dn_pwd2"/> </td>
+    </tr>
+    <tr> <td colspan=3 align='right'> <input type="submit" name="submit" value="Submit"> </td>
+    </tr>
+</table>
+</form>
+
+<div style='width:800px;'> 
+<div>
+<h2> Some more Details </h2>
+ The monitoring system can run tests to verify the availability and sanity of the
+resources of the Grid. These tests, which are termed site functional tests (SFTs),
+are all run under real identities of real users. (If you want to see the involved users
+for each test, please take a look on the 'details' menue item associated with each 
+SFT.)</br>
+</p>
+</div>
+<div style='width:450px; float:left;>'
+<img src="/img/sft_user.png" alt="Schema how user credentials are used for Site Functional Tests (SFT)" width='450'>
+</div>
+<div style='width:350px; float:right; vertical-align:top;'>
+When a SFT is due to run, the monitoring system fetches a proxy certificate of one of 
+the involved users from the MyProxy server. In does this by reading the encrypted 
+password from a local database (see figure). </br>
+Once it has fetched the proxy certificate, which will be valid for at max 12 hours, it 
+will also try to fech the VO membership as specified by the SFT (not shown in the picture.). 
+After having successfully fetched the user crendentials, the monitoring system will submit
+the test jobs to the specified Grid resource(s).
+<h3> What does this mean for You?</h3>
+If you are participating in site functional tests, you must upload the certificate you
+are using for the test to the MyProxy server (see first part of figure). The upload will 
+have to be repeated every time the uploaded certificate is about to expire. </br>
+With above form you tell the monitoring system the password with wich it can fetch the 
+certificate from the MyProxy server. Notice, the password will be stored, <b>encrypted 
+with the monitor's hostkey</b>, in a local database (see middle part of figure).
+</div>
+</div>

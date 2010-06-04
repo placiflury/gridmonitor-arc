@@ -1,0 +1,54 @@
+
+<%inherit file="/base/gridadmin.html"/>
+
+<form name="gridadmin_testsuit" method="get" action="/gridadmin/testjobs/submit">
+    <table> 
+    <tr>
+        <th> Test Job </th>
+        <th> VO(s) </th>
+        <th> Cluster (Groups) </th>
+        <th> Execution Time </th>
+        <th> Repeat every </th>
+    <tr>
+    <tr>
+        <td>
+        <input type="checkbox" name="testsuit1" value="arc_test_1"> ARC Test job 1
+        </td>
+        <td>
+            <input type="checkbox" name="t1_vos" value="all"> all <br/>
+            <input type="checkbox" name="t1_vos" value="smscg"> smscg<br/>
+            <input type="checkbox" name="t1_vos" value="life">  life <br/>
+            <input type="checkbox" name="t1_vos" value="earth"> earth <br/>
+            <input type="checkbox" name="t1_vos" value="crypto"> crypto<br/>
+            <input type="checkbox" name="t1_vos" value="tutor"> tutor<br/>
+         </td>
+        <td> 
+            <input type="checkbox" name="t1_clusters" value="all"> all <br/>
+            <input type="checkbox" name="t1_clusters" value="cluster_group1"> cluster group 1 (link) <br/>
+        </td>
+        <td> 
+            within x hours<br/>
+         </td>
+        <td> day/week/month/never </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="checkbox" name="testsuit1" value="scratchtest" > ARC scratch directory test 
+        </td>
+        <td> -- </td>
+        <td> -- </td>
+        <td> -- </td>
+        <td> -- </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="checkbox" name="testsuit1" value="test1"> some test 
+        <td> -- </td>
+        <td> -- </td>
+        <td> -- </td>
+        <td> -- </td>
+    </tr>
+    <tr> <td colspan=5 align='right'> <input type="submit" name="submit" value="Submit"> </td>
+    </tr>
+    </table>
+</form>
