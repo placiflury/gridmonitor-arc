@@ -1,0 +1,46 @@
+.yuimenu{
+   padding-left: 1px;
+   width: 72%;
+}
+
+#usermenuClusters.yuimenu{
+    width: 110%;
+}
+#gridadminmenuVO_Usage.yuimenu{
+    width: 110%;
+}
+#gridadminmenuClusters.yuimenu{
+    width: 110%;
+}
+
+#siteadminmenuClusters.yuimenu{
+    width: 110%;
+}
+
+#usermenu {
+    position: static;
+ }
+ /* (taken from yui exmample)
+  For IE 6: trigger "haslayout" for the anchor elements in the root Menu by 
+   setting the "zoom" property to 1.  This ensures that the selected state of 
+   MenuItems doesn't get dropped when the user mouses off of the text node of 
+   the anchor element that represents a MenuItem's text label.
+*/ 
+#usermenu .yuimenuitemlabel {
+        _zoom: 1;
+}
+#usermenu .yuimenu .yuimenuitemlabel {
+        _zoom: normal;
+}
+
+#siteadminmenu {
+    position: static;
+ }
+
+#siteadminmenu .yuimenuitemlabel {
+        _zoom: 1;
+}
+#siteadminmenu .yuimenu .yuimenuitemlabel {
+        _zoom: normal;
+}
+

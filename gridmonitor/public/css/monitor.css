@@ -1,0 +1,32 @@
+.code {
+    font-family: monospace;
+    font-size: 93%;
+    }
+
+.emph{font-style: italic;}
+
+.vo_emph{background-color: #FFFFE0}
+.table_row_odd{background-color:#f5f5f5}
+.table_cell_emph{background-color:#FFFFE0}
+.table_row_emph{background-color:#FFFFE0}
+.table_head{background-color: #eee}
+.table_head2{background-color: #E0FFFF}
+.table_head3{background-color: #F0F0F0}
+
+.ok{color:#68CE67; font-weight:bold}
+.warn{color:#FFA500; font-weight:bold}
+.error{color:#FF0000; font-weight:bold}
+.critical{color:#FF5000; font-weight:bold}
+.unknown{color:#809DAA; font-weight:bold}
+
+
+
+#user-info{font-size:80%;
+        color: #FFFFFF;
+    text-align: right;
+    margin-top: 22px;
+    margin-right: 5px;
+}
+
+p{width: 750px;}
+body{margin:0px;}
