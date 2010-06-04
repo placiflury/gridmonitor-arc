@@ -75,6 +75,15 @@ class HandlerApi:
             end_t       -  valid until time end_t
         """
         pass
+    
+    def get_cluster_users(self, cluster_hostname, start_t=None, end_t = None):
+        """ Returns list of users (DNs) of allowed on cluster. 
+            
+            cluster_hostname     -  DN of cluster
+            start_t     -  valid from time starting at start_t
+            end_t       -  valid until time end_t
+        """
+        pass
 
 
     def get_user_clusters(self,user_dn,start_t=None, end_t = None):
@@ -88,7 +97,7 @@ class HandlerApi:
     
     def get_user_queues(self,user_dn, cluster_hostname,start_t,end_t):
         """ Returns list of queue objects to which user is grated access.
-            The queue objects implemet the queue api.
+            The queue objects implement the queue api.
             
             user_dn     -  DN of user (like in certificate)
             cluster_hostname -  DNS of cluster
@@ -98,8 +107,17 @@ class HandlerApi:
         pass
 
     def get_user_jobs(self,user_dn, status=None, start_t = None, end_t=None):
-        """ detection of  orphans (ie. jobs that got executed on a queue the user
-            can't access anymore) is expected to be handled on a higher 'level'.
+        """ 
+        special job status 'orphans' must be supported. Orphans are jobs
+        jobs that got executed on a queue the user can't access anymore.
+        """
+        pass
+    
+    def get_num_user_jobs(self,user_dn, cluster_hostname=None, status=None, start_t = None, end_t=None):
+        """ 
+        Returns only the number of jobs for user. 
+        special job status 'orphans' must be supported. Orphans are jobs
+        jobs that got executed on a queue the user can't access anymore.
         """
         pass
 

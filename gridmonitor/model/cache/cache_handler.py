@@ -5,8 +5,10 @@ be possible without any changes as long as the implementation sticks to
 the APIs. 
 """
 __author__="Placi Flury placi.flury@switch.ch"
-__date__="22.04.2009"
+__date__="16.11.2009"
 __version__="0.1"
+
+# last change -- after being notified of new cache, read it so it gets in memory
 
 from pylons import config
 import logging
@@ -18,22 +20,28 @@ from gridmonitor.model.cache.cache_reader import *
 from gridmonitor.model.cache.cache_checker import CacheModifyChecker
 
 
-class CacheHandler(HandlerApi):
+class Singleton(object):
+    def __new__(cls,*args,**kwargs):
+        if '_inst' not in vars(cls):
+            cls._inst = super(Singleton,cls).__new__(cls,*args,**kwargs)
+        return cls._inst    
+    
+
+class CacheHandler(Singleton,HandlerApi):
     """
     DataHandler for accessing cached data of the grid information system 
     (e.g GRIS/GIIS, BDII).
     """
 
-    
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.cache_file = config['infocache_file'].strip()
         cache_check_interval = config['infocache_check_interval'].strip()
         unpickle_path = config['infocache_unpickle_classes'].strip()
         sys.path.append(unpickle_path)
-
+        self.name = "cachehandler"
         self.checker = CacheModifyChecker(self.cache_file,cache_check_interval)
-        self.checker.register_observer(self) 
+        self.checker.register_observer(self,self.name) 
         self.checker.start()
 
         self.refresh() 
@@ -49,6 +57,9 @@ class CacheHandler(HandlerApi):
         self.cache = CacheReader(self.cache_file)
         try:
             self.db = self.cache.get_handle() # logging done at level below 
+            # XXX read it in order to get it in memory
+            for k in self.db.keys():
+                self.db[k]   
         except CACHE.ACCESS_ERROR, e:
             raise HANDLER.ACCESS_ERROR(e.expression, e.message)
     
@@ -72,6 +83,14 @@ class CacheHandler(HandlerApi):
             if self.db['cluster_jobs'].has_key(cluster_hostname):
                 return self.db['cluster_jobs'][cluster_hostname]
         return list()
+
+    def get_cluster_users(self, cluster_hostname, start_t=None, end_t = None):
+        """ start_t and end_t are currently ignored."""
+        if self.db.has_key('cluster_allowed_users'):
+            if self.db['cluster_allowed_users'].has_key(cluster_hostname):
+                return self.db['cluster_allowed_users'][cluster_hostname]
+        return list()
+    
 
     def get_user_clusters(self,user_dn,start_t=None, end_t = None):
         """ start_t and end_t are currently ignored."""

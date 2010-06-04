@@ -4,19 +4,20 @@ minimal set of fuct that a job object needs to implement
 
 class JobApi:
 
+    def get_globalid(self):
+        """ returns global job id """
+        pass
+    
+    def get_globalowner(self):
+        pass
+    
+    def get_status(self):
+        pass
+    
     def get_jobname(self):
         """ returns job name """
         return None
 
-    def get_globalid(self):
-        """ returns global job id """
-        pass
-
-    def get_globalowner(self):
-        pass
-
-    def get_status(self):
-        pass
 
     def get_exitcode(self):
         pass
@@ -25,6 +26,9 @@ class JobApi:
         pass
 
     def get_queue_name(self):
+        pass
+
+    def get_usedwalltime(self):
         pass
     
     def get_attribute_names(self):

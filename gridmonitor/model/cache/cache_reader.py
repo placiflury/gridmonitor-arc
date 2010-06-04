@@ -22,7 +22,7 @@ class CacheReader(Cache):
         if os.path.exists(self.dbfile) and os.path.isfile(self.dbfile):
             try:
                 dbase = shelve.open(self.dbfile, 'r') # read only
-                self.log.info("Accessing cache/shelve '%s'" % self.dbfile)
+                self.log.debug("Accessing cache/shelve '%s'" % self.dbfile)
             except Exception, e:
                 self.log.error("Access of '%s' cache failed with %r" % (self.dbfile, e))
                 raise ACCESS_ERROR("Access Error", "Could not access cache at '%s'." % self.dbfile)

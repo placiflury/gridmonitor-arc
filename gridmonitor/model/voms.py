@@ -9,8 +9,11 @@ log = logging.getLogger(__name__)
 
 class VOMSConnector:
     """
-    Connector to the VOMS server's wsdl/soap interface. 
-    
+    Connector to the VOMS server's wsdl/soap interface.
+ 
+    VOMS Admin interface must be patched, so it does not exit
+    upon a connection error (e.g. SSL error), but that it throws 
+    an execption instead that can be caught.
     """
 
     def __init__(self, user_dn=None, ca=None):
@@ -136,41 +139,53 @@ class VOMSConnector:
             else:
                 log.error("No (proxy) certificate found for accessing VOMS.")
                 raise VOMS_ENV_ERROR("Environment Errror","No (proxy) certificate foud for accessing VOMS.")
-    
-    def get_admin_proxy(self,vo):
+   
+    def get_voms_admin_proxy(self,vo):
         """ 
         returns communication endpoint (stub) to voms server 
+        or None if communication endpoint not working
         """
-
         admin_module_path = os.path.join(self.glite_location,"share","voms-admin","client")
         sys.path.append(admin_module_path)
         from VOMSAdmin import VOMSCommands
-
+    
         if self.voms_opts['vo'] == vo:
             pass
         else:
             self.voms_opts['vo'] = vo
             self.voms_opts['host'] = self.voms_servers[vo]
-            self.proxy = VOMSCommands.VOMSAdminProxy(**self.voms_opts)
-            
-        return self.proxy
 
+        admin_proxy = VOMSCommands.VOMSAdminProxy(**self.voms_opts)
+        return admin_proxy
+    
     def listUserGroups(self,vo):
         """ 
         returns all groups of user known by this VO 
         """
         try:
-            admin = self.get_admin_proxy(vo)
+            admin = self.get_voms_admin_proxy(vo)
             return admin.admin.listUserGroups(self.user_dn, self.ca)
         except:
             return [] 
-    
+
+
+    def listUsers(self,vo):
+        """
+        returns all users of VO
+        """
+        try:
+            admin = self.get_voms_admin_proxy(vo)
+            return admin.listUsers()
+        except:
+            return [] 
+
+ 
     def listUserRoles(self,vo):
         """ 
         returns all roles of user known by this VO 
         """
         try: 
-            admin = self.get_admin_proxy(vo)
+            admin = self.get_voms_admin_proxy(vo)
             return admin.admin.listUserRoles(self.user_dn, self.ca)
         except:
             return []
@@ -180,7 +195,7 @@ class VOMSConnector:
         returns list of 'generic' attributes for this user and vo 
         """
         try:
-            admin = self.get_admin_proxy(vo)
+            admin = self.get_voms_admin_proxy(vo)
             return admin.attributes.listUserAttributes(self.user_dn, self.ca)
         except:
             return []

@@ -34,9 +34,11 @@ class Cache:
             'cluster_queues' - dict('cluster_name'= dict(queue_name: <<queue_obj>,..), ...)
             'cluster_jobs' - dict('cluster_name'=[<job_obj>,...],...)
             'cluster_allowed_users' - dict('cluster_name'=[user_dn,..])
-
-            'user_cluster_queues' - dict(user_dn= dict(cluster_name=[<queue_obj>,],...),...)
+            
+            'user_cluster_queues' - dict(user_dn= dict(cluster_name=[<queue_obj>,],...),...)  
             'user_jobs' = dict(user_dn:dict=(job_status=[<job_obj>,], ..., orphans=[<job_obj>,]),...) 
+
+            'grid_stats' - a tree-structured collection of NGStats objects, which hold statistics
 
             Notice: <objects> must implement their respective 'API', 
             e.g. the <cluster_obj> must be accessible via methods of 
