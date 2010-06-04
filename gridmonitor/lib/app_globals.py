@@ -5,6 +5,8 @@ import sys, time
 from pylons import config
 from gridmonitor.model.factories import DataHandlerFactory
 from gridmonitor.model.errors.handler import * 
+from gridmonitor.model.voms import VOMSConnector
+from gridmonitor.model.errors.voms import * 
 
 
 class Globals(object):
@@ -18,13 +20,16 @@ class Globals(object):
     def __init__(self):
         """One instance of Globals is created during application
         initialization and is available during requests via the 'g'
-        variable
+        variable:
+        XXX: since multiple instances of apache (may) get spawned, each instance
+        will create it's own Globals object. ;-(
+        --> BEWARE: the time it takes for the __init__ is  critical for user perception on performance. 
         """
         self.log = logging.getLogger(__name__)
         self.data_handler = None
-        self.log.info("Init gridmon globals: let's rock...")  
         for i in xrange(0,Globals.NUM_TRIES): 
             try:
+                self.log.info("Starting GridMonitor by getting handler...")  
                 self.data_handler = DataHandlerFactory().get_handler()
                 self.log.debug("...got data handler")
                 break
@@ -38,6 +43,9 @@ class Globals(object):
             self.log.error("Stop trying to get handler.")
             sys.exit(1)
 
+    
+    def __del__(self):
+        del(self.data_handler)
 
     def get_data_handler(self):
         """ return data handler """
@@ -77,10 +85,10 @@ class Globals(object):
         grid_stats= self.data_handler.get_grid_stats()
         name = config[stats_variable].strip()
         val = grid_stats.get_attribute(name)
-        self.log.debug("Grid statistics: '%s=%d'" % (name,val))
-        if val:
-            return int(val)
-        return 0     
+        self.log.debug("Grid statistics: '%s=%r'" % (name,val))
+        if val == None:
+            return 0
+        return val
     
     def get_cluster_stats(self,cluster_hostname,stats_variable):
         """ return value of statistical variable for given cluster. If
@@ -91,10 +99,11 @@ class Globals(object):
         if not cluster_stats:  return 0
         name = config[stats_variable].strip()
         val = cluster_stats.get_attribute(name)
-        self.log.debug("Cluster statistics: '%s=%d'" % (name,val))
-        if val:
-            return int(val)
-        return 0     
+        self.log.debug("Cluster statistics: '%s=%r'" % (name,val))
+        if val == None:
+            return 0
+        return val
+
 
     def get_queue_stats(self,cluster_hostname,queue_name,stats_variable):
         """ return value of statistical variable for given cluster-queue. If
@@ -105,10 +114,10 @@ class Globals(object):
         if not queue_stats: return 0
         name = config[stats_variable].strip()
         val = queue_stats.get_attribute(name)
-        self.log.debug("Queue statistics: '%s=%d'" % (name,val))
-        if val:
-            return int(val)
-        return 0     
+        self.log.debug("Queue statistics: '%s=%r'" % (name,val))
+        if val == None:
+            return 0
+        return val 
     
 
 

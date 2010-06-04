@@ -12,6 +12,11 @@ from pylons.templating import render
 
 import gridmonitor.lib.helpers as h
 import gridmonitor.model as model
+from gridmonitor.model.nagios import meta as nagios_meta
+from gridmonitor.model.acl import meta as acl_meta
+from gridmonitor.model.sft import sft_meta
+#from gridmonitor.model.nagios import hosttables
+#from gridmonitor.model.nagios import servicetables
 
 class BaseController(WSGIController):
 
@@ -20,7 +25,13 @@ class BaseController(WSGIController):
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
-        return WSGIController.__call__(self, environ, start_response)
+        try:
+            return WSGIController.__call__(self, environ, start_response)
+        finally:
+            nagios_meta.Session.remove()
+            acl_meta.Session.remove()
+            sft_meta.Session.remove()
+            
 
 # Include the '_' function in the public names
 __all__ = [__name for __name in locals().keys() if not __name.startswith('_') \
