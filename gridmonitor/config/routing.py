@@ -25,15 +25,42 @@ def make_map():
     map.connect('user/clusters/:action/:id/:queue', controller='user_clusters')
     map.connect('user/jobs/:action', controller='user_jobs')
     map.connect('user/jobs/:action/:status', controller='user_jobs')
+    map.connect('user/jobdetails/:dn/:jobid',controller='user_job_details')
     map.connect('user/statistics/:action', controller='user_statistics')
+    map.connect('user/tickets', controller='user_tickets')
+    map.connect('user/links', controller='user_links')
     
-    # mocking sites
+    # site admin
     map.connect('siteadmin',controller='siteadmin_overview')
     map.connect('siteadmin/overview/:action', controller='siteadmin_overview')
-    map.connect('siteadmin/vos/:action', controller='siteadmin_vos')
+    map.connect('siteadmin/clusters/:action', controller='siteadmin_clusters')
+    map.connect('siteadmin/clusters/:action/:id', controller='siteadmin_clusters')
+    map.connect('siteadmin/clusters/:action/:id/:queue', controller='siteadmin_clusters')
+    map.connect('siteadmin/jobs/:action', controller='siteadmin_jobs')
+    map.connect('siteadmin/users/:action', controller='siteadmin_users')
     map.connect('siteadmin/testjobs/:action', controller='siteadmin_testjobs')
     map.connect('siteadmin/testjobs/:action/:suit', controller='siteadmin_testjobs')
     map.connect('siteadmin/statistics/:action', controller='siteadmin_statistics')
+    
+    # grid admin
+    map.connect('gridadmin',controller='gridadmin_overview')
+    map.connect('gridadmin/overview/:action', controller='gridadmin_overview')
+    map.connect('gridadmin/clusters/:action', controller='gridadmin_clusters')
+    map.connect('gridadmin/clusters/:action/:id', controller='gridadmin_clusters')
+    map.connect('gridadmin/clusters/:action/:id/:queue', controller='gridadmin_clusters')
+    map.connect('gridadmin/vos/:action', controller='gridadmin_vos')
+    map.connect('gridadmin/vos/:action/:id', controller='gridadmin_vos')
+    map.connect('gridadmin/vos/:action/:id/:queue', controller='gridadmin_vos')
+    map.connect('gridadmin/sfts/:action', controller='gridadmin_sfts')
+    map.connect('gridadmin/sfts/:action/:name', controller='gridadmin_sfts')
+    map.connect('gridadmin/sfts/:action/:name/:cluster_name', controller='gridadmin_sfts')
+    map.connect('gridadmin/statistics/:action', controller='gridadmin_statistics')
+    map.connect('gridadmin/infosys/:action', controller='gridadmin_infosys')
+    map.connect('gridadmin/infosys/:action/:arg', controller='gridadmin_infosys')
+    map.connect('gridadmin/plot/:action/:type/:name', controller='gridadmin_plot')
+
+    # help 
+    map.connect('help',controller='help')
 
 
 

@@ -7,6 +7,13 @@ import gridmonitor.lib.app_globals as app_globals
 import gridmonitor.lib.helpers
 from gridmonitor.config.routing import make_map
 
+from sqlalchemy import engine_from_config
+from gridmonitor.model.nagios import init_model 
+from gridmonitor.model.acl import init_acl_model 
+from gridmonitor.model.giisdb import init_giisdb_model 
+from gridmonitor.model.sft import init_sft_model
+
+
 def load_environment(global_conf, app_conf):
     """Configure the Pylons environment via the ``pylons.config``
     object
@@ -31,3 +38,17 @@ def load_environment(global_conf, app_conf):
 
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
+    nagios_engine = engine_from_config(config, 'sqlalchemy_nagios.')
+    init_model(nagios_engine)
+    acl_engine = engine_from_config(config, 'sqlalchemy_acl.')
+    init_acl_model(acl_engine)
+    
+    handler_type = config['data_handler_type'].lower().strip()
+    if handler_type in ['giisdb','giis_handler']:
+        giisdb_engine = engine_from_config(config,'sqlalchemy_giisdb.')
+        init_giisdb_model(giisdb_engine)
+
+    sft_engine = engine_from_config(config, 'sqlalchemy_sft.')
+    init_sft_model(sft_engine)
+
+
