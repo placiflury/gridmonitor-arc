@@ -1,11 +1,11 @@
 import logging
 
 from gridmonitor.lib.base import *
-from siteadmin import SiteAdminController 
+from siteadmin import SiteadminController 
 
 log = logging.getLogger(__name__)
 
-class SiteadminVosController(SiteAdminController):
+class SiteadminVosController(SiteadminController):
     
     def index(self):
 	

@@ -9,15 +9,14 @@ class UserController(BaseController):
     
     NO_QUEUE_FOUND = 'NO_QUEUE'     # Tag to denote that no queue name was found 
     def __init__(self):
-
         # info about user
-        c.user_name = request.environ[config['shib_given_name']]
-        c.user_surname = request.environ[config['shib_surname']]
-        home_org = request.environ[config['shib_home_org']]
-        unique_id = request.environ[config['shib_unique_id']]
+        c.user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
+        c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
+        home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
+        unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
 
         if request.environ.has_key('SSL_CLIENT_S_DN'):
-            user_client_dn = request.environ['SSL_CLIENT_S_DN'].strip()
+            user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'ISO-8859-1')
             # if emailaddress= within DN -> fix it
             cand = user_client_dn.split("emailAddress=")
             if len(cand) >1:
@@ -35,9 +34,11 @@ class UserController(BaseController):
         log.debug("SHIB ID: name '%s', surname '%s', unique ID '%s'." %(c.user_name,c.user_surname,unique_id))
         # --end 
 
-    
+
         # build up menu (dynamic part)
         c.cluster_menu = list()
+        c.no_queue_clusters = list()    
+
         clusters = g.get_clusters()
         
         for cluster_hostname, cluster_obj in clusters.items():
@@ -51,6 +52,7 @@ class UserController(BaseController):
             if not queues_names:
                 log.debug("Cluster has no queue") 
                 cluster_queues = [(UserController.NO_QUEUE_FOUND,cluster_path)]
+                c.no_queue_clusters.append((cluster_display_name,cluster_hostname))
             else:    
                 for name  in queues_names:
                     log.debug("Got queue '%s'" % name) 
@@ -59,7 +61,8 @@ class UserController(BaseController):
         log.debug("finished building up cluster menu...\n %r" % c.cluster_menu)
  
        # build up menu (static part)
-        job_states = ('all', 'ACCEPTED','PREPARED', 'INLRMS','FINISHED','FAILED','KILLED','DELETED','orphans')
+        job_states = ('all', 'ACCEPTED','PREPARED', 'INLRMS','FINISHED',
+            'FAILED','KILLED','DELETED','FETCHED','orphans') # FETCHED is a meta-state
         jobs = list()
         for state in job_states:
           jobs.append((state,'/user/jobs/show/%s' % state))		
@@ -69,7 +72,7 @@ class UserController(BaseController):
 
         c.top_nav= [('User','/user'),
             ('Site Admin', '/siteadmin'),
-            ('VO/Grid Admin', '/voadmin'),
+            ('VO/Grid Admin', '/gridadmin'),
             ('Help','/help')]
        
         # XXX nagios and support links should be read from config file and not be hardcoded.
@@ -79,9 +82,8 @@ class UserController(BaseController):
                 ('Clusters', '/user/clusters', c.cluster_menu),
                 ('My Jobs', '/user/jobs', jobs), 
                 ('My Statistics', '/user/statistics'),
-            ('Nagios','/nagios'),
-            ('Submit a Ticket','http://rt.smscg.ch'), 
-            ('Links','/user')]
+                ('Got a Problem?','/user/tickets'), 
+                ('Links','/user/links')]
 
         c.top_nav_active="User"
     

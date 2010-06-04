@@ -1,0 +1,142 @@
+#
+# GridMonitor - Pylons development environment configuration
+#
+# The %(here)s variable will be replaced with the parent directory of this file
+#
+[DEFAULT]
+debug = false
+email_to = you@yourdomain.com
+smtp_server = localhost
+error_email_from = paste@localhost
+
+[server:main]
+use = egg:Paste#http
+host = 0.0.0.0
+port = 5000
+
+[app:main]
+use = egg:GridMonitor
+full_stack = true
+cache_dir = %(here)s/data
+beaker.session.key = gridmonitor
+beaker.session.secret = ${app_instance_secret}
+app_instance_uuid = ${app_instance_uuid}
+
+
+[app:main]
+
+data_handler_type=giisdb
+#data_handler_type=infocache
+## infosys cache block (used if data_handler_type == infocache)
+#infocache_file=/tmp/giiscache.shelve
+#infocache_check_interval=30
+#infocache_unpickle_classes=/opt/ch.smscg.infocache
+
+# VOMS stuff
+# syntax: voms = <VOMS_server>:<VO_1>|<VO_2>,<VOMS_SERVER_2>:<VO_1>|
+voms = voms.smscg.ch:smscg|tutor|crypto|life|earth,voms.cern.ch:atlas
+grid_security_path=/etc/grid-security
+glite_location=/opt/glite
+
+# Nagios stuff 
+# url to Nagios server
+nagios = monitor.smscg.ch
+# nagios hostgroup for Grid Core services (alias)
+nagios_core=SMSCG Core
+# nagios hostgroup for Computing Elements of Grid (alias)
+nagios_ces=SMSCG CEs
+
+# SLCS configuration (AAI attributes)
+shib_given_name=Shib-InetOrgPerson-givenName
+shib_surname=Shib-Person-surname
+shib_unique_id=Shib-SwissEP-UniqueID
+shib_email=Shib-InetOrgPerson-mail 
+shib_home_org=Shib-SwissEP-HomeOrganization
+shib_affiliation=Shib-EP-Affiliation
+slcs_ca="/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
+
+# key-value mappings for statistical objects
+stats_cpus= cpus
+stats_grid_running=gridrunning
+stats_grid_queued=gridqueued
+stats_local_queued=localqueued
+stats_prelrms_queued=prelrmsqueued
+stats_running=running
+stats_totaljobs=totaljobs
+stats_usedcpus=usedcpus
+stats_totalcpus=totalcpus
+stats_vo_usage=vo_usage
+
+# nagios ndoutils database
+sqlalchemy_nagios.url= <DB_URL> 
+# db_url syntax: driver://username:password@host:port/database
+sqlalchemy_nagios.pool_recycle = 3600
+# acl databse
+sqlalchemy_acl.url= <DB_URL>
+sqlalchemy_acl.pool_recycle = 3600
+# giisdb database
+sqlalchemy_giisdb.url= <DB_URL>
+sqlalchemy_giisdb.pool_recycle = 3600
+# sft tests database
+sqlalchemy_sft.url= <DB_URL>
+sqlalchemy_sft.pool_recycle = 3600
+sft_private_key=<PRIVATE_KEY_USED_BY_SFT>
+# eg. sft_private_key=/etc/apache2/ssl/monitor.smscg.ch.key
+#sft_new_private_key=<NEW_PRIVATE_KEY>
+
+use = egg:GridMonitor
+full_stack = true
+cache_dir = %(here)s/data
+beaker.session.key = gridmonitor
+beaker.session.secret = somesecret
+
+# Logging configuration
+[loggers]
+keys=root,gridmonitor,lib,cache_handler,pylons,routes
+[handlers]
+keys=rotor
+
+[formatters]
+keys=generic
+
+[logger_root]
+level=INFO
+handlers=rotor 
+
+[logger_pylons]
+level=INFO
+handlers = 
+qualname=pylons
+
+[logger_routes]
+level=INFO
+handlers = 
+qualname=routes
+
+[logger_gridmonitor]
+level = INFO
+# no handler specified -> propagates to root handler
+handlers =
+qualname = gridmonitor
+
+[logger_lib]
+level = DEBUG
+# no handler specified -> propagates to root handler
+handlers =
+qualname = gridmonitor.lib
+
+[logger_cache_handler]
+level=INFO
+handlers=
+qualname=gridmonitor.model.cache
+
+[handler_rotor]
+class=handlers.RotatingFileHandler
+level=INFO
+args=('/var/log/gridmonitor/gridmonitor.log','a', 1000000,0)
+formatter=generic
+
+[formatter_generic]
+format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %Y-%m-%d %H:%M:%S
+

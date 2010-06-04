@@ -1,0 +1,7 @@
+recursive-include gridmonitor/public *
+recursive-include gridmonitor/templates *
+recursive-include gridmonitor/templates *
+recursive-include gridmonitor/management * 
+include TODO.txt
+include LICENSE
+

@@ -1,27 +1,33 @@
 import logging
-
 from gridmonitor.lib.base import *
-from user import UserController 
-from pylons import config, request
+from gridadmin import GridadminController
+from user_overview import UserOverviewController
+from datetime import datetime
+
+from gridmonitor.model.giisdb import meta
+from gridmonitor.model.giisdb import ng_schema
 
 log = logging.getLogger(__name__)
 
-class UserOverviewController(UserController):
-
-    NAGIOS_CHECK_AGE_WARN = 1 # records older than 1 day
-    NAGIOS_CHECK_AGE_CRIT = 3 # records older than 3 days
+class GridadminOverviewController(GridadminController):    
+    """ Grid administrator overview controller """
 
     def __init__(self):
-        UserController()
+        GridadminController.__init__(self)
         self.nagios_core_tag = config['nagios_core'] # core services (defined by nagios hostgroup alias)
         self.nagios_ces_tag = config['nagios_ces']   # Grid computing elements  (defined by nagios hostgroup alias)
-        
     
     def index(self):
-        c.title = "Monitoring System: User View"
+        c.title = "Monitoring System: VO/Grid Admin View"
         c.menu_active = "Overview"
-        c.heading = "Welcome  %s %s" % (c.user_name,c.user_surname)
-
+        c.heading = "Nothing to View"  # default
+        
+        """"     
+        if self.access_denied:
+            c.heading= "Site Overview"
+            return render('/derived/siteadmin/error/access_denied.html')
+        """        
+        c.heading = "Tactical Overview on Grid Services"
         status_core = h.get_nagios_host_services_from_group_tag(self.nagios_core_tag)
 
         # CORE SERVICES
@@ -70,44 +76,12 @@ class UserOverviewController(UserController):
                             state = service.status[0].current_state
                             c.ces_stats_summary[state] = c.ces_stats_summary[state] +1
 
-        # MY JOBS SUMMARY
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
-        c.job_state_distribution = dict(FINISHED=0,FAILED=0,KILLED=0,DELETED=0, FETCHED=0,other=0, orphaned=0)
-       
-        num_finished = g.data_handler.get_num_user_jobs(slcs_dn, status='FINISHED') + \
-                    g.data_handler.get_num_user_jobs(browser_dn, status= 'FINISHED')
-        c.job_state_distribution['FINISHED'] = num_finished
 
-        num_failed = g.data_handler.get_num_user_jobs(slcs_dn,status ='FAILED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='FAILED') 
-        c.job_state_distribution['FAILED'] = num_failed
-        
-        num_killed = g.data_handler.get_num_user_jobs(slcs_dn,status='KILLED') + \
-                g.data_handler.get_num_user_jobs(browser_dn,status='KILLED')
+        # inactive COMPUTING ELEMENTS 
+        query = meta.Session.query(ng_schema.Cluster)
+        c.db_inactive_clusters = query.filter_by(status='inactive').all()
+        meta.Session.clear()
 
-        c.job_state_distribution['KILLED'] = num_killed
-
-        num_deleted = g.data_handler.get_num_user_jobs(slcs_dn,status='DELETED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='DELETED')
-
-        c.job_state_distribution['DELETED'] = num_deleted
-        
-        num_fetched = g.data_handler.get_num_user_jobs(slcs_dn,status='FETCHED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='FETCHED')
-
-        c.job_state_distribution['FETCHED'] = num_fetched
-
-        num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status='orphans') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='orphans')
-
-        c.job_state_distribution['orphaned'] = num_orphaned
-
-        num_other = g.data_handler.get_num_user_jobs(slcs_dn) + \
-                g.data_handler.get_num_user_jobs(browser_dn) - num_finished -\
-                num_killed - num_deleted - num_orphaned - num_failed - num_fetched
-
-        c.job_state_distribution['other'] = num_other
 
         # GRID LOAD + max load cluster + min load cluster
         c.max_load_cluster=dict(name=None,tot_running=0,tot_cpus=0,tot_queued=0, relative_load=-1)
@@ -199,26 +173,38 @@ class UserOverviewController(UserController):
                 c.min_load_cluster['tot_cpus'] = cpus
                 c.min_load_cluster['tot_queued'] = tot_queued 
                 c.min_load_cluster['relative_load'] = relative_cluster_load
-
-            # CHECK FOR SCHEDULED DOWNTIMES 
-            c.down_time_items = h.get_nagios_scheduleddowntime_items()
+        
+        # CHECK FOR SCHEDULED DOWNTIMES 
+        c.down_time_items = h.get_nagios_scheduleddowntime_items()
+        c.now_scheduled_down = list() # keep list of currenlty down items
+        if c.down_time_items:
+            for ditem in c.down_time_items:
+                hostname = ditem.generic_object.name1
+                start_t = ditem.scheduled_start_time
+                end_t = ditem.scheduled_end_time
+                if datetime.now() > start_t and datetime.now() < end_t:
+                    c.now_scheduled_down.append(hostname)  
             
-        return render('/derived/user/overview/index.html')
 
- 
+        # GETTING GIIS-LIST
+        c.giises = meta.Session.query(ng_schema.Giis).all()
+        
+        return render('/derived/gridadmin/overview/index.html')
+    
     def core(self):
-        c.title = "Monitoring System: User View"
-        c.menu_active="Core Services"
-        c.heading = "Services Details"
+        c.title = "Monitoring System: Site Admin View"
+        c.menu_active="My Services"
+        c.heading = "My Services Status"
+        
         c.nagios_check_warn_days = UserOverviewController.NAGIOS_CHECK_AGE_WARN
         c.nagios_check_crit_days = UserOverviewController.NAGIOS_CHECK_AGE_CRIT
         c.status_core = h.get_nagios_host_services_from_group_tag(self.nagios_core_tag)
         c.status_ces = h.get_nagios_host_services_from_group_tag(self.nagios_ces_tag)
+        
         return render('/derived/user/overview/core.html')
-    
+
     def reports(self):
-        c.title = "Monitoring System: User View"
-        c.menu_active="Reports"
+        c.title = "Monitoring System: VO/Grid Admin View"
+        c.menu_active ="Reports"
         c.heading = "Reports"
-        return render('/derived/user/overview/report.html')
-	 
+        return render('/derived/gridadmin/overview/report.html')	 
