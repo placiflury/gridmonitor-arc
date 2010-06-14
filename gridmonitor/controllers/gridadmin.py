@@ -1,8 +1,9 @@
 import logging
 
+from sft.db import sft_meta
+from sft.db import sft_schema
+
 from gridmonitor.lib.base import *
-from gridmonitor.model.sft import sft_meta
-from gridmonitor.model.sft import sft_schema
 from gridmonitor.lib.slcs import SLCS
 
 log = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import mapper, relation
+from sqlalchemy.orm import mapper, relationship
 from gridmonitor.model.acl import meta
 
 """
@@ -102,17 +102,17 @@ mapper(ServiceACL, t_service_acl)
 # N:M mappings
 mapper(Site, t_site,
     properties = dict(
-        admins = relation(Admin,
+        admins = relationship(Admin,
         secondary = t_site_acl,
         primaryjoin = t_site.c.name == t_site_acl.c.site_name,
         secondaryjoin = t_site_acl.c.admin_id == t_admin.c.shib_unique_id,
          backref='sites'),
-        services = relation(Service, backref='site'))
+        services = relationship(Service, backref='site'))
 )
 
 mapper(Service, t_service,
         properties = dict(
-        admins = relation(Admin,
+        admins = relationship(Admin,
         secondary = t_service_acl,
         primaryjoin = sa.and_(t_service.c.name == t_service_acl.c.service_name,
             t_service.c.hostname == t_service_acl.c.hostname),

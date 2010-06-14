@@ -14,9 +14,7 @@ import gridmonitor.lib.helpers as h
 import gridmonitor.model as model
 from gridmonitor.model.nagios import meta as nagios_meta
 from gridmonitor.model.acl import meta as acl_meta
-from gridmonitor.model.sft import sft_meta
-#from gridmonitor.model.nagios import hosttables
-#from gridmonitor.model.nagios import servicetables
+from sft.db import sft_meta
 
 class BaseController(WSGIController):
 

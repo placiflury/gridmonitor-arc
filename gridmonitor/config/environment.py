@@ -10,8 +10,7 @@ from gridmonitor.config.routing import make_map
 from sqlalchemy import engine_from_config
 from gridmonitor.model.nagios import init_model 
 from gridmonitor.model.acl import init_acl_model 
-from gridmonitor.model.giisdb import init_giisdb_model 
-from gridmonitor.model.sft import init_sft_model
+from sft.db import init_model as init_sft_model
 
 
 def load_environment(global_conf, app_conf):
@@ -45,6 +44,7 @@ def load_environment(global_conf, app_conf):
     
     handler_type = config['data_handler_type'].lower().strip()
     if handler_type in ['giisdb','giis_handler']:
+        from infocache.db  import init_model as init_giisdb_model
         giisdb_engine = engine_from_config(config,'sqlalchemy_giisdb.')
         init_giisdb_model(giisdb_engine)
 

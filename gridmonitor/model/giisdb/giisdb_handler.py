@@ -4,18 +4,13 @@ in a (local) db.
 """
 __author__="Placi Flury grid@switch.ch"
 __date__ = "21.11.2009"
-__version__="0.1"
+__version__="0.2"
 
 import logging, pickle
 from gridmonitor.model.api.handler_api import HandlerApi
-from gridmonitor.model.giisdb import meta
-from gridmonitor.model.giisdb import ng_schema  #XXX either make it reflective or use same as infocache
+from infocache.db import meta
+from infocache.db import ng_schema
 from sqlalchemy import and_
-
-# VERY UGLY -> XXX find alternative (used by pickle.loads)
-# XXX quick-fix idea -> pass path by configuration file
-import sys
-sys.path.append('/opt/ch.smscg.infocache')
 
 
 class GiisDbHandler(HandlerApi):

@@ -1,13 +1,15 @@
 import logging
 
 from sqlalchemy import desc
-from gridmonitor.lib.base import *
-from gridadmin import GridadminController
-from gridmonitor.model.sft import sft_meta
-from gridmonitor.model.sft import sft_schema
-from gridmonitor.model.sft.user_handler import UserPool
 from sqlalchemy import and_
 from datetime import datetime
+
+from sft.db import sft_meta
+from sft.db import sft_schema
+from sft.db.user_handler import UserPool
+from gridmonitor.lib.base import *
+
+from gridadmin import GridadminController
 
 
 log = logging.getLogger(__name__)

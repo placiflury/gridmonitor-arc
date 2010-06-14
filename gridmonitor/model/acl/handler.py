@@ -35,7 +35,7 @@ class AdminsPool():
             admin = schema.Admin(shib_unique_id, 
                 shib_surname, shib_given_name, shib_email,
                 shib_affiliation, shib_homeorg)
-            self.session.save(admin)
+            self.session.add(admin)
             self.session.flush() 
 
     def remove_admin(self, shib_unique_id):
@@ -62,7 +62,7 @@ class SitesPool():
         else:
             print "Adding site '%s'" % name
             site = schema.Site(name,alias)
-            self.session.save(site)
+            self.session.add(site)
             self.session.flush()
 
     def add_admin(self, site_name, shib_unique_id):
@@ -124,7 +124,7 @@ class ServicesPool():
         if not site:
             print "Adding site '%s'" % name
             site = schema.Site(name)
-            self.session.save(site)
+            self.session.add(site)
 
         service = self.session.query(schema.Service).filter_by(name=name, hostname=hostname).first()
         if service:
@@ -138,7 +138,7 @@ class ServicesPool():
         else:
             print "Adding service '%s' (%s)" % (name, hostname)
             service = schema.Service(name, site_name, type, hostname, alias)
-            self.session.save(service)
+            self.session.add(service)
 
         self.session.flush()
         
