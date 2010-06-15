@@ -10,7 +10,7 @@ import logging, pickle
 from gridmonitor.model.api.handler_api import HandlerApi
 from infocache.db import meta
 from infocache.db import ng_schema
-from sqlalchemy import and_
+from sqlalchemy import and_ 
 
 
 class GiisDbHandler(HandlerApi):
@@ -30,7 +30,6 @@ class GiisDbHandler(HandlerApi):
         self.log.debug("Found %d active clusters." % (len(dbclusters)))
         for cluster in dbclusters:
             cls[cluster.hostname] = pickle.loads(cluster.pickle_object) 
-        meta.Session.clear()
         return cls 
 
 
@@ -47,7 +46,6 @@ class GiisDbHandler(HandlerApi):
         query = meta.Session.query(ng_schema.Queue)
         for queue in query.filter_by(hostname=cluster_hostname,status='active').all():
             qs[queue.name] = pickle.loads(queue.pickle_object)
-        meta.Session.clear()
         return qs
         
     def get_cluster_jobs(self, cluster_hostname, start_t=None, end_t = None):
@@ -61,7 +59,6 @@ class GiisDbHandler(HandlerApi):
         # XXX implement start_t and end_t
         query = meta.Session.query(ng_schema.Job)
         jobs = query.filter_by(cluster_name=cluster_hostname).all()
-        meta.Session.clear()
         return jobs
         
 
@@ -78,7 +75,6 @@ class GiisDbHandler(HandlerApi):
         for u in users:
             ulist.append(u.user)
 
-        meta.Session.clear()
         return ulist
 
     def get_user_clusters(self,user_dn,start_t=None, end_t = None):
@@ -95,7 +91,6 @@ class GiisDbHandler(HandlerApi):
         for cluster in clusters:
             cls.append(cluster.hostname)
 
-        meta.Session.clear()
         return cls
 
     def get_user_queues(self,user_dn, cluster_hostname,start_t,end_t):
@@ -112,7 +107,6 @@ class GiisDbHandler(HandlerApi):
         qs=list()
         for q in queues:
             qs.append(q.name)
-        meta.Session.clear()
         return qs
 
     def get_user_jobs(self,user_dn, status=None, start_t = None, end_t=None):
@@ -124,11 +118,10 @@ class GiisDbHandler(HandlerApi):
         query = query.outerjoin('access')
        
         if status == 'orphans':
-            query = query.filter(and_(ng_schema.Job.c.globalowner==user_dn, 
+            query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
             ng_schema.UserAccess.user==None))
             orphans = query.all()
             self.log.debug("Found %d orphans" % len(orphans))
-            meta.Session.clear()
             return orphans
         elif status == 'INLRMS':
             jobs=query.filter(and_(ng_schema.UserAccess.user!=None,
@@ -143,7 +136,6 @@ class GiisDbHandler(HandlerApi):
             jobs = query.filter(and_(ng_schema.Job.globalowner==user_dn)).all()
 
         self.log.debug("Found %d non-orphaned jobs" % len(jobs))
-        meta.Session.clear()
         return jobs
 
     def get_num_user_jobs(self,user_dn, cluster_hostname=None, status=None, start_t = None, end_t=None):
@@ -157,10 +149,9 @@ class GiisDbHandler(HandlerApi):
       
         if not cluster_hostname: 
             if status == 'orphans':
-                query = query.filter(and_(ng_schema.Job.c.globalowner==user_dn, 
+                query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
                 ng_schema.UserAccess.user==None))
                 norphans = query.count()
-                meta.Session.clear()
                 return norphans
             elif status == 'INLRMS':
                 njobs=query.filter(and_(ng_schema.UserAccess.user!=None,
@@ -174,14 +165,12 @@ class GiisDbHandler(HandlerApi):
             else:
                 njobs = query.filter(and_(ng_schema.Job.globalowner==user_dn)).count()
 
-            meta.Session.clear()
             return njobs
         else:
             if status == 'orphans':
-                query = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.c.globalowner==user_dn, 
+                query = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.globalowner==user_dn, 
                 ng_schema.UserAccess.user==None))
                 norphans = query.count()
-                meta.Session.clear()
                 return norphans
             elif status == 'INLRMS':
                 njobs=query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.UserAccess.user!=None,
@@ -194,7 +183,6 @@ class GiisDbHandler(HandlerApi):
                     ng_schema.Job.globalowner==user_dn, ng_schema.Job.status==status)).count()
             else:
                 njobs = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.globalowner==user_dn)).count()
-            meta.Session.clear()
             return njobs
             
 
@@ -224,7 +212,6 @@ class GiisDbHandler(HandlerApi):
         query = meta.Session.query(ng_schema.GridStats)
         stats = query.first()
         if stats:
-            meta.Session.clear()
             return pickle.loads(stats.pickle_object)
         return None
 
@@ -237,7 +224,6 @@ class GiisDbHandler(HandlerApi):
             cluster_stats = grid_stats.get_children()
             for cluster_stat in cluster_stats:
                 if cluster_stat.get_name() == cluster_hostname:
-                    meta.Session.clear()
                     return cluster_stat
         return None
 
@@ -251,7 +237,6 @@ class GiisDbHandler(HandlerApi):
             queue_stats_list = cluster_stats.get_children()
             for queue_stat in queue_stats_list:
                 if queue_stat.get_name() == queue_name:
-                    meta.Session.clear()
                     return queue_stat
 
     def get_user_stats(self,user_dn):

@@ -25,7 +25,7 @@ class BaseController(WSGIController):
         # available in environ['pylons.routes_dict']
         try:
             return WSGIController.__call__(self, environ, start_response)
-        finally:
+        finally: # make sure scoped sessions get removed...
             nagios_meta.Session.remove()
             acl_meta.Session.remove()
             sft_meta.Session.remove()

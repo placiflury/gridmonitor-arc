@@ -1,5 +1,5 @@
 """Pylons environment configuration"""
-import os
+import os, logging
 
 from pylons import config
 
@@ -12,6 +12,8 @@ from gridmonitor.model.nagios import init_model
 from gridmonitor.model.acl import init_acl_model 
 from sft.db import init_model as init_sft_model
 
+
+log = logging.getLogger(__name__)
 
 def load_environment(global_conf, app_conf):
     """Configure the Pylons environment via the ``pylons.config``
@@ -39,16 +41,17 @@ def load_environment(global_conf, app_conf):
     # any Pylons config options)
     nagios_engine = engine_from_config(config, 'sqlalchemy_nagios.')
     init_model(nagios_engine)
-    acl_engine = engine_from_config(config, 'sqlalchemy_acl.')
+    log.info('Nagios DB connection initialized')
+    acl_engine = engine_from_config(config, prefix='sqlalchemy_acl.')
     init_acl_model(acl_engine)
-    
+    log.info('ACL DB connection initialized')
     handler_type = config['data_handler_type'].lower().strip()
     if handler_type in ['giisdb','giis_handler']:
         from infocache.db  import init_model as init_giisdb_model
-        giisdb_engine = engine_from_config(config,'sqlalchemy_giisdb.')
+        giisdb_engine = engine_from_config(config, prefix='sqlalchemy_giisdb.')
         init_giisdb_model(giisdb_engine)
-
-    sft_engine = engine_from_config(config, 'sqlalchemy_sft.')
+        log.info('GIIS DB connection initialized')
+    sft_engine = engine_from_config(config, prefix='sqlalchemy_sft.')
     init_sft_model(sft_engine)
-
+    log.info('SFT DB connection initialized')
 

@@ -17,7 +17,8 @@ def setup_config(command, filename, section, vars):
     from gridmonitor.model.acl import meta
     meta.acl_metadata.bind = meta.engine
     meta.acl_metadata.create_all(checkfirst=True)
-    
+    """
     from sft.db import sft_meta
     sft_meta.metadata.bind = sft_meta.engine
-    sft_meta.metadata.create_all(checkfirst=True)
+    sft _meta.metadata.create_all(checkfirst=True)
+    """

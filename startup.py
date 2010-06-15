@@ -2,4 +2,4 @@
 #fileConfig('/opt/GridMonitor/logging.ini')
 
 from paste.deploy import loadapp
-app = loadapp('config:/opt/monitor/smscgmonitor.ini')
+app = loadapp('config:/opt/monitor/deploy.ini')

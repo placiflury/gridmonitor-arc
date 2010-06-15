@@ -8,7 +8,6 @@ from gridmonitor.model.errors.handler import *
 from gridmonitor.model.voms import VOMSConnector
 from gridmonitor.model.errors.voms import * 
 
-
 class Globals(object):
     """Globals acts as a container for objects available throughout the
     life of the application
