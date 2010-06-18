@@ -5,6 +5,7 @@ from sft.db import sft_schema
 
 from gridmonitor.lib.base import *
 from gridmonitor.lib.slcs import SLCS
+from gridmonitor.controllers.user import UserController
 
 log = logging.getLogger(__name__)
 

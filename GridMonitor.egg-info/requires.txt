@@ -1,2 +1,5 @@
 Pylons>=0.9.6.2
 SQLAlchemy>=0.5
+glite-voms-admin-client>=2.0.6
+python-zsi
+

@@ -4,8 +4,8 @@ from gridadmin import GridadminController
 from user_overview import UserOverviewController
 from datetime import datetime
 
-from gridmonitor.model.giisdb import meta
-from gridmonitor.model.giisdb import ng_schema
+from infocache.db import meta
+from infocache.db import ng_schema
 
 log = logging.getLogger(__name__)
 
@@ -80,7 +80,6 @@ class GridadminOverviewController(GridadminController):
         # inactive COMPUTING ELEMENTS 
         query = meta.Session.query(ng_schema.Cluster)
         c.db_inactive_clusters = query.filter_by(status='inactive').all()
-        meta.Session.clear()
 
 
         # GRID LOAD + max load cluster + min load cluster

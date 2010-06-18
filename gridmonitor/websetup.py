@@ -6,6 +6,9 @@ from pylons import config
 
 from gridmonitor.config.environment import load_environment
 
+from sft.db import sft_meta
+from gridmonitor.model.acl import meta as acl_meta
+
 log = logging.getLogger(__name__)
 
 def setup_config(command, filename, section, vars):
@@ -13,12 +16,7 @@ def setup_config(command, filename, section, vars):
     conf = appconfig('config:' + filename)
     load_environment(conf.global_conf, conf.local_conf)
     
-    # Load the models
-    from gridmonitor.model.acl import meta
-    meta.acl_metadata.bind = meta.engine
-    meta.acl_metadata.create_all(checkfirst=True)
-    """
-    from sft.db import sft_meta
-    sft_meta.metadata.bind = sft_meta.engine
-    sft _meta.metadata.create_all(checkfirst=True)
-    """
+    # Load (create)  the models
+    # XXX tables are not created. Fix it!!
+    acl_meta.metadata.create_all(bind=acl_meta.engine)
+    sft_meta.metadata.create_all(bind=sft_meta.engine)

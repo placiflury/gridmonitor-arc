@@ -1,7 +1,12 @@
  TODO list for Gridmonitor:
 ---------------------------
 
-- in model/giisdb/giisdb_handler.py  pass ch.smscg.infocache path by configuration
+- gridadmin view dependency to infocache: 
+    . inactive clusters
+    . list of giis'es
+    . blacklisted clusters 
+-> these dependecies need to be made 'infocache' independent.
+
 - report on jobs that got submitted and executed but where not fetched by users -> jobs erased by sites
 - make sure db sessions are closed (memory of queries freed) regularily
 - limiting number of displayed jobs (or introduce pagination: query.order_by(sa.desc(ng_schema.Cluster.db_lastmodified)).limit(10).all())

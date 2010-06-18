@@ -80,7 +80,7 @@ sqlalchemy_giisdb.pool_recycle = 3600
 # sft tests database
 sqlalchemy_sft.url= <DB_URL>
 sqlalchemy_sft.pool_recycle = 3600
-sft_private_key=<PRIVATE_KEY_USED_BY_SFT>
+sft_config=/opt/smscg/sft/etc/config.ini
 # eg. sft_private_key=/etc/apache2/ssl/monitor.smscg.ch.key
 #sft_new_private_key=<NEW_PRIVATE_KEY>
 

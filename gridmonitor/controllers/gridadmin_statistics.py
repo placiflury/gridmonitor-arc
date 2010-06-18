@@ -2,10 +2,10 @@ import logging
 
 from gridmonitor.lib.base import *
 from gridadmin import GridadminController
-
+"""
 from gridmonitor.model.giisdb import meta
 from gridmonitor.model.giisdb import ng_schema
-
+"""
 log = logging.getLogger(__name__)
 
 class GridadminStatisticsController(GridadminController):
@@ -17,12 +17,11 @@ class GridadminStatisticsController(GridadminController):
         c.title = "Monitoring System: VO/Grid Admin Statistics"
         c.menu_active = "Grid Statistics"
         c.heading = "VO/Grid Statistics"
-
+        """
         query = meta.Session.query(ng_schema.Cluster)
         c.dbclusters = query.filter_by(status='active').all()
         c.blacklisted = meta.Session.query(ng_schema.Grisblacklist).all()
         c.giises = meta.Session.query(ng_schema.Giis).all()
-        meta.Session.clear() 
-        
+        """
 
         return render('/derived/gridadmin/statistics/index.html')

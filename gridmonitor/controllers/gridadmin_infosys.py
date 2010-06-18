@@ -3,8 +3,8 @@ import logging
 from gridmonitor.lib.base import *
 from gridadmin import GridadminController
 
-from gridmonitor.model.giisdb import meta
-from gridmonitor.model.giisdb import ng_schema
+from infocache.db import meta
+from infocache.db import ng_schema
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,6 @@ class GridadminInfosysController(GridadminController):
         c.dbclusters = query.all()
         c.blacklisted = meta.Session.query(ng_schema.Grisblacklist).all()
         c.giises = meta.Session.query(ng_schema.Giis).all()
-        meta.Session.clear() 
         c.title = "Monitoring System -- Infosys (GRIS/GIIS) Statistics --"
         
         # get some query time
@@ -39,7 +38,6 @@ class GridadminInfosysController(GridadminController):
         
         query = meta.Session.query(ng_schema.Cluster)
         c.db_inactive_clusters = query.filter_by(status='inactive').all()
-        meta.Session.clear() 
         return render('/derived/gridadmin/infosys/index.html')
 
     

@@ -12,16 +12,17 @@ import sqlalchemy.orm as orm
 
 from gridmonitor.model.acl.handler import * 
 import gridmonitor.model.acl.meta as meta
+import gridmonitor.model.acl.schema
 
 if __name__ == '__main__':
     
-    db = 'mysql://monitor:<passwd>@localhost/monitor'  # name of ACL DB
+    db = 'mysql://monuser:lap2ns@localhost/monitor'  # name of ACL DB
     
     engine = sa.create_engine(db)
     meta.metadata.bind = engine
     meta.metadata.create_all(checkfirst=True)
   
-    Session = orm.sessionmaker(autoflush=False, transactional=False, bind=engine)
+    Session = orm.sessionmaker(bind=engine)
     
     session = Session()
     
@@ -40,7 +41,7 @@ if __name__ == '__main__':
     admins.add_admin('6D34303231303401@uzh.ch','Maffioletti','Sergio','m402104@access.uzh.ch')
     admins.add_admin('aesch@unibe.ch', 'Aeschlimann', 'Andres', 'andres.aeschlimann@id.unibe.ch')
     admins.add_admin('haug@unibe.ch','Haug','Sigve','sigve.haug@lhep.unibe.ch')
-    admins.add_admin('vonbuere@unibe.ch','von Büren','Peter','peter.vonbuerien@id.unibe.ch')
+    admins.add_admin('vonbuere@unibe.ch',u'von Büren','Peter','peter.vonbueren@id.unibe.ch')
     
     sites = SitesPool(session)    
     sites.add_site('SWITCH')
