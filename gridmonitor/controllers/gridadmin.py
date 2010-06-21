@@ -20,6 +20,11 @@ class GridadminController(BaseController):
         c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
         user_email = unicode(request.environ[config['shib_email']], "utf-8")
         user_home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
+        nagios_server = config['nagios']
+        if nagios_server == 'localhost':
+            nagios_server_url = '/nagios'
+        else:
+            nagios_server_url = 'http://' + nagios_server + '/nagios'
         
         if request.environ.has_key('SSL_CLIENT_S_DN'):
             c.user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'ISO-8859-1')
@@ -78,7 +83,8 @@ class GridadminController(BaseController):
             ('Site Admin', '/siteadmin'),
             ('VO/Grid Admin', '/gridadmin'),
             ('Help','/help')]
-         
+        
+ 
         c.menu = [('Overview', '/gridadmin/overview', overview),
                 ('Clusters','/gridadmin/clusters', c.cluster_menu),
                 ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals),
@@ -86,7 +92,7 @@ class GridadminController(BaseController):
                 ('Grid Statistics', '/gridadmin/statistics'),
                 ('SFTs', '/gridadmin/sfts', sfts),
                 ('SFTs User', '/gridadmin/sfts/user_mgnt'),
-                ('Nagios', '/nagios')]
+                ('Nagios', nagios_server_url)]
 
         c.top_nav_active="VO/Grid Admin"
 

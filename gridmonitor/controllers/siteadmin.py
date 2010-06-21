@@ -24,6 +24,12 @@ class SiteadminController(BaseController):
         c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
         user_email = unicode(request.environ[config['shib_email']], "utf-8")
         user_home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
+        
+        nagios_server = config['nagios']
+        if nagios_server == 'localhost':
+            nagios_server_url = '/nagios'
+        else:
+            nagios_server_url = 'http://' + nagios_server + '/nagios'
 
         query = meta.Session.query(schema.Admin)
         
@@ -50,36 +56,6 @@ class SiteadminController(BaseController):
                             log.info("Access to service %s granted." % service.name)
                             self.cores.append(service.hostname)
                 
-            
-            """
-            # check whether permitted access to view any cluster
-            query = meta.Session.query(schema.SiteACL)
-            log.info("Site access check for admin: '%s'." % self.admin.shib_unique_id)
-            site_access = query.filter_by(admin_id = self.admin.shib_unique_id)
-            if site_access and site_access.first():
-                log.info("Admin got access to entire site.")
-                query = meta.Session.query(schema.Service)
-                services = query.filter_by(site_name=site_access.first().site_name).all()
-                for service in services:
-                    if service.type == 'cluster':
-                        self.clusters.append(service.hostname)
-                    if service.type == 'other': # XXX this might change
-                        self.cores.append(service.hostname)
-
-            # check whether access to 'non-site' services                        
-            query = meta.Session.query(schema.ServiceACL)
-            service_access = query.filter_by(admin_id = self.admin.shib_unique_id)
-            if service_access:
-                for service_acl_item in service_access.all():
-                    query = meta.Session.query(schema.Service)
-                    services = query.filter_by(id=service_acl_item.service_id).all()
-                    for service in services:
-                        log.info("Access to service %s granted." % service.name)
-                        if service.type == 'cluster' and (service.hostname not in self.clusters):
-                            self.clusters.append(service.hostname)
-                        if service.type == 'other' and (service.hostname not in self.cores):
-                            self.cores.append(service.hostname)
-            """
         # static menu information
         test_jobs = [('test_suit1','/siteadmin/testjobs/test/suit1')]
         
@@ -118,7 +94,7 @@ class SiteadminController(BaseController):
                 ('Users','/siteadmin/users'),
                 ('Test Jobs', '/siteadmin/testjobs', test_jobs), 
                 ('Site Statistics', '/siteadmin/statistics'),
-                ('Nagios','/nagios')]
+                ('Nagios', nagios_server_url)]
 
         c.top_nav_active="Site Admin"
  
