@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from sqlalchemy import desc
@@ -132,13 +133,12 @@ class GridadminSftsController(GridadminController):
         c.menu_active = "-- none --"
         c.heading = "Storing the password of your MyProxy certificate."
 
-
         up = UserPool()
         
         if request.params.has_key('CB_browser_dn'):
-            browser_dn = request.params['CB_browser_dn']
-            browser_pwd = request.params['browser_dn_pwd']
-            browser_pwd2 = request.params['browser_dn_pwd2']
+            browser_dn = request.params['CB_browser_dn'].encode('utf-8')
+            browser_pwd = request.params['browser_dn_pwd'].encode('utf-8')
+            browser_pwd2 = request.params['browser_dn_pwd2'].encode('utf-8')
             if not browser_pwd:
                 c.form_error= "You must enter a password for your '%s' certificate" % browser_dn
                 return render('/derived/gridadmin/sfts/form.html')
@@ -154,12 +154,12 @@ class GridadminSftsController(GridadminController):
             else:
                 up.add_user(browser_dn, browser_pwd)
                 c.browser_msg =  "'%s' has been added successfully" % browser_dn
-
         
         if request.params.has_key('CB_slcs_dn'):
-            slcs_dn = request.params['CB_slcs_dn']
-            slcs_pwd = request.params['slcs_dn_pwd']
-            slcs_pwd2 = request.params['slcs_dn_pwd2']
+            slcs_dn = request.params['CB_slcs_dn'].encode('utf-8')
+            slcs_pwd =request.params['slcs_dn_pwd'].encode('utf-8')
+            slcs_pwd2 = request.params['slcs_dn_pwd2'].encode('utf-8')
+
             if not slcs_pwd:
                 c.form_error = "Your must enter a password for your '%s' certificate" % slcs_dn
                 return render('/derived/gridadmin/sfts/form.html')
@@ -174,7 +174,6 @@ class GridadminSftsController(GridadminController):
             else:
                 up.add_user(slcs_dn, slcs_pwd)
                 c.slcs_msg =  "'%s' has been added successfully" % slcs_dn
-       
  
         if not c.slcs_msg and not c.browser_msg: 
             return render('/derived/gridadmin/sfts/nochange.html')
