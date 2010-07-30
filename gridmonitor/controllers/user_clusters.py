@@ -12,7 +12,7 @@ class UserClustersController(UserController):
     def index(self):
         c.title = "Monitoring System: User View - Clusters"
         c.menu_active = "Clusters"
-        c.heading = "Grid Clusters"
+        c.heading = "Grid Clusters for %s %s" % (c.user_name, c.user_surname)
         
         # collect access information
         slcs_dn = c.user_slcs_obj.get_dn()

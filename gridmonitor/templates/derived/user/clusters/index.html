@@ -1,7 +1,12 @@
 <%inherit file="/base/user.html"/>
 <p>
-According to the grid information system the entire Grid consists of following clusters, providing in total
-${c.tot_cpus} CPUs. Notice, you might not have access to the entire CPU pool.</p>
+This page displays all clusters the Grid consists of (estimated <span class="emph"> ${c.tot_cpus} </span>logical CPUs.) with their current usage patterns. 
+<br/>
+If you click on  <a href="javascript:showUserClusters('slcs')">SLCS</a> only the 
+clusters you can access with your SLCS certificate are displayed. 
+By clicking on <a href="javascript:showUserClusters('browser_cert')">browser cert</a>
+you get the clusters you can access with the certificate, which is in your browsers (if any). 
+To get back to all clusters click <a href="javascript:showUserClusters('all')">all</a>. <p>
 
 <table width="900">
 <tr><td>
@@ -42,6 +47,9 @@ cpus=g.get_cluster_stats(hostname,'stats_cpus')
     </td>
 
 <td>
+<div>
+<span align="center" style="font-weight:bold;"> Cluster Sizes [logical CPUs]</span>
+</div>
 <div id="pie_slcs_browser_access" style="display:none">
 % if c.user_client_dn:
 <img src="http://chart.apis.google.com/chart?
