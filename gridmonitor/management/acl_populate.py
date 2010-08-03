@@ -32,6 +32,7 @@ if __name__ == '__main__':
     admins.add_admin('828471@switch.ch', 'Usai','Alessandro','alessandro.usai@switch.ch')
     admins.add_admin('521780@switch.ch', 'Flury','Placi','placi.flury@switch.ch')
     admins.add_admin('596758@vho-switchaai.ch', 'Flury','Placi','flury@switch.ch')
+    admins.add_admin('499772@switch.ch', 'Witzig','Christoph','christoph.witzig@switch.ch')
     admins.add_admin('186988207178@unil.ch', 'Stockinger','Heinz','Heinz.Stockinger@unil.ch')
     admins.add_admin('jocasutt@unibe.ch','Casutt',u'Joël','joel.casutt@id.unibe.ch')
     admins.add_admin('d9a030e98708201905ee206bee9d691f@wsl.ch',u'Wüst','Thomas','thomas.wuest@wsl.ch')
@@ -62,7 +63,8 @@ if __name__ == '__main__':
     services.add_service('CE','UniBe','cluster', 'nordugrid.unibe.ch')
     services.add_service('CE','UniBe', 'cluster','ce.lhep.unibe.ch')
     services.add_service('CE','GC3 UZH','cluster','idgc3grid01.uzh.ch')
-    services.add_service('CE','GC3 UZH', 'cluster','ocikbpra.unizh.ch')
+    #services.remove_service('GC3 UZH', 'ociknor.unizh.ch')
+    services.add_service('CE','GC3 UZH', 'cluster','ocikbnor.uzh.ch')
     services.add_service('CE','EPFL', 'cluster','smscg.epfl.ch')
     services.add_service('CE','VITAL-IT', 'cluster','globus.vital-it.ch')
     services.add_service('CE','WSL', 'cluster','hera.wsl.ch')
@@ -78,28 +80,41 @@ if __name__ == '__main__':
     services.add_service('MONITOR','SWITCH','other','monitor.smscg.ch')
  
     # ACL
-    sites.add_admin('SWITCH','521780@switch.ch') # placi
     sites.add_admin('SWITCH','596758@vho-switchaai.ch') # placi
+    sites.add_admin('SWITCH','521780@switch.ch') # placi
     sites.add_admin('SWITCH','828471@switch.ch') # Ale
     sites.add_admin('GC3 UZH','521780@switch.ch') # placi
     sites.add_admin('UniBe','521780@switch.ch') # placi
     sites.add_admin('VITAL-IT','521780@switch.ch') # placi
     sites.add_admin('WSL','521780@switch.ch') # placi
     sites.add_admin('EPFL','521780@switch.ch') # placi
+    sites.add_admin('HESGE','521780@switch.ch') # placi
+    sites.add_admin('SWITCH','499772@switch.ch') # christoph
+    sites.add_admin('SWITCH','828471@switch.ch') # Ale
+    sites.add_admin('GC3 UZH','499772@switch.ch') # christoph
+    sites.add_admin('UniBe','499772@switch.ch') # chrirstoph
+    sites.add_admin('VITAL-IT','499772@switch.ch') # christoph
+    sites.add_admin('WSL','499772@switch.ch') # christoph
+    sites.add_admin('EPFL','499772@switch.ch') # christoph
+    sites.add_admin('HESGE','499772@switch.ch') # christoph
     sites.add_admin('UniBe','jocasutt@unibe.ch') # Joel
     sites.add_admin('UniBe','aesch@unibe.ch') # Res
     sites.add_admin('UniBe','vonbuere@unibe.ch') # Peter 
     sites.add_admin('UniBe','haug@unibe.ch') # Sigve
-    sites.add_admin('GC3 UZH','6D34303231303401@uzh.ch') # Sergio
+    sites.add_admin('GC3 UZH','6D34303231303401@uzh.ch') # Sergio 
+    sites.add_admin('UniBe','6D34303231303401@uzh.ch') # Sergio 
+    sites.add_admin('VITAL-IT','6D34303231303401@uzh.ch') # Sergio 
+    sites.add_admin('WSL','6D34303231303401@uzh.ch') # Sergio 
+    sites.add_admin('EPFL','6D34303231303401@uzh.ch') # Sergio 
     sites.add_admin('GC3 UZH','6D3130333832343601@uzh.ch') # Mike
     sites.add_admin('VITAL-IT','186988207178@unil.ch') # Heinz
     sites.add_admin('WSL','d9a030e98708201905ee206bee9d691f@wsl.ch') #Thomas
     sites.add_admin('EPFL','128552@epfl.ch') # Pascal  
     sites.add_admin('EPFL','103777@epfl.ch') # Pascal  
-
-    #services.add_admin('CE','disir.switch.ch','521780@switch.ch')
     services.add_admin('CE','arc01.lcg.cscs.ch','haug@unibe.ch') # Sigve
     services.add_admin('CE','arc02.lcg.cscs.ch','haug@unibe.ch') # Sigve
+
+
 
     # TESTS  
     """

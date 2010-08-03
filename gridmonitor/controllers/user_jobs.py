@@ -9,7 +9,7 @@ class UserJobsController(UserController):
     
     # XXX  logging
    
-    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED', 
+    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED', 'INLRMS: R',
             'FETCHED'] # FETCHED state is a meta-state for FINISHED_FETCHED etc..
 
     def __init__(self): 
@@ -50,16 +50,16 @@ class UserJobsController(UserController):
                 cluster_bag[cluster_name][state] = num
                 sum_state_jobs += num
             
-            orphans = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name,status='orphans') + \
-                g.data_handler.get_num_user_jobs(browser_dn,cluster_hostname=cluster_name,status='orphans')
-            cluster_bag[cluster_name]['orphans'] = orphans
+            orphaned = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name,status='orphaned') + \
+                g.data_handler.get_num_user_jobs(browser_dn,cluster_hostname=cluster_name,status='orphaned')
+            cluster_bag[cluster_name]['orphaned'] = orphaned
           
             total = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name) + \
                     g.data_handler.get_num_user_jobs(browser_dn, cluster_hostname=cluster_name)
             if c.max_tot_jobs < total:
                 c.max_tot_jobs = total
             
-            cluster_bag[cluster_name]['other'] = total - sum_state_jobs - orphans
+            cluster_bag[cluster_name]['other'] = total - sum_state_jobs - orphaned
             cluster_bag[cluster_name]['total'] = total
             sum_jobs_allowed_clusters += total
         
@@ -68,16 +68,16 @@ class UserJobsController(UserController):
         num_all_user_jobs = g.data_handler.get_num_user_jobs(slcs_dn) + \
                             g.data_handler.get_num_user_jobs(browser_dn)
 
-        if sum_jobs_allowed_clusters != num_all_user_jobs: # there are more orphans 
-            orphans = num_all_user_jobs - sum_jobs_allowed_clusters
+        if sum_jobs_allowed_clusters != num_all_user_jobs: # there are more orphaned 
+            orphaned = num_all_user_jobs - sum_jobs_allowed_clusters
             cluster_bag['DOWN_CLUSTERS'] = dict()
             cluster_bag['DOWN_CLUSTERS']['other'] = 0 
             for state in UserJobsController.JOB_STATES:
                 cluster_bag['DOWN_CLUSTERS'][state] = 0 
-            cluster_bag['DOWN_CLUSTERS']['orphans'] = orphans # XXX list cluster names instead
-            cluster_bag['DOWN_CLUSTERS']['total'] = orphans 
-            if c.max_tot_jobs < orphans:
-                c.max_tot_jobs = orphans
+            cluster_bag['DOWN_CLUSTERS']['orphaned'] = orphaned # XXX list cluster names instead
+            cluster_bag['DOWN_CLUSTERS']['total'] = orphaned 
+            if c.max_tot_jobs < orphaned:
+                c.max_tot_jobs = orphaned
          
         c.cluster_bag = cluster_bag            
 
@@ -100,7 +100,7 @@ class UserJobsController(UserController):
         c.cluster_bar_chd="t:%s" % (h.list2string(cluster_bar_chd))
        
         # setting for user jobs  bar chart
-        c.job_stat_summary=[0,0,0,0,0,0,0,0]  # finished, failed, killed, deleted,fetched,other,orphan,total
+        c.job_stat_summary=[0,0,0,0,0,0,0,0,0]  # finished, failed, killed, deleted,fetched,running,other,orphan,total
         
         for cluster in c.cluster_bag.values():
             c.job_stat_summary[0] += cluster['FINISHED']
@@ -108,9 +108,10 @@ class UserJobsController(UserController):
             c.job_stat_summary[2] += cluster['KILLED']
             c.job_stat_summary[3] += cluster['DELETED']
             c.job_stat_summary[4] += cluster['FETCHED']
-            c.job_stat_summary[5] += cluster['other']
-            c.job_stat_summary[6] += cluster['orphans']
-            c.job_stat_summary[7] += cluster['total']
+            c.job_stat_summary[5] += cluster['INLRMS: R']
+            c.job_stat_summary[6] += cluster['other']
+            c.job_stat_summary[7] += cluster['orphaned']
+            c.job_stat_summary[8] += cluster['total']
         
         c.max_status_value = max(c.job_stat_summary[:-1])
         c.job_bar_chd="t:%s" % (h.list2string(c.job_stat_summary[:-1]))
@@ -126,7 +127,7 @@ class UserJobsController(UserController):
         c.job_status = status
         c.menu_active = status
         if status != 'all':
-            if status == 'orphans':
+            if status == 'orphaned':
                 c.heading = "Orphaned Jobs"
                 c.title = "Orphaned Jobs"
             else:

@@ -111,18 +111,18 @@ class GiisDbHandler(HandlerApi):
 
     def get_user_jobs(self,user_dn, status=None, start_t = None, end_t=None):
         """ 
-        special job status 'orphans' must be supported. Orphans are jobs
+        special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
         query = meta.Session.query(ng_schema.Job)
         query = query.outerjoin('access')
        
-        if status == 'orphans':
+        if status == 'orphaned':
             query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
             ng_schema.UserAccess.user==None))
-            orphans = query.all()
-            self.log.debug("Found %d orphans" % len(orphans))
-            return orphans
+            orphaned = query.all()
+            self.log.debug("Found %d orphaned" % len(orphaned))
+            return orphaned
         elif status == 'INLRMS':
             jobs=query.filter(and_(ng_schema.UserAccess.user!=None,
                 ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).all()
@@ -141,18 +141,18 @@ class GiisDbHandler(HandlerApi):
     def get_num_user_jobs(self,user_dn, cluster_hostname=None, status=None, start_t = None, end_t=None):
         """ 
         Returns the number of jobs for user.
-        special job status 'orphans' must be supported. Orphans are jobs
+        special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
         query = meta.Session.query(ng_schema.Job)
         query = query.outerjoin('access')
       
         if not cluster_hostname: 
-            if status == 'orphans':
+            if status == 'orphaned':
                 query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
                 ng_schema.UserAccess.user==None))
-                norphans = query.count()
-                return norphans
+                norphaned = query.count()
+                return norphaned
             elif status == 'INLRMS':
                 njobs=query.filter(and_(ng_schema.UserAccess.user!=None,
                     ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).count()
@@ -167,11 +167,11 @@ class GiisDbHandler(HandlerApi):
 
             return njobs
         else:
-            if status == 'orphans':
+            if status == 'orphaned':
                 query = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.globalowner==user_dn, 
                 ng_schema.UserAccess.user==None))
-                norphans = query.count()
-                return norphans
+                norphaned = query.count()
+                return norphaned
             elif status == 'INLRMS':
                 njobs=query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.UserAccess.user!=None,
                     ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).count()

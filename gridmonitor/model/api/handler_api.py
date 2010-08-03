@@ -108,7 +108,7 @@ class HandlerApi:
 
     def get_user_jobs(self,user_dn, status=None, start_t = None, end_t=None):
         """ 
-        special job status 'orphans' must be supported. Orphans are jobs
+        special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
         pass
@@ -116,7 +116,7 @@ class HandlerApi:
     def get_num_user_jobs(self,user_dn, cluster_hostname=None, status=None, start_t = None, end_t=None):
         """ 
         Returns only the number of jobs for user. 
-        special job status 'orphans' must be supported. Orphans are jobs
+        special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
         pass

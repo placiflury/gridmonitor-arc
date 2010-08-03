@@ -98,8 +98,8 @@ class UserOverviewController(UserController):
 
         c.job_state_distribution['FETCHED'] = num_fetched
 
-        num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status='orphans') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='orphans')
+        num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status='orphaned') + \
+                g.data_handler.get_num_user_jobs(browser_dn, status='orphaned')
 
         c.job_state_distribution['orphaned'] = num_orphaned
 

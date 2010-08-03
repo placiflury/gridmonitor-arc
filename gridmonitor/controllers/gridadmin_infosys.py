@@ -56,9 +56,9 @@ class GridadminInfosysController(GridadminController):
             c.suffix= '_y1.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of current  year."
         else:
-            c.menu_active = "last 6 hours"
-            c.suffix= '_h6.png'
-            c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of last 6 hours."
+            c.menu_active = "last 24 hours"
+            c.suffix= '_h24.png'
+            c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of last 24 hours."
             
         return render('/derived/gridadmin/infosys/index.html')
     

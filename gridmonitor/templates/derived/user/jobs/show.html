@@ -1,9 +1,9 @@
 <%inherit file="/base/user.html"/>
 <%namespace name="jobtable" file="/components/jobstable.mako"/>
 
-%if c.job_status not in ['all','orphans']:
+%if c.job_status not in ['all','orphaned']:
     <p> Listing of all user jobs in state '${c.job_status}', with pagination. </p>
-%elif c.job_status == 'orphans':
+%elif c.job_status == 'orphaned':
     <p> Listing of all of your 'orphaned' jobs. Orphaned jobs are jobs that have
     been submited to a queue you do not have access anymore. This may have happend because
     your VO membership expired or the site implemented a local policy denying you access.</p>

@@ -62,7 +62,7 @@ class UserController(BaseController):
  
        # build up menu (static part)
         job_states = ('all', 'ACCEPTED','PREPARED', 'INLRMS','FINISHED',
-            'FAILED','KILLED','DELETED','FETCHED','orphans') # FETCHED is a meta-state
+            'FAILED','KILLED','DELETED','FETCHED','orphaned') # FETCHED is a meta-state
         jobs = list()
         for state in job_states:
           jobs.append((state,'/user/jobs/show/%s' % state))		

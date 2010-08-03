@@ -67,7 +67,7 @@ class GridadminController(BaseController):
         # static menu information
         overview = [('Reports','/gridadmin/overview/reports')]
        
-        infosys_intervals = [('last 6 hours', '/gridadmin/infosys/show/h6'),
+        infosys_intervals = [('last 24 hours', '/gridadmin/infosys/show/h24'),
                     ('last week', '/gridadmin/infosys/show/w1'),
                     ('last year', '/gridadmin/infosys/show/y1')]
         
