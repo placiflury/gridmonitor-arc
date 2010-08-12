@@ -84,6 +84,10 @@ sft_config=/opt/smscg/sft/etc/config.ini
 # eg. sft_private_key=/etc/apache2/ssl/monitor.smscg.ch.key
 #sft_new_private_key=<NEW_PRIVATE_KEY>
 
+# sgas accounting records database
+sqlalchemy_sgas.url= <DB_URL>
+sqlalchemy_sgas.pool_recycle = 3600
+
 use = egg:GridMonitor
 full_stack = true
 cache_dir = %(here)s/data

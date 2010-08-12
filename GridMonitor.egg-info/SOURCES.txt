@@ -274,6 +274,7 @@ gridmonitor/templates/derived/user/jobs/show.html
 gridmonitor/templates/derived/user/overview/core.html
 gridmonitor/templates/derived/user/overview/index.html
 gridmonitor/templates/derived/user/overview/report.html
+gridmonitor/templates/derived/user/statistics/.index.html.swp
 gridmonitor/templates/derived/user/statistics/index.html
 gridmonitor/templates/derived/user/tickets/index.html
 gridmonitor/templates/derived/user/vos/index.html
