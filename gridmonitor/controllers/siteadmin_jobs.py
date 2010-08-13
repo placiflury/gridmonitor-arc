@@ -9,15 +9,13 @@ USER_NAME_LEN = 11
 
 class SiteadminJobsController(SiteadminController):    
 
-    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED', 'ACCEPTED','PREPARED']
+    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED', 'FETCHED','INLRMS: R']
 
     def index(self):
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Jobs"
-        c.heading = "Jobs/Users on Your Clusters"  # default
+        c.heading = "Jobs/Users on Your Cluster(s)"  # default
        
-
-        # XXX support multiple clusters, now we just take first if there is any
  
         if self.access_denied:
             c.heading = "Nothing to View"  # default
@@ -101,15 +99,16 @@ class SiteadminJobsController(SiteadminController):
 
 
             # setting for populating the user jobs states  bar chart
-            job_stat_summary=[0,0,0,0,0,0,0,0]  # finished, failed, killed, deleted,accepted, prep,other,total
+            job_stat_summary=[0,0,0,0,0,0,0,0]  # finished, failed, killed, deleted,fetched,running,other,total
+
 
             for job in users_bag.values():
                 job_stat_summary[0] += job['FINISHED']
                 job_stat_summary[1] += job['FAILED']
                 job_stat_summary[2] += job['KILLED']
                 job_stat_summary[3] += job['DELETED']
-                job_stat_summary[4] += job['ACCEPTED']
-                job_stat_summary[5] += job['PREPARED']
+                job_stat_summary[4] += job['FETCHED']
+                job_stat_summary[5] += job['INLRMS: R']
                 job_stat_summary[6] += job['other']
                 job_stat_summary[7] += job['total']
 

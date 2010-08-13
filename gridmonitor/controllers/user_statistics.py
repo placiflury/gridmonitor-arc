@@ -15,8 +15,8 @@ class UserStatisticsController(UserController):
     
     def index(self):
         c.title = "Monitoring System: User Job  Statistics"
-        c.menu_active = "My Statistics"
-        c.heading = "My Job Statistics"
+        c.menu_active = "Statistics about my Jobs"
+        c.heading = "Statistics about my Jobs"
 
         slcs_dn_id = None
         browser_dn_id = None
@@ -114,10 +114,10 @@ class UserStatisticsController(UserController):
         # prepare data for plot
         c.n_jobs_max = n_jobs_max
         c.major_page_faults_max = major_page_faults_max
-        c.cpu_duration_max = cpu_duration_max / 60  # conversion in minutes
-        c.wall_duration_max = wall_duration_max / 60
-        c.kernel_time_max = kernel_time_max / 60 
-        c.user_time_max = user_time_max / 60
+        c.cpu_duration_max = float(cpu_duration_max / 60)  # conversion in minutes
+        c.wall_duration_max = float(wall_duration_max / 60)
+        c.kernel_time_max = float(kernel_time_max / 60) 
+        c.user_time_max = float(user_time_max / 60)
         
         # start date
         w4 = datetime.utcfromtimestamp(start_t_epoch)
@@ -142,20 +142,20 @@ class UserStatisticsController(UserController):
         for date in xrange(start_t_epoch + resolution_1, now_epoch + resolution_1, resolution_1):
             if t_series.has_key(date):
                 if c.n_job_series:
-                    c.n_job_series += ',%s' % t_series[date]['n_jobs']
-                    c.major_page_faults_series += ',%s' % t_series[date]['major_page_faults']
-                    c.cpu_series += ',%s' % (t_series[date]['cpu_duration'] / 60)
-                    c.wall_series += ',%s' % (t_series[date]['wall_duration'] / 60) 
-                    c.user_series += ',%s' % (t_series[date]['user_time'] / 60 )
-                    c.kernel_series += ',%s' % (t_series[date]['kernel_time'] / 60) 
+                    c.n_job_series += ',%d' % t_series[date]['n_jobs']
+                    c.major_page_faults_series += ',%d' % t_series[date]['major_page_faults']
+                    c.cpu_series += ',%0.2f' % (t_series[date]['cpu_duration'] / 60)
+                    c.wall_series += ',%0.2f' % (t_series[date]['wall_duration'] / 60) 
+                    c.user_series += ',%0.2f' % (t_series[date]['user_time'] / 60 )
+                    c.kernel_series += ',%0.2f' % (t_series[date]['kernel_time'] / 60) 
             
                 else:
-                    c.n_job_series = '%s' % t_series[date]['n_jobs']
-                    c.major_page_faults_series = '%s' % t_series[date]['major_page_faults']
-                    c.cpu_series += '%s' % (t_series[date]['cpu_duration'] / 60)
-                    c.wall_series += '%s' % (t_series[date]['wall_duration'] / 60) 
-                    c.user_series += '%s' % (t_series[date]['user_time'] / 60 )
-                    c.kernel_series += '%s' % (t_series[date]['kernel_time'] / 60)
+                    c.n_job_series = '%d' % t_series[date]['n_jobs']
+                    c.major_page_faults_series = '%d' % t_series[date]['major_page_faults']
+                    c.cpu_series += '%0.2f' % (t_series[date]['cpu_duration'] / 60)
+                    c.wall_series += '%0.2f' % (t_series[date]['wall_duration'] / 60) 
+                    c.user_series += '%0.2f' % (t_series[date]['user_time'] / 60 )
+                    c.kernel_series += '%0.2f' % (t_series[date]['kernel_time'] / 60)
                     
             else:
                 if c.n_job_series:

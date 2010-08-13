@@ -258,6 +258,7 @@ gridmonitor/templates/derived/siteadmin/jobs/index.html
 gridmonitor/templates/derived/siteadmin/overview/core.html
 gridmonitor/templates/derived/siteadmin/overview/index.html
 gridmonitor/templates/derived/siteadmin/overview/report.html
+gridmonitor/templates/derived/siteadmin/statistics/.index.html.swp
 gridmonitor/templates/derived/siteadmin/statistics/index.html
 gridmonitor/templates/derived/siteadmin/testjobs/index.html
 gridmonitor/templates/derived/siteadmin/users/index.html
@@ -274,7 +275,6 @@ gridmonitor/templates/derived/user/jobs/show.html
 gridmonitor/templates/derived/user/overview/core.html
 gridmonitor/templates/derived/user/overview/index.html
 gridmonitor/templates/derived/user/overview/report.html
-gridmonitor/templates/derived/user/statistics/.index.html.swp
 gridmonitor/templates/derived/user/statistics/index.html
 gridmonitor/templates/derived/user/tickets/index.html
 gridmonitor/templates/derived/user/vos/index.html
