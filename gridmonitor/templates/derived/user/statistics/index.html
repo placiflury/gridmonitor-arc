@@ -9,13 +9,13 @@ submitted during the same day have been summed up). <br/>
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
-&amp;chs=700x150
+&amp;chs=600x150
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.n_job_series}|${c.major_page_faults_series}
 &amp;chds=0,${'%0.2f' % (c.n_jobs_max * 1.1)},0,${'%0.2f' % (c.major_page_faults_max * 1.1)}
 &amp;chxr=1,0,${'%0.2f'% (c.n_jobs_max * 1.1)}|2,0,${'%0.2f' % (c.major_page_faults_max * 1.1)}
-&amp;chbh=8,1,5
+&amp;chbh=6,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
 &amp;chxp=0,2,27,52,77,98.5
@@ -28,13 +28,13 @@ alt="Number of Jobs and Major Page Faults Chart"
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
-&amp;chs=700x150
+&amp;chs=600x150
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.cpu_series}|${c.wall_series}
 &amp;chds=0,${'%0.2f' % (c.cpu_duration_max * 1.1)},0,${'%0.2f' % (c.wall_duration_max * 1.1)}
 &amp;chxr=1,0,${'%0.2f' % (c.cpu_duration_max * 1.1)}|2,0,${'%0.2f' % (c.wall_duration_max * 1.1)}
-&amp;chbh=8,1,5
+&amp;chbh=6,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
 &amp;chxp=0,2,27,52,77,98.5
@@ -47,13 +47,13 @@ alt="CPU and Walltime durations"
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
-&amp;chs=700x150
+&amp;chs=600x150
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.user_series}|${c.kernel_series}
 &amp;chds=0,${'%0.2f' % (c.user_time_max * 1.1)},0,${'%0.2f' % (c.kernel_time_max * 1.1)}
 &amp;chxr=1,0,${'%0.2f' % (c.user_time_max * 1.1)}|2,0,${'%0.2f' % (c.kernel_time_max * 1.1)}
-&amp;chbh=8,1,5
+&amp;chbh=6,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
 &amp;chxp=0,2,27,52,77,98.5

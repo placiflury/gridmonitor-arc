@@ -1,0 +1,191 @@
+<%inherit file="/base/user.html"/>
+
+<!--begin custom header content for this example-->
+<style type="text/css">
+#fromContainer { display:none; position:absolute; left:327px; top:5px; z-index:2}
+#toContainer { display:none; position:absolute; left:327px; top:245px; z-index:1}
+#inlinetable {width:240px}
+.cell_left {text-align:right; float:left; width:5em;}
+.cell_right {text-align:left; float:left;}
+</style>
+
+
+%if c.form_error:
+    <p>
+    <b style='color:red;'> Form error: ${c.form_error}</b></br>
+</p>
+
+%endif
+
+<form name="get_user_stats" method="post" action="/user/statistics">
+<table border=1 width='750'>
+<tr class="table_head2"> 
+    <th>Output Selection</th>
+    <th colspan=2>Variables </th>
+</tr>
+<tr>
+    <td rowspan=2>
+    <div id="inlinetable">
+        <div> 
+            <div class="cell_left"> From: </div>
+            <div class="cell_right"> 
+                <input id='start_t_from' type="text" name='start_t_str' size='8'value="${c.start_t_str}"/>  
+                <button id="fromBtn" type="button">change</button>
+                <div id="fromContainer" style='display:none'></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> To: </div>
+            <div class="cell_right"> 
+                <input id='end_t' type="text" name='end_t_str' size='8'value="${c.end_t_str}"/>
+                <button id="toBtn" type="button">change</button>
+                <div id="toContainer"></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> Resolution:</div>
+            <div class="cell_right"> 
+                <select name="resolution" size="1">
+                     <option value="86400"> 1 day </option>
+                     <option value="604800" /> 1 week </option>
+                     <option value="2419200"/> 4 weeks </option>
+                     <option value="0"/> No sampling </option>
+                </select>
+            <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+        </div>
+    </div>
+    </td>
+
+
+    <td>
+    <input type="checkbox" name="n_jobs_page_faults" value="n_jobs_page_faults" checked/>
+            n_jobs & major_page_faults <br/>
+    <input type="checkbox" name="cpu_wall_duration" value="cpu_wall_duration" checked/>
+            CPU duration & Wall duration <br/>
+    </td>
+    <td>
+    <input type="checkbox" name="user_kernel_time" value="user_kernel_time"/>
+            User time & Kernel time <br/>
+    <input type="checkbox" name="jobs status" value="job_status"/> 
+            Jobs Status <br/>
+    </td>
+</tr>
+<tr>
+<td> 
+                <input type="checkbox" name="plot_table" value="1"/> Display table(s) only.
+</td>
+<td> <input type="submit" value="Fetch Statistics"></td>
+</tr>
+</table>
+</form>
+
+
+
+<p>
+${c.test}
+</p>
+
+
+
+
+
+<script type="text/javascript">
+    YAHOO.namespace("smscg.calendar");
+    var Dom = YAHOO.util.Dom
+    
+    var inEl = Dom.get('inlinetable')
+    
+    YAHOO.smscg.calendar.init = function() {
+    
+        function handleSelectFrom(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtfrom = document.getElementById("start_t_from");
+            txtfrom.value = day + "." + month + "." + year;
+        }
+        
+        function handleSelectTo(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtto = document.getElementById("end_t");
+            txtto.value = day + "." + month + "." + year;
+        }
+        
+        function hideme(e) {
+            var el = YAHOO.util.Event.getTarget(e);
+            if (el != inEl && !Dom.isAncestor(inEl, el)) {
+                document.getElementById("fromContainer").style.display='none';
+                document.getElementById("toContainer").style.display='none';
+            }
+        }
+
+        YAHOO.util.Event.addListener(document, "click", hideme);
+
+
+        YAHOO.smscg.calendar.cal1 = new YAHOO.widget.Calendar("fromBtn","fromContainer", { 
+                                    title:"Starting from:", close:true});
+
+        // Correct formats for Germany: dd.mm.yyyy, dd.mm, mm.yyyy
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+
+
+
+        YAHOO.smscg.calendar.cal1.selectEvent.subscribe(handleSelectFrom, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.smscg.calendar.cal1.render();
+        
+        
+        YAHOO.smscg.calendar.cal2 = new YAHOO.widget.Calendar("toBtn","toContainer", { title:"Until:", close:true} );
+        
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+        YAHOO.smscg.calendar.cal2.selectEvent.subscribe(handleSelectTo, YAHOO.smscg.calendar.cal2, true);
+        YAHOO.smscg.calendar.cal2.render();
+
+        // Listener to show the 1-up Calendar when the button is clicked
+        YAHOO.util.Event.addListener("fromBtn", "click", YAHOO.smscg.calendar.cal1.show, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.util.Event.addListener("toBtn", "click", YAHOO.smscg.calendar.cal2.show, YAHOO.smscg.calendar.cal2, true);
+        
+        
+    }
+    YAHOO.util.Event.onDOMReady(YAHOO.smscg.calendar.init);
+    
+</script>
+<script type="text/javascript">
+    // Hide Calendar if we click anywhere in the document other than the calendar
+
+</script>
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/yui/build/fonts/fonts-min.css', 'screen')}
+    ${self.css_link('/css/yui/build/calendar/assets/skins/sam/calendar.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
+    <script type="text/javascript" src="/js/yui//build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/build/calendar/calendar-min.js"></script>
+</%def>
+
+
+
+
