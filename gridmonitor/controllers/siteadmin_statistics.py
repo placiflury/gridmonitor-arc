@@ -1,13 +1,17 @@
-import logging, time
+import logging
 from datetime import datetime
+import time, calendar
+from decimal import Decimal
 
 from gridmonitor.lib.base import *
+from gridmonitor.model.statistics.series import Series
 from siteadmin import SiteadminController 
 
 from sqlalchemy import and_
 from sgas.db import sgas_meta
 from sgas.db import ag_schema # schema of tables of aggregated usage record 
 from sgas.db import sgas_schema  # original SGAS schema
+from sgas.utils import helpers 
 
 
 log = logging.getLogger(__name__)
@@ -15,6 +19,169 @@ log = logging.getLogger(__name__)
 class SiteadminStatisticsController(SiteadminController):
     
     def index(self):
+
+        c.title = "Monitoring System: Site Admin Statistics"
+        c.menu_active = "Site Statistics"
+        c.heading = "Site Statistics"
+        
+        c.form_error =''
+        resolution = 86400
+        
+        series = dict()
+
+        if not request.params.has_key('start_t_str'): # setting defaults
+            now = int(time.time())
+            secs_back = 28 * resolution  # 4 weeks
+            start_t = now - (now % resolution) - secs_back
+            end_t = now
+            start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t))        
+            end_t_str = time.strftime("%d.%m.%Y", time.gmtime(now))
+            for cluster in self.clusters:
+                series[cluster] = dict()
+                series[cluster]['n_jobs'] = Series('n_jobs',start_t, end_t,resolution)
+                series[cluster]['major_page_faults'] = Series('major_page_faults',start_t, end_t,resolution)
+                series[cluster]['cpu_duration'] = Series('cpu_duration',start_t, end_t,resolution)
+                series[cluster]['wall_duration'] = Series('wall_duration',start_t, end_t,resolution)
+            c.n_jobs_page_faults = True
+            c.cpu_wall_duration = True
+        else: 
+            start_t_str = request.params['start_t_str'] 
+            end_t_str = request.params['end_t_str'] 
+            log.info('%s %s' % (start_t_str, end_t_str))
+            try:
+                start_t = calendar.timegm(time.strptime(start_t_str,'%d.%m.%Y'))
+                end_t = calendar.timegm(time.strptime(end_t_str,'%d.%m.%Y'))
+                if end_t < start_t:
+                    t = end_t
+                    end_t = start_t
+                    start_t = t
+            except:
+                c.form_error = "Please enter dates in 'dd.mm.yyyy' format"
+                return render('/derived/siteadmin/statistics/form.html')
+
+            resolution = int(request.params['resolution'])
+
+            for cluster in self.clusters:
+                series[cluster] = dict()
+                if request.params.has_key('n_jobs_page_faults') and resolution > 0:
+                    series[cluster]['n_jobs'] = Series('n_jobs',start_t, end_t,resolution)
+                    series[cluster]['major_page_faults'] = \
+                        Series('major_page_faults',start_t, end_t,resolution)
+                    c.n_jobs_page_faults = True
+                elif request.params.has_key('n_jobs_page_faults'):
+                    series[cluster]['major_page_faults'] = \
+                        Series('major_page_faults',start_t, end_t,resolution)
+                if request.params.has_key('cpu_wall_duration'):
+                    series[cluster]['cpu_duration'] = Series('cpu_duration',start_t, end_t,resolution)
+                    series[cluster]['wall_duration'] = Series('wall_duration',start_t, end_t,resolution)
+                    c.cpu_wall_duration = True
+                if request.params.has_key('user_kernel_time'):
+                    series[cluster]['user_time'] = Series('user_time',start_t, end_t,resolution)
+                    series[cluster]['kernel_tiem'] = Series('kernel_time',start_t, end_t,resolution)
+                    c.user_kernel_time = True
+            if request.params.has_key('plot_table'):
+                c.plot_table = True  
+       
+        t_ref = None # for resolutions > 86440 we need to callibrate time series
+
+        for cluster in self.clusters:
+            for acrec in  helpers.get_cluster_acrecords(cluster, start_t, end_t, resolution):
+                if resolution == 0: # convert datetime to epoch time
+                    t_epoch = time.mktime(acrec.end_time.timetuple()) + \
+                    acrec.end_time.microsecond/1000000.0 - time.timezone
+                else:
+                    t_epoch = acrec.t_epoch
+                    t_ref = t_epoch
+                for k in series[cluster].keys():
+                    series[cluster][k].add_sample(t_epoch, eval('acrec.%s' % k))
+
+        c.end_t_str_max = time.strftime("%d.%m.%Y", time.gmtime())
+        c.start_t_str = start_t_str
+        c.end_t_str = end_t_str
+        
+        start_tp = start_t
+        end_tp = end_t 
+        
+        if c.plot_table or resolution == 0:
+            # XXX to do 
+            log.info("XXX, only tables or original resolution")
+            return render('/derived/siteadmin/statistics/form.html')
+            
+        else:
+            n_samples = (end_t - start_t)/ resolution
+            n_padding = (28 - n_samples % 28) % 28
+            c.samples = n_samples + n_padding 
+        
+            if n_padding > 0:
+                t_now = time.time()
+                n_samples_right = int(t_now - end_t) / resolution
+                if n_samples_right > n_padding:
+                    n_samples_right = n_padding
+                    start_tp = start_t
+                else:
+                    n_samples_left = n_padding - n_samples_right
+                    start_tp = start_t - (n_samples_left) * resolution
+                end_tp = end_t + (n_samples_right) * resolution
+                # markers for plot (chm)
+                c.start_chm = n_samples_left
+                c.end_chm = n_samples_left +  n_samples
+                log.debug("Dummy samples left %0.2f samples right %0.2f" % (n_samples_left, n_samples_right))
+
+            if (resolution > 86400) and t_ref: # callibration
+                t_offset = (t_ref - start_tp) % resolution
+                start_tp += t_offset
+                end_tp += t_offset
+            
+            ref_dates = range(start_tp, end_tp, resolution)
+            
+            minutes = Decimal(1)/Decimal(6)
+        
+            c.n_job_series= dict()
+            c.major_page_faults_series= dict()
+            c.cpu_duration_series = dict()
+            c.wall_duration_series = dict()
+            c.user_time_series = dict()
+            c.kernel_time_series = dict()
+            
+            for cluster in self.clusters:
+                if c.n_jobs_page_faults and resolution > 0:
+                    c.n_job_series[cluster] = series[cluster]['n_jobs'].get_series2str(ref_dates)
+                if c.n_jobs_page_faults:
+                    c.major_page_faults_series[cluster] = \
+                        series[cluster]['major_page_faults'].get_series2str(ref_dates)
+                if c.cpu_wall_duration:
+                        series[cluster]['cpu_duration'].set_scaling_factor(minutes)
+                        series[cluster]['wall_duration'].set_scaling_factor(minutes)
+                        c.cpu_duration_series[cluster] = \
+                            series[cluster]['cpu_duration'].get_series2str(ref_dates)
+                        c.wall_duration_series[cluster] = \
+                            series[cluster]['wall_duration'].get_series2str(ref_dates)
+                if c.user_kernel_time:
+                    series[cluster]['user_time'].set_scaling_factor(minutes)
+                    series[cluster]['kernel_time'].set_scaling_factor(minutes)
+                    c.user_time_series[cluster] = series[cluster]['user_time'].get_series2str(ref_dates)
+                    c.kernel_time_series[cluster] = series[cluster]['kernel_time'].get_series2str(ref_dates)
+            
+            slice_size = (end_tp - start_tp)/4
+            d0 = datetime.utcfromtimestamp(start_tp)
+            d1 = datetime.utcfromtimestamp(start_tp + slice_size)
+            d2 = datetime.utcfromtimestamp(start_tp + 2 * slice_size)
+            d3 = datetime.utcfromtimestamp(start_tp + 3 * slice_size)
+            d4 = datetime.utcfromtimestamp(end_t)
+            c.dates = '%d/%d/%d|%d/%d/%d|%d/%d/%d|%d/%d/%d|%d/%d/%d' % \
+                (d0.day,d0.month, d0.year%100, 
+                d1.day, d1.month, d1.year%100,
+                d2.day, d2.month, d2.year%100,
+                d3.day, d3.month, d3.year%100, 
+                d4.day, d4.month, d4.year%100)
+
+        c.clusters = self.clusters
+        c.series = series
+        c.resolution = resolution
+        return render('/derived/siteadmin/statistics/form.html')
+
+ 
+    def old_index(self):
 
         c.title = "Monitoring System: Site Admin Statistics"
         c.menu_active = "Site Statistics"

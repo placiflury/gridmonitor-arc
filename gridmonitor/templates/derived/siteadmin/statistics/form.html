@@ -1,0 +1,429 @@
+<%inherit file="/base/siteadmin.html"/>
+
+<!--begin custom header content for this example-->
+<style type="text/css">
+#fromContainer { display:none; position:absolute; left:327px; top:5px; z-index:2}
+#toContainer { display:none; position:absolute; left:327px; top:245px; z-index:1}
+#inlinetable {width:240px}
+.cell_left {text-align:right; float:left; width:5em;}
+.cell_right {text-align:left; float:left;}
+</style>
+
+
+%if c.form_error:
+    <p>
+    <b style='color:red;'> Form error: ${c.form_error}</b></br>
+</p>
+
+%endif
+
+<form name="get_siteadmin_stats" method="post" action="/siteadmin/statistics">
+<table border=1 width='750'>
+<tr class="table_head2"> 
+    <th>Output Selection</th>
+    <th colspan=2>Variables </th>
+</tr>
+<tr>
+    <td rowspan=2>
+    <div id="inlinetable">
+        <div> 
+            <div class="cell_left"> From: </div>
+            <div class="cell_right"> 
+                <input id='start_t_from' type="text" name='start_t_str' size='8'value="${c.start_t_str}"/>  
+                <button id="fromBtn" type="button">change</button>
+                <div id="fromContainer" style='display:none'></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> To: </div>
+            <div class="cell_right"> 
+                <input id='end_t' type="text" name='end_t_str' size='8'value="${c.end_t_str}"/>
+                <button id="toBtn" type="button">change</button>
+                <div id="toContainer"></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> Resolution:</div>
+            <div class="cell_right"> 
+                <select name="resolution" size="1">
+                     <option value="86400"> 1 day </option>
+                     <option value="604800" 
+
+%if c.resolution == 604800:
+SELECTED
+%endif
+/> 1 week </option>
+                     <option value="2419200"
+%if c.resolution == 2419200:
+SELECTED
+%endif
+/> 
+4 weeks </option>
+                     <option value="0"
+%if c.resolution == 0:
+SELECTED
+%endif
+/> No sampling </option>
+                </select>
+            <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+        </div>
+    </div>
+    </td>
+
+    <td>
+    <input type="checkbox" name="n_jobs_page_faults" value="n_jobs_page_faults" 
+    % if c.n_jobs_page_faults:
+    checked
+    %endif
+    />
+            n_jobs & major_page_faults <br/>
+    <input type="checkbox" name="cpu_wall_duration" value="cpu_wall_duration"
+    % if c.cpu_wall_duration:
+    checked
+    %endif
+    />
+            CPU duration & Wall duration <br/>
+    </td>
+    <td>
+    <input type="checkbox" name="user_kernel_time" value="user_kernel_time"
+    % if c.user_kernel_time:
+    checked
+    %endif
+    />
+            User time & Kernel time <br/>
+<!--
+    <input type="checkbox" name="jobs_status" value="jobs_status"
+    % if c.jobs_status:
+    checked
+    %endif
+    />
+            Jobs Status <br/> -->
+    </td>
+</tr>
+<tr>
+<td> 
+                <input type="checkbox" name="plot_table" value="table_only" 
+                %if c.plot_table:
+                checked
+                %endif
+    /> Display table(s) only.
+</td>
+<td> <input type="submit" value="Fetch Statistics"></td>
+</tr>
+</table>
+</form>
+
+<!-- DISPLAY STARTING HERE -->
+<% 
+plot_order=[['n_jobs','major_page_faults'], ['cpu_duration','wall_duration'], ['kernel_time','user_time']]
+
+%>
+%if c.series:
+    <table>
+    <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
+
+%for cluster in c.clusters:
+
+%for p in plot_order:
+    %if not c.series[cluster].has_key(p[0]):
+        <!-- do nothing -->
+    %else:
+<%
+v = c.series[cluster][p[0]]
+name = v.get_name() + ' (' +  cluster + ')'
+bp = v.get_box_plot()
+min = v.get_min() 
+max = v.get_max()
+median = v.get_median()
+avg = v.get_average()
+if min != None:
+    min = '%0.2f' % min
+if max != None:
+    max = '%02.f' % max   
+if avg != None:
+    avg = '%0.2f' % avg
+if median != None:
+    median = '%0.2f' % median
+if bp:
+    bp_min = bp['lnot_outliner']
+    bp_max = bp['unot_outliner']
+    lquart =  bp['lquartile']
+    uquart =  bp['uquartile']
+    outliners = bp['l_outliners'] + bp['u_outliners']
+endif
+
+v_2 = c.series[cluster][p[1]]
+name_2 = v_2.get_name() + ' (' +  cluster + ')'
+bp_2 = v_2.get_box_plot()
+min_2 = v_2.get_min() 
+if min_2 != None:
+    min_2 = '%0.2f' % min_2
+max_2 = v_2.get_max()
+if max_2 != None:
+    max_2 = '%02.f' % max_2   
+avg_2 = v_2.get_average()
+if avg_2 != None:
+    avg_2 = '%0.2f' % avg_2
+
+median_2 = v_2.get_median()
+if median_2 != None:
+    median_2 = '%0.2f' % median_2
+if bp_2:
+    bp_min_2 = bp_2['lnot_outliner']
+    bp_max_2 = bp_2['unot_outliner']
+    lquart_2 =  bp_2['lquartile']
+    uquart_2 =  bp_2['uquartile']
+    outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
+endif
+%>
+            <tr>
+
+            <td style="font-size:small"> <b>${name} </b><br/>
+                     min: ${min} max: ${max} <br/>
+                    avg:  ${avg} 
+                    median: ${median}<br/> </td>
+            <td>
+            %if bp: 
+              <!-- box-plot -->
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+&amp;chs=200x60
+&amp;cht=bhg
+&amp;chd=t0:${bp_min}|${lquart}|${uquart}|${bp_max}|${median}
+%for outliner in outliners:
+|${outliner}
+%endfor
+&amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
+%for i in xrange(0,len(outliners)):
+|o,055670,${i+5},-1,5
+%endfor
+&amp;chxt=x
+&amp;chxr=0,0,${float(max) * 1.1}
+&amp;chds=0,${float(max) * 1.1}
+&amp;chdh=20
+&amp;alt="Box-Plot of ${name} time series."/>
+            %endif
+            </td>
+            <td rowspan=2>  
+            %if bp: 
+              <!-- time series plot -->  
+                %if p[0] == 'n_jobs': 
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.n_job_series[cluster]}|${c.major_page_faults_series[cluster]}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['n_jobs'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['n_jobs'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=number%20of%20jobs|number%20of%20major%20page%20faults
+&amp;chdlp=b"     
+alt="Number of Jobs and Major Page Faults Chart"
+/>
+                %elif p[0] == 'cpu_duration':
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.cpu_duration_series[cluster]}|${c.wall_duration_series[cluster]}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['cpu_duration'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['cpu_duration'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=CPU%20Duration%20[minutes]|Wall%20Duration%20[minutes]
+&amp;chdlp=b"     
+alt="CPU and Wall Duration Chart"
+/>
+                %elif p[0] == 'kernel_time':
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.user_time_series[cluster]}|${c.kernel_time_series[cluster]}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['user_time'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['user_time'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=user%20time%20[minutes]|kernel%20time%20[minutes]
+&amp;chdlp=b"     
+alt="User and Kernel Time Chart"
+/>
+
+                %endif
+            %endif
+            </td>
+
+            </tr>
+            <tr>
+            <td style="font-size:small"> <b>${name_2} </b><br/>
+                     min: ${min_2} max: ${max_2} <br/>
+                    avg:  ${avg_2} 
+                    median: ${median_2}<br/> </td>
+            <td>
+            %if bp_2:
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+&amp;chs=200x60
+&amp;cht=bhg
+&amp;chd=t0:${bp_min_2}|${lquart_2}|${uquart_2}|${bp_max_2}|${median_2}
+%for outliner in outliners_2:
+|${outliner}
+%endfor
+&amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
+%for i in xrange(0,len(outliners_2)):
+|o,055670,${i+5},-1,5
+%endfor
+&amp;chxt=x
+&amp;chxr=0,0,${float(max_2) * 1.1}
+&amp;chds=0,${float(max_2) * 1.1}
+&amp;chdh=20
+&amp;alt="Box-Plot of ${name_2} time series."/>
+            %endif
+            </td>
+            </tr>
+        %endif
+        %endfor
+    %endfor
+</table>
+%endif
+
+
+<script type="text/javascript">
+    YAHOO.namespace("smscg.calendar");
+    var Dom = YAHOO.util.Dom
+    
+    var inEl = Dom.get('inlinetable')
+    
+    YAHOO.smscg.calendar.init = function() {
+    
+        function handleSelectFrom(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtfrom = document.getElementById("start_t_from");
+            txtfrom.value = day + "." + month + "." + year;
+        }
+        
+        function handleSelectTo(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtto = document.getElementById("end_t");
+            txtto.value = day + "." + month + "." + year;
+        }
+        
+        function hideme(e) {
+            var el = YAHOO.util.Event.getTarget(e);
+            if (el != inEl && !Dom.isAncestor(inEl, el)) {
+                document.getElementById("fromContainer").style.display='none';
+                document.getElementById("toContainer").style.display='none';
+            }
+        }
+
+        YAHOO.util.Event.addListener(document, "click", hideme);
+
+
+        YAHOO.smscg.calendar.cal1 = new YAHOO.widget.Calendar("fromBtn","fromContainer", { 
+                                    title:"Starting from:", close:true});
+
+        // Correct formats for Germany: dd.mm.yyyy, dd.mm, mm.yyyy
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+
+        YAHOO.smscg.calendar.cal1.selectEvent.subscribe(handleSelectFrom, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.smscg.calendar.cal1.render();
+        
+        
+        YAHOO.smscg.calendar.cal2 = new YAHOO.widget.Calendar("toBtn","toContainer", { title:"Until:", close:true} );
+        
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+        YAHOO.smscg.calendar.cal2.selectEvent.subscribe(handleSelectTo, YAHOO.smscg.calendar.cal2, true);
+        YAHOO.smscg.calendar.cal2.render();
+
+        // Listener to show the 1-up Calendar when the button is clicked
+        YAHOO.util.Event.addListener("fromBtn", "click", YAHOO.smscg.calendar.cal1.show, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.util.Event.addListener("toBtn", "click", YAHOO.smscg.calendar.cal2.show, YAHOO.smscg.calendar.cal2, true);
+        
+        
+    }
+    YAHOO.util.Event.onDOMReady(YAHOO.smscg.calendar.init);
+    
+</script>
+<script type="text/javascript">
+    // Hide Calendar if we click anywhere in the document other than the calendar
+
+</script>
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/yui/build/fonts/fonts-min.css', 'screen')}
+    ${self.css_link('/css/yui/build/calendar/assets/skins/sam/calendar.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
+    <script type="text/javascript" src="/js/yui//build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/build/calendar/calendar-min.js"></script>
+</%def>
+
+
+
+
