@@ -47,9 +47,23 @@
             <div class="cell_right"> 
                 <select name="resolution" size="1">
                      <option value="86400"> 1 day </option>
-                     <option value="604800" /> 1 week </option>
-                     <option value="2419200"/> 4 weeks </option>
-                     <option value="0"/> No sampling </option>
+                     <option value="604800" 
+
+%if c.resolution == 604800:
+SELECTED
+%endif
+/> 1 week </option>
+                     <option value="2419200"
+%if c.resolution == 2419200:
+SELECTED
+%endif
+/> 
+4 weeks </option>
+                     <option value="0"
+%if c.resolution == 0:
+SELECTED
+%endif
+/> No sampling </option>
                 </select>
             <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div>
@@ -57,37 +71,261 @@
     </div>
     </td>
 
-
     <td>
-    <input type="checkbox" name="n_jobs_page_faults" value="n_jobs_page_faults" checked/>
+    <input type="checkbox" name="n_jobs_page_faults" value="n_jobs_page_faults" 
+    % if c.n_jobs_page_faults:
+    checked
+    %endif
+    />
             n_jobs & major_page_faults <br/>
-    <input type="checkbox" name="cpu_wall_duration" value="cpu_wall_duration" checked/>
+    <input type="checkbox" name="cpu_wall_duration" value="cpu_wall_duration"
+    % if c.cpu_wall_duration:
+    checked
+    %endif
+    />
             CPU duration & Wall duration <br/>
     </td>
     <td>
-    <input type="checkbox" name="user_kernel_time" value="user_kernel_time"/>
+    <input type="checkbox" name="user_kernel_time" value="user_kernel_time"
+    % if c.user_kernel_time:
+    checked
+    %endif
+    />
             User time & Kernel time <br/>
-    <input type="checkbox" name="jobs status" value="job_status"/> 
-            Jobs Status <br/>
+<!--
+    <input type="checkbox" name="jobs_status" value="jobs_status"
+    % if c.jobs_status:
+    checked
+    %endif
+    />
+            Jobs Status <br/> -->
     </td>
 </tr>
 <tr>
 <td> 
-                <input type="checkbox" name="plot_table" value="1"/> Display table(s) only.
+                <input type="checkbox" name="plot_table" value="table_only" 
+                %if c.plot_table:
+                checked
+                %endif
+    /> Display table(s) only.
 </td>
 <td> <input type="submit" value="Fetch Statistics"></td>
 </tr>
 </table>
 </form>
 
+<!-- DISPLAY STARTING HERE -->
+<% 
+plot_order=[['n_jobs','major_page_faults'], ['cpu_duration','wall_duration'], ['kernel_time','user_time']]
 
+%>
+%if c.series:
+    <table>
+    <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
 
-<p>
-${c.test}
-</p>
+%for p in plot_order:
+    %if not c.series.has_key(p[0]):
+        <!-- do nothing -->
+    %else:
+<%
+v = c.series[p[0]]
+name = v.get_name()
+bp = v.get_box_plot()
+min = v.get_min() 
+max = v.get_max()
+median = v.get_median()
+avg = v.get_average()
+if min != None:
+    min = '%0.2f' % min
+if max != None:
+    max = '%02.f' % max   
+if avg != None:
+    avg = '%0.2f' % avg
+if median != None:
+    median = '%0.2f' % median
+if bp:
+    bp_min = bp['lnot_outliner']
+    bp_max = bp['unot_outliner']
+    lquart =  bp['lquartile']
+    uquart =  bp['uquartile']
+    outliners = bp['l_outliners'] + bp['u_outliners']
+endif
 
+v_2 = c.series[p[1]]
+name_2 = v_2.get_name()
+bp_2 = v_2.get_box_plot()
+min_2 = v_2.get_min() 
+if min_2 != None:
+    min_2 = '%0.2f' % min_2
+max_2 = v_2.get_max()
+if max_2 != None:
+    max_2 = '%02.f' % max_2   
+avg_2 = v_2.get_average()
+if avg_2 != None:
+    avg_2 = '%0.2f' % avg_2
 
+median_2 = v_2.get_median()
+if median_2 != None:
+    median_2 = '%0.2f' % median_2
+if bp_2:
+    bp_min_2 = bp_2['lnot_outliner']
+    bp_max_2 = bp_2['unot_outliner']
+    lquart_2 =  bp_2['lquartile']
+    uquart_2 =  bp_2['uquartile']
+    outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
+endif
+%>
+            <tr>
 
+            <td style="font-size:small"> <b>${name} </b><br/>
+                     min: ${min} max: ${max} <br/>
+                    avg:  ${avg} 
+                    median: ${median}<br/> </td>
+            <td>
+            %if bp: 
+              <!-- box-plot -->
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+&amp;chs=200x60
+&amp;cht=bhg
+&amp;chd=t0:${bp_min}|${lquart}|${uquart}|${bp_max}|${median}
+%for outliner in outliners:
+|${outliner}
+%endfor
+&amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
+%for i in xrange(0,len(outliners)):
+|o,055670,${i+5},-1,5
+%endfor
+&amp;chxt=x
+&amp;chxr=0,0,${float(max) * 1.1}
+&amp;chds=0,${float(max) * 1.1}
+&amp;chdh=20
+&amp;alt="Box-Plot of ${name} time series."/>
+            %endif
+            </td>
+            <td rowspan=2>  
+            %if bp: 
+              <!-- time series plot -->  
+                %if p[0] == 'n_jobs': 
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.n_job_series}|${c.major_page_faults_series}
+&amp;chds=0,${'%0.2f' % (float(c.series['n_jobs'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['n_jobs'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=number%20of%20jobs|number%20of%20major%20page%20faults
+&amp;chdlp=b"     
+alt="Number of Jobs and Major Page Faults Chart"
+/>
+                %elif p[0] == 'cpu_duration':
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.cpu_duration_series}|${c.wall_duration_series}
+&amp;chds=0,${'%0.2f' % (float(c.series['cpu_duration'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['cpu_duration'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=CPU%20Duration%20[minutes]|Wall%20Duration%20[minutes]
+&amp;chdlp=b"     
+alt="CPU and Wall Duration Chart"
+/>
+                %elif p[0] == 'kernel_time':
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+cht=bvg
+&amp;chma=30,30,30,30
+%if c.samples == 28:
+&amp;chs=500x150
+%elif c.samples == 56:
+&amp;chs=800x150
+%else:
+&amp;chs=1000x150
+%endif
+&amp;chco=4682B4,055670
+&amp;chf=bg,lg,0,F5FFFA
+&amp;chd=t:${c.user_time_series}|${c.kernel_time_series}
+&amp;chds=0,${'%0.2f' % (float(c.series['user_time'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['user_time'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chbh=4,1,4
+&amp;chxt=x,y,r
+&amp;chxl=0:|${c.dates}
+&amp;chxp=0,2,27,52,77,98.5
+&amp;chg=25,25,5,0
+%if c.start_chm:
+&amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
+%endif
+&amp;chdl=user%20time%20[minutes]|kernel%20time%20[minutes]
+&amp;chdlp=b"     
+alt="User and Kernel Time Chart"
+/>
+
+                %endif
+            %endif
+            </td>
+
+            </tr>
+            <tr>
+            <td style="font-size:small"> <b>${name_2} </b><br/>
+                     min: ${min_2} max: ${max_2} <br/>
+                    avg:  ${avg_2} 
+                    median: ${median_2}<br/> </td>
+            <td>
+            %if bp_2:
+<img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
+&amp;chs=200x60
+&amp;cht=bhg
+&amp;chd=t0:${bp_min_2}|${lquart_2}|${uquart_2}|${bp_max_2}|${median_2}
+%for outliner in outliners_2:
+|${outliner}
+%endfor
+&amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
+%for i in xrange(0,len(outliners_2)):
+|o,055670,${i+5},-1,5
+%endfor
+&amp;chxt=x
+&amp;chxr=0,0,${float(max_2) * 1.1}
+&amp;chds=0,${float(max_2) * 1.1}
+&amp;chdh=20
+&amp;alt="Box-Plot of ${name_2} time series."/>
+            %endif
+            </td>
+            </tr>
+
+        %endif
+    %endfor
+</table>
+%endif
 
 
 <script type="text/javascript">
@@ -138,8 +376,6 @@ ${c.test}
         YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_YEAR_POSITION", 3);
         YAHOO.smscg.calendar.cal1.cfg.setProperty("mindate", '1.1.2009');
         YAHOO.smscg.calendar.cal1.cfg.setProperty("maxdate", '${c.end_t_str_max}');
-
-
 
 
         YAHOO.smscg.calendar.cal1.selectEvent.subscribe(handleSelectFrom, YAHOO.smscg.calendar.cal1, true);
