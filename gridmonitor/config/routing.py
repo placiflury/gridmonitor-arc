@@ -41,6 +41,7 @@ def make_map():
     map.connect('siteadmin/testjobs/:action', controller='siteadmin_testjobs')
     map.connect('siteadmin/testjobs/:action/:suit', controller='siteadmin_testjobs')
     map.connect('siteadmin/statistics/:action', controller='siteadmin_statistics')
+    map.connect('siteadmin/newadmin/:action', controller='siteadmin_newadmin')
     
     # grid admin
     map.connect('gridadmin',controller='gridadmin_overview')
