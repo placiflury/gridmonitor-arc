@@ -17,6 +17,10 @@
     width: 110%;
 }
 
+#monadminmenu.yuimenu{
+    width: 96%;
+}
+
 #usermenu {
     position: static;
  }

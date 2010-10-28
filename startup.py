@@ -4,4 +4,4 @@
 #fileConfig('/opt/monitor/logging.ini')
 
 from paste.deploy import loadapp
-app = loadapp('config:/opt/monitor/deploy.ini')
+application = loadapp('config:/opt/monitor/deploy.ini')

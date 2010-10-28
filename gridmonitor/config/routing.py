@@ -65,13 +65,14 @@ def make_map():
     map.connect('help',controller='help')
 
 
-
-
-
+    # administrator interface for GridMonitor
+    map.connect('monadmin',controller='monadmin_resources')
+    map.connect('monadmin/resources/:action', controller='monadmin_resources')
+    map.connect('monadmin/acl/:action', controller='monadmin_acl')
 
 
     # CUSTOM ROUTES HERE
     map.connect(':controller/:action/:id')
-    map.connect('*url', controller='template', action='view')
+    #map.connect('*url', controller='template', action='view')
 
     return map
