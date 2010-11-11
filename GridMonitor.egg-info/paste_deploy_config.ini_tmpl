@@ -39,8 +39,8 @@ grid_security_path=/etc/grid-security
 glite_location=/opt/glite
 
 # Nagios stuff 
-# url to Nagios server
-nagios = monitor.smscg.ch
+# DN of your Nagios server (eg. monitor.smscg.ch
+nagios = <YOUR_NAGIOS_SERVER_DN>
 # nagios hostgroup for Grid Core services (alias)
 nagios_core=SMSCG Core
 # nagios hostgroup for Computing Elements of Grid (alias)
