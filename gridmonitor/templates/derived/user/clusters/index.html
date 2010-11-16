@@ -21,7 +21,7 @@ cpus=g.get_cluster_stats(hostname,'stats_cpus')
 %>
         % if hostname in c.allowed_clusters['slcs_browser']: 
             <div class="slcs_browser_access" style="display:''">
-        % elif hostname in c.allowed_clusters[c.user_slcs_obj.get_dn()]:
+        % elif hostname in c.allowed_clusters[c.slcs_dn]:
           <div class="slcs_access" style="display:inline">
         %elif hostname in c.allowed_clusters[c.user_client_dn]:
             <div class="browser_dn_access" style="display:''">
@@ -53,7 +53,7 @@ cpus=g.get_cluster_stats(hostname,'stats_cpus')
 <div id="pie_slcs_browser_access" style="display:none">
 % if c.user_client_dn:
 <img src="http://chart.apis.google.com/chart?
-chs=610x150
+chs=610x200
 &amp;chds=0,${c.max_cpus}
 &amp;chd=${c.cl_pie_chart_data[c.user_client_dn]}
 &amp;chl=${c.cl_pie_chart_labels[c.user_client_dn]}
@@ -63,16 +63,16 @@ alt="Clusters Chart"/>
 </div>
 <div id="pie_slcs_access" style="display:none">
 <img src="http://chart.apis.google.com/chart?
-chs=610x150
+chs=610x200
 &amp;chds=0,${c.max_cpus}
-&amp;chd=${c.cl_pie_chart_data[c.user_slcs_obj.get_dn()]}
-&amp;chl=${c.cl_pie_chart_labels[c.user_slcs_obj.get_dn()]}
+&amp;chd=${c.cl_pie_chart_data[c.slcs_dn]}
+&amp;chl=${c.cl_pie_chart_labels[c.slcs_dn]}
 &amp;cht=p3"
 alt="Clusters Chart"/>
 </div>
 <div id="pie_all"style="display:''">
 <img src="http://chart.apis.google.com/chart?
-chs=610x150
+chs=610x200
 &amp;chds=0,${c.max_cpus}
 &amp;chd=${c.cl_pie_chart_data['all']}
 &amp;chl=${c.cl_pie_chart_labels['all']}
@@ -115,7 +115,7 @@ else:
 
 % if hostname in c.allowed_clusters['slcs_browser']: 
     <tr  class="slcs_browser_access" > 
-% elif hostname in c.allowed_clusters[c.user_slcs_obj.get_dn()]:
+% elif hostname in c.allowed_clusters[c.slcs_dn]:
     <tr class="slcs_access" >
 %elif hostname in c.allowed_clusters[c.user_client_dn]:
     <tr class="browser_dn_access">

@@ -27,7 +27,10 @@ from the MyProxy server.
         <td> <input type="password" name="browser_dn_pwd2"/> </td>
     </tr>
     %endif
-    <tr> <td>
+    %if c.user_slcs_dn:
+    <tr> 
+
+    <td>
             <input type="checkbox" name="CB_slcs_dn" value="${c.user_slcs_dn}">
             ${c.user_slcs_dn} 
          </td>
@@ -36,6 +39,7 @@ from the MyProxy server.
     </tr>
     <tr> <td colspan=3 align='right'> <input type="submit" name="submit" value="Submit"> </td>
     </tr>
+    %endif
 </table>
 </form>
 

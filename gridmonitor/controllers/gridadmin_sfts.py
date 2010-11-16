@@ -17,6 +17,16 @@ log = logging.getLogger(__name__)
 
 class GridadminSftsController(GridadminController):
 
+    def __init__(self):
+
+        GridadminController.__init__(self)
+
+        if session.has_key('user_client_dn'):
+            c.user_client_dn = session['user_client_dn']
+        if session.has_key('user_slcs_obj'):
+            slcs_obj = session['user_slcs_obj']
+            c.user_slcs_dn = slcs_obj.get_dn()
+
     def index(self):
         c.title = "Monitoring System: VO/Grid Site Functional Tests"
         c.menu_active = "SFTs"
@@ -132,6 +142,7 @@ class GridadminSftsController(GridadminController):
         c.title = "Storing the password of your  MyProxy certificate."
         c.menu_active = "-- none --"
         c.heading = "Storing the password of your MyProxy certificate."
+        
 
         up = UserPool()
         

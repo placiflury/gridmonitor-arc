@@ -14,7 +14,7 @@ class SiteadminUsersController(SiteadminController):
             
         # XXX support multiple clusters, now we just take first if there is any
         
-        if self.access_denied:
+        if not self.authorized:
             c.heading = "Nothing to View"
             return render('/derived/siteadmin/error/access_denied.html')
         

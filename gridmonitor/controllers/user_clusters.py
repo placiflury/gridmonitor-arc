@@ -13,14 +13,28 @@ class UserClustersController(UserController):
         c.title = "Monitoring System: User View - Clusters"
         c.menu_active = "Clusters"
         c.heading = "Grid Clusters for %s %s" % (c.user_name, c.user_surname)
-        
+       
+        slcs_dn = ''
+        browser_dn = ''     
+
+
         # collect access information
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            slcs_dn = user_slcs_obj.get_dn()
+        c.slcs_dn = slcs_dn
+
+
+        if session.has_key('user_client_dn'):
+            browser_dn = session['user_client_dn']
+            c.user_client_dn = browser_dn
+    
+        
         c.allowed_clusters = {}
         c.allowed_clusters[slcs_dn] = g.data_handler.get_user_clusters(slcs_dn)
         c.allowed_clusters[browser_dn] = g.data_handler.get_user_clusters(browser_dn)
-        c.allowed_clusters['slcs_browser'] =  [sc for sc in c.allowed_clusters[slcs_dn] for bc in c.allowed_clusters[browser_dn] if sc==bc] # list comprehension
+        c.allowed_clusters['slcs_browser'] =  [sc for sc in c.allowed_clusters[slcs_dn] \
+            for bc in c.allowed_clusters[browser_dn] if sc==bc] # list comprehension
                         
         
         c.tot_cpus = g.get_grid_stats('stats_cpus')

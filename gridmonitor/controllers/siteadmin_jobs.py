@@ -17,7 +17,7 @@ class SiteadminJobsController(SiteadminController):
         c.heading = "Jobs/Users on Your Cluster(s)"  # default
        
  
-        if self.access_denied:
+        if not self.authorized:
             c.heading = "Nothing to View"  # default
             return render('/derived/siteadmin/error/access_denied.html')
 

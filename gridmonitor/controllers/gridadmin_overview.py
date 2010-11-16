@@ -22,11 +22,6 @@ class GridadminOverviewController(GridadminController):
         c.menu_active = "Overview"
         c.heading = "Nothing to View"  # default
         
-        """"     
-        if self.access_denied:
-            c.heading= "Site Overview"
-            return render('/derived/siteadmin/error/access_denied.html')
-        """        
         c.heading = "Tactical Overview on Grid Services"
         status_core = h.get_nagios_host_services_from_group_tag(self.nagios_core_tag)
 

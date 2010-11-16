@@ -75,11 +75,17 @@ class UserStatisticsController(UserController):
                 c.user_kernel_time = True
             if request.params.has_key('plot_table'):
                 c.plot_table = True  
-        
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
        
+        slcs_dn = None
+        browser_dn = None 
         t_ref = None # for resolutions > 86440 we need to callibrate time series
+ 
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            slcs_dn = user_slcs_obj.get_dn()
+        
+        if session.has_key('user_client_dn'):
+            browser_dn = session['user_client_dn']
  
         if slcs_dn:
             for acrec in  helpers.get_user_acrecords(slcs_dn, start_t, end_t, resolution):
@@ -114,7 +120,6 @@ class UserStatisticsController(UserController):
         
         if c.plot_table or resolution == 0:
             # XXX to do 
-            log.info("XXX, only tables or original resolution")
             return render('/derived/user/statistics/form.html')
             
         else:

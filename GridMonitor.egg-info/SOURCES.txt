@@ -38,6 +38,7 @@ gridmonitor/controllers/monadmin_resources.py
 gridmonitor/controllers/siteadmin.py
 gridmonitor/controllers/siteadmin_clusters.py
 gridmonitor/controllers/siteadmin_jobs.py
+gridmonitor/controllers/siteadmin_newadmin.py
 gridmonitor/controllers/siteadmin_overview.py
 gridmonitor/controllers/siteadmin_statistics.py
 gridmonitor/controllers/siteadmin_testjobs.py
@@ -94,7 +95,6 @@ gridmonitor/model/nagios/scheduleddowntimes.py
 gridmonitor/model/nagios/servicetables.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
-gridmonitor/public/css/.menu.css.swp
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
 gridmonitor/public/css/nav.css
@@ -270,6 +270,7 @@ gridmonitor/templates/derived/siteadmin/jobs/index.html
 gridmonitor/templates/derived/siteadmin/overview/core.html
 gridmonitor/templates/derived/siteadmin/overview/index.html
 gridmonitor/templates/derived/siteadmin/overview/report.html
+gridmonitor/templates/derived/siteadmin/statistics/.index.html.swp
 gridmonitor/templates/derived/siteadmin/statistics/form.html
 gridmonitor/templates/derived/siteadmin/statistics/index.html
 gridmonitor/templates/derived/siteadmin/testjobs/index.html

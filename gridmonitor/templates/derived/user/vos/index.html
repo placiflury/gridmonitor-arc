@@ -8,14 +8,20 @@
 %endfor
 </ul>
 
+% if c.user_client_dn or c.user_slcs_dn:
 <h3>You are Member of the following VOs </h3>
- 
+% else:
+<h3>Sorry, you are not a Member of any of above VOs </h3>
+%endif
+
 %if c.user_client_dn:
     <% type = 'Browser' %>
     ${votable.vo_table(c.user_client_dn, c.user_client_ca,c.vo_list,c.voms_connector,type)}
 %endif
 
-${votable.vo_table(c.user_slcs_obj.get_dn(), c.user_slcs_obj.get_ca(),c.vo_list,c.voms_connector)}
+%if c.user_slcs_dn:
+    ${votable.vo_table(c.slcs_dn, c.slcs_ca, c.vo_list,c.voms_connector)}
+%endif
 
 
 

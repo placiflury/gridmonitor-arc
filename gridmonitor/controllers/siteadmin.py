@@ -13,49 +13,45 @@ class SiteadminController(BaseController):
 
     def __init__(self):
         self.admin = None
-        self.access_denied = True
-        self.clusters= list()  # list of hostname of clusters
-        self.cores= list()  # list of hostname of non-cluster services (core services)
-
-        # authorization and mapping
-        # info about user
-        unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
-        c.user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
-        c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
-        user_email = unicode(request.environ[config['shib_email']], "utf-8")
-        user_home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
+        self.authorized = False
+        self.clusters= list()  # hostname of clusters
+        self.cores= list()  # hostname of non-cluster services (core services)
         
         nagios_server = config['nagios']
         if nagios_server == 'localhost':
             nagios_server_url = '/nagios'
         else:
             nagios_server_url = 'http://' + nagios_server + '/nagios'
-
-        query = meta.Session.query(schema.Admin)
         
-        admin = query.filter_by(shib_unique_id=unique_id).first()
-        if admin:
-            self.access_denied = False
-    
-        if not self.access_denied: 
-            for site in admin.sites:
-                for service in site.services:
-                    if service.type == 'cluster':
-                        log.info("Access to service %s granted." % service.name)
-                        self.clusters.append(service.hostname)
-                    elif service.type == 'other': # XXX this might change
-                        log.info("Access to service %s granted." % service.name)
-                        self.cores.append(service.hostname)
-            for service in admin.services:
-                    if service.type == 'cluster':
-                        if service.hostname not in self.clusters:
+        self.__before__() # call base class for authentication info
+        c.user_name = session['user_name']
+        c.user_surname = session['user_surname']
+
+        if session.has_key('user_unique_id'):
+            query = meta.Session.query(schema.Admin)
+            user_unique_id = session['user_unique_id']
+            admin = query.filter_by(shib_unique_id=user_unique_id).first()
+            if admin:
+                self.authorized = True  # doesn't mean there are any resources though.
+                for site in admin.sites:
+                    for service in site.services:
+                        if service.type == 'cluster':
                             log.info("Access to service %s granted." % service.name)
                             self.clusters.append(service.hostname)
-                    elif service.type == 'other': # XXX this might change
-                        if service.hostname not in self.cores:
+                        elif service.type == 'other': # XXX this might change
                             log.info("Access to service %s granted." % service.name)
                             self.cores.append(service.hostname)
-                
+                for service in admin.services:
+                        if service.type == 'cluster':
+                            if service.hostname not in self.clusters:
+                                log.info("Access to service %s granted." % service.name)
+                                self.clusters.append(service.hostname)
+                        elif service.type == 'other': # XXX this might change
+                            if service.hostname not in self.cores:
+                                log.info("Access to service %s granted." % service.name)
+                                self.cores.append(service.hostname)
+        
+
         # static menu information
         test_jobs = [('test_suit1','/siteadmin/testjobs/test/suit1')]
         
@@ -102,7 +98,7 @@ class SiteadminController(BaseController):
         
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Overview"
-        if self.access_denied == True:
+        if self.authorized == True:
             return render('/derived/siteadmin/error/access_denied.html')        
         return render('/base/siteadmin.html')
   

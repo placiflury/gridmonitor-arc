@@ -17,7 +17,7 @@ class SiteadminOverviewController(SiteadminController):
         c.menu_active = "Overview"
         c.heading = "Nothing to View"  # default
         
-        if self.access_denied:
+        if not self.authorized:
             c.heading= "Site Overview"
             return render('/derived/siteadmin/error/access_denied.html')
         

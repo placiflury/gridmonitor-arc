@@ -13,7 +13,7 @@ class SiteadminClustersController(SiteadminController):
         c.menu_active = "Your Cluster(s)"
         c.heading = "Your Cluster(s)"  
         
-        if self.access_denied:
+        if not self.authorized:
             c.heading= "Your Cluster(s)"
             return render('/derived/siteadmin/error/access_denied.html')
         

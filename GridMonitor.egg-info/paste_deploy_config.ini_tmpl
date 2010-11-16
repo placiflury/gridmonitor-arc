@@ -22,9 +22,6 @@ beaker.session.key = gridmonitor
 beaker.session.secret = ${app_instance_secret}
 app_instance_uuid = ${app_instance_uuid}
 
-
-[app:main]
-
 data_handler_type=giisdb
 #data_handler_type=infocache
 ## infosys cache block (used if data_handler_type == infocache)
@@ -34,28 +31,31 @@ data_handler_type=giisdb
 
 # VOMS stuff
 # syntax: voms = <VOMS_server>:<VO_1>|<VO_2>,<VOMS_SERVER_2>:<VO_1>|
-voms = voms.smscg.ch:smscg|tutor|crypto|life|earth,voms.cern.ch:atlas
+# e.g.voms = voms.smscg.ch:smscg|tutor|crypto|life|earth,voms.cern.ch:atlas
+voms = <VOMS_server>:<VO_1>|<VO_2>,<VOMS_SERVER_2>:<VO_1>|
 grid_security_path=/etc/grid-security
 glite_location=/opt/glite
 
 # Nagios stuff 
-# DN of your Nagios server (eg. monitor.smscg.ch
+# DN of your Nagios server (eg. monitor.smscg.ch)
 nagios = <YOUR_NAGIOS_SERVER_DN>
 # nagios hostgroup for Grid Core services (alias)
 nagios_core=SMSCG Core
 # nagios hostgroup for Computing Elements of Grid (alias)
 nagios_ces=SMSCG CEs
 
-# SLCS configuration (AAI attributes)
+# Shibboleth attributes (AAI attributes) -> will be ignored for non-AAI installations
 shib_given_name=Shib-InetOrgPerson-givenName
 shib_surname=Shib-Person-surname
 shib_unique_id=Shib-SwissEP-UniqueID
 shib_email=Shib-InetOrgPerson-mail 
 shib_home_org=Shib-SwissEP-HomeOrganization
 shib_affiliation=Shib-EP-Affiliation
+# enable disable SLCS (online CA) ->  currently only available for SWITCHaai Federation
+slcs_enabled=False
 slcs_ca="/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
 
-# key-value mappings for statistical objects
+# key-value mappings for statistical objects -> don't touch
 stats_cpus= cpus
 stats_grid_running=gridrunning
 stats_grid_queued=gridqueued
@@ -81,18 +81,11 @@ sqlalchemy_giisdb.pool_recycle = 3600
 sqlalchemy_sft.url= <DB_URL>
 sqlalchemy_sft.pool_recycle = 3600
 sft_config=/opt/smscg/sft/etc/config.ini
-# eg. sft_private_key=/etc/apache2/ssl/monitor.smscg.ch.key
-#sft_new_private_key=<NEW_PRIVATE_KEY>
 
 # sgas accounting records database
 sqlalchemy_sgas.url= <DB_URL>
 sqlalchemy_sgas.pool_recycle = 3600
 
-use = egg:GridMonitor
-full_stack = true
-cache_dir = %(here)s/data
-beaker.session.key = gridmonitor
-beaker.session.secret = somesecret
 
 # Logging configuration
 [loggers]
@@ -137,7 +130,7 @@ qualname=gridmonitor.model.cache
 [handler_rotor]
 class=handlers.RotatingFileHandler
 level=INFO
-args=('/var/log/gridmonitor/gridmonitor.log','a', 1000000,0)
+args=('/var/log/smscg/gridmonitor.log','a', 1000000,0)
 formatter=generic
 
 [formatter_generic]

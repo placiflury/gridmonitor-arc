@@ -71,40 +71,47 @@ class UserOverviewController(UserController):
                             c.ces_stats_summary[state] = c.ces_stats_summary[state] +1
 
         # MY JOBS SUMMARY
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
+        num_finished = 0
+        num_failed = 0
+        num_killed = 0
+        num_deleted = 0
+        num_fetched = 0
+        num_orphaned = 0
+        num_tot_slcs = 0
+        num_tot_browser = 0
+        
         c.job_state_distribution = dict(FINISHED=0,FAILED=0,KILLED=0,DELETED=0, FETCHED=0,other=0, orphaned=0)
-       
-        num_finished = g.data_handler.get_num_user_jobs(slcs_dn, status='FINISHED') + \
-                    g.data_handler.get_num_user_jobs(browser_dn, status= 'FINISHED')
+
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            slcs_dn = user_slcs_obj.get_dn()
+            num_finished = g.data_handler.get_num_user_jobs(slcs_dn, status='FINISHED')
+            num_failed = g.data_handler.get_num_user_jobs(slcs_dn,status ='FAILED') 
+            num_killed = g.data_handler.get_num_user_jobs(slcs_dn,status='KILLED') 
+            num_deleted = g.data_handler.get_num_user_jobs(slcs_dn,status='DELETED') 
+            num_fetched = g.data_handler.get_num_user_jobs(slcs_dn,status='FETCHED') 
+            num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status='orphaned')
+            num_tot_slcs = g.data_handler.get_num_user_jobs(slcs_dn) 
+
+
+        if session.has_key('user_client_dn'):
+            browser_dn = session['user_client_dn']
+            num_finished += g.data_handler.get_num_user_jobs(browser_dn, status= 'FINISHED')
+            num_failed += g.data_handler.get_num_user_jobs(browser_dn, status='FAILED') 
+            num_killed += g.data_handler.get_num_user_jobs(browser_dn,status='KILLED')
+            num_deleted += g.data_handler.get_num_user_jobs(browser_dn, status='DELETED')
+            num_fetched += g.data_handler.get_num_user_jobs(browser_dn, status='FETCHED')
+            num_orphaned += g.data_handler.get_num_user_jobs(browser_dn, status='orphaned')
+            num_tot_browser = g.data_handler.get_num_user_jobs(browser_dn)
+
         c.job_state_distribution['FINISHED'] = num_finished
-
-        num_failed = g.data_handler.get_num_user_jobs(slcs_dn,status ='FAILED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='FAILED') 
         c.job_state_distribution['FAILED'] = num_failed
-        
-        num_killed = g.data_handler.get_num_user_jobs(slcs_dn,status='KILLED') + \
-                g.data_handler.get_num_user_jobs(browser_dn,status='KILLED')
-
         c.job_state_distribution['KILLED'] = num_killed
-
-        num_deleted = g.data_handler.get_num_user_jobs(slcs_dn,status='DELETED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='DELETED')
-
         c.job_state_distribution['DELETED'] = num_deleted
-        
-        num_fetched = g.data_handler.get_num_user_jobs(slcs_dn,status='FETCHED') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='FETCHED')
-
         c.job_state_distribution['FETCHED'] = num_fetched
-
-        num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status='orphaned') + \
-                g.data_handler.get_num_user_jobs(browser_dn, status='orphaned')
-
         c.job_state_distribution['orphaned'] = num_orphaned
 
-        num_other = g.data_handler.get_num_user_jobs(slcs_dn) + \
-                g.data_handler.get_num_user_jobs(browser_dn) - num_finished -\
+        num_other = num_tot_slcs + num_tot_browser - num_finished -\
                 num_killed - num_deleted - num_orphaned - num_failed - num_fetched
 
         c.job_state_distribution['other'] = num_other

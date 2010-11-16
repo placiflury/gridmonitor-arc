@@ -15,22 +15,16 @@ class GridadminController(BaseController):
 
         # authorization and mapping
         # info about user  XXX finish ACL implementation 
-        unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
-        c.user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
-        c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
-        user_email = unicode(request.environ[config['shib_email']], "utf-8")
-        user_home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
+        self.__before__() # call base class for authentication info
+        c.user_name = session['user_name']
+        c.user_surname = session['user_surname']
+        
         nagios_server = config['nagios']
         if nagios_server == 'localhost':
             nagios_server_url = '/nagios'
         else:
             nagios_server_url = 'http://' + nagios_server + '/nagios'
         
-        if request.environ.has_key('SSL_CLIENT_S_DN'):
-            c.user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'ISO-8859-1')
-
-        user_slcs_obj = SLCS(user_home_org,c.user_name,c.user_surname,unique_id)  
-        c.user_slcs_dn = user_slcs_obj.get_dn()
 
         # build up menu (dynamic part)
         c.cluster_menu = list()
@@ -60,7 +54,7 @@ class GridadminController(BaseController):
                     cluster_queues.append((name, cluster_path + '/' + h.str_cannonize(name)))
                     vo_cluster_queues.append((name, vo_path + '/' + h.str_cannonize(name)))
             c.cluster_menu.append((cluster_display_name,cluster_path, cluster_queues))
-            vo_menu.append((cluster_display_name, vo_path, vo_cluster_queues))
+            vo_menu.append((cluster_display_name, vo_path))
         log.debug("finished building up cluster menu...\n %r" % c.cluster_menu)
  
 

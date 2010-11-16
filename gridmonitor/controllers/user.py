@@ -8,33 +8,10 @@ log = logging.getLogger(__name__)
 class UserController(BaseController):
     
     NO_QUEUE_FOUND = 'NO_QUEUE'     # Tag to denote that no queue name was found 
+
+
     def __init__(self):
-        # info about user
-        c.user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
-        c.user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
-        home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
-        unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
-
-        if request.environ.has_key('SSL_CLIENT_S_DN'):
-            user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'ISO-8859-1')
-            # if emailaddress= within DN -> fix it
-            cand = user_client_dn.split("emailAddress=")
-            if len(cand) >1:
-                c.user_client_dn = cand[0] + "Email=" + cand[1]
-            else:
-                c.user_client_dn = user_client_dn
-            
-            c.user_client_ca = request.environ['SSL_CLIENT_I_DN'].strip()
-        else:
-            c.user_client_dn = None
-            c.user_client_ca = None
-       
-        c.user_slcs_obj = SLCS(home_org,c.user_name,c.user_surname,unique_id)  
-        log.debug("Browser certificate DN: %s." %(c.user_client_dn))
-        log.debug("SHIB ID: name '%s', surname '%s', unique ID '%s'." %(c.user_name,c.user_surname,unique_id))
-        # --end 
-
-
+        
         # build up menu (dynamic part)
         c.cluster_menu = list()
         c.no_queue_clusters = list()    
@@ -86,14 +63,18 @@ class UserController(BaseController):
                 ('Links','/user/links')]
 
         c.top_nav_active="User"
-    
+        
+        # the __before__ method only gets called after instatiation of class
+        # we need to call it immediately
+        self.__before__() # base class
+        c.user_name = session['user_name']
+        c.user_surname = session['user_surname']
 
     def index(self):
-	
-	c.title = "Monitoring System: User View"
-	c.menu_active = "Overview"
-    # XXX -crumbs to be implemented
-	c.crumbs=["User"]	
+        c.title = "Monitoring System: User View"
+        c.menu_active = "Overview"
+        # XXX -crumbs to be implemented
+        c.crumbs=["User"]	
         
-	return render('/base/user.html')
-  
+
+        return render('/base/user.html')

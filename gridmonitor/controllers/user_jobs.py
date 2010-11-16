@@ -21,9 +21,16 @@ class UserJobsController(UserController):
         c.menu_active = "My Jobs"
         c.heading = "Information about User Jobs"
          
+        slcs_dn = None       
+        browser_dn = None
+ 
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            slcs_dn = user_slcs_obj.get_dn()
         
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
+        if session.has_key('user_client_dn'):
+            browser_dn = session['user_client_dn']
+
 
         all_jobs = g.get_user_jobs(slcs_dn) + g.get_user_jobs(browser_dn)
         allowed_clusters = g.data_handler.get_user_clusters(slcs_dn) + \
