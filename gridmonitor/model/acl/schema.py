@@ -3,6 +3,15 @@ from sqlalchemy.orm import mapper, relationship
 from gridmonitor.model.acl import meta
 
 """
+The ACL database is used to protect some parts of the GridMonitor portal
+from unauthorized access. 
+If has primarily been designed for a Shibboleth environment (thus the 
+naming of the table entries); this doesn't mean that the tables must 
+be populated with Shibboleth entries. 
+"""
+
+
+"""
 site table:
     name: name of the site
     alias: alias for site name (optional)
@@ -15,27 +24,24 @@ t_site = sa.Table("site", meta.metadata,
 """
 service table:
     name: e.g. cluster name, VOMS, VASH, etc. // primary key
-    hostname: dns entry where service is hosted // primary key
+    hostname: DNS entry where service is hosted // primary key
     site_name: name of site
-    type: current values [cluster|other]
-    alias: an alias (optional)
+    type: current values [CE | VOMS| VASH|...] -> used to build up cluster-list in controllers
+    alias: an alias (optional) e.g. an DNS alias
 """
 t_service = sa.Table("service", meta.metadata,
-        sa.Column("name", sa.types.VARCHAR(128), primary_key=True),
-        sa.Column("hostname", sa.types.VARCHAR(128), primary_key=True),
+        sa.Column("name", sa.types.VARCHAR(128), primary_key=True, nullable=False),
+        sa.Column("hostname", sa.types.VARCHAR(128), primary_key=True, nullable=False),
         sa.Column("site_name", None, sa.ForeignKey("site.name"), nullable=False),        
         sa.Column("type", sa.types.VARCHAR(64), nullable=False),
         sa.Column("alias", sa.types.VARCHAR(128))
 )
 
 t_admin = sa.Table("admin", meta.metadata,
-        sa.Column("shib_unique_id", sa.types.VARCHAR(255), primary_key=True),
+        sa.Column("shib_unique_id", sa.types.VARCHAR(255), primary_key=True, nullable=False),
         sa.Column("shib_surname", sa.types.VARCHAR(255), nullable=False),
         sa.Column("shib_given_name", sa.types.VARCHAR(255), nullable=False),
-        sa.Column("shib_email", sa.types.VARCHAR(255), nullable=False),
-        sa.Column("shib_affiliation", sa.types.VARCHAR(255)),
-        sa.Column("shib_homeorg", sa.types.VARCHAR(255))
-)
+        sa.Column("shib_email", sa.types.VARCHAR(255), nullable=False))
 
 t_service_acl = sa.Table("service_acl", meta.metadata,
         sa.Column("id", sa.types.Integer, primary_key=True),
@@ -58,14 +64,10 @@ class Site(object):
 
 class Service(object):
 
-    VALID_TYPES = ['cluster','other']
     
     def __init__(self, name, site_name, type,
         hostname, alias = None):    
-        
-        if type not in Service.VALID_TYPES:
-            # XXX raising exception instead
-            type = 'other'
+     
         self.name = name
         self.hostname = hostname
         self.site_name = site_name
@@ -74,19 +76,14 @@ class Service(object):
         
 class Admin(object):
 
-    def __init__(self, shib_unique_id,
-        shib_surname,
-        shib_given_name,
-        shib_email,
-        shib_affiliation = None,
-        shib_homeorg = None):
-        
-        self.shib_unique_id = shib_unique_id
-        self.shib_surname = shib_surname
-        self.shib_given_name = shib_given_name
-        self.shib_email = shib_email
-        self.shib_affiliation = shib_affiliation 
-        self.shib_homeorg = shib_homeorg
+    def __init__(self, unique_id,
+       surname,
+       given_name,
+       email):
+        self.shib_unique_id = unique_id
+        self.shib_surname = surname
+        self.shib_given_name = given_name
+        self.shib_email = email
 
 class SiteACL(object):
     pass
