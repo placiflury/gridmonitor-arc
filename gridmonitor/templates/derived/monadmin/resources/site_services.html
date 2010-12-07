@@ -1,2 +1,45 @@
-<%inherit file="/base/monadmin.html"/>
+<%inherit file="/base/monadmin_table.html"/>
+
+<%def name="showUI()">\
+    <script type="text/javascript">$(document).ready(function() { showUI('start_resources_site') })</script>
+</%def>\
+
+<%def name="list1_head()" >\
+    Sites
+</%def>\
+
+<%def name="list1_container()" >\
+    <% c.list = 'list1' %>
+    <% c.listOnChange = "map('/monadmin/resources/map/', '#site_list', '#list2_container', 'map', true)" %>
+    <% c.listOnChange += ";changeRes(this,'site','show')" %>
+    <%include file="/derived/monadmin/includes/getsites.mako" />
+</%def>\
+
+<%def name="list1_edit()" >\
+    <a class="edit_list" onclick="changeRes('select#site_list','site','new')" href="#">new site</a><br>
+    <a class="edit_list" onclick="changeRes('select#site_list','site','del')" href="#">del site</a>
+</%def>\
+
+<%def name="list2_head()" >
+  Services
+</%def>\
+
+<%def name="list2_container()" >
+    <% c.list = 'list2' %>
+    <% c.listOnChange = "changeRes(this,'service','show')" %>
+    <%include file="/derived/monadmin/includes/res_getservices.mako" />
+</%def>\
+
+<%def name="list2_edit()" >
+    <a class="edit_list" onclick="changeRes('select#service_list','service','new')" href="#">new service</a><br>
+    <a class="edit_list" onclick="changeRes('select#service_list','service','del')" href="#">del service</a>
+</%def>\
+
+<%def name="change_forms()" >\
+    
+</%def>\
+
+<%def name="status_code()" >\
+    
+</%def>\
 

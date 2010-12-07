@@ -1,7 +1,7 @@
 from sqlalchemy import orm
 import logging
-from gridmonitor.model.acl import meta
-from gridmonitor.model.acl import schema
+
+import meta, schema, handler, errors  # from gridmonitor.model.acl
 
 log = logging.getLogger(__name__)
 

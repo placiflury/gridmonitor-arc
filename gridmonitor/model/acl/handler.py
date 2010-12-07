@@ -1,12 +1,11 @@
 """
 Interface for ACL of GridMonitor portal 
 """
-# XXX add admins based on their X509 DN 
+__all__=['AdminsPool','SitesPool','ServicesPool']
 
-from pylons import config
 
-import gridmonitor.model.acl.schema as schema
-from gridmonitor.model.acl.errors import *
+import schema
+from errors import *
 import logging
 
 log = logging.getLogger(__name__)
@@ -32,7 +31,7 @@ def strip_args(func):
                 else:
                     kwargs_stripped[k] = v
                 
-        func(args_stripped, kwargs_stripped)
+        return func(*args_stripped, **kwargs_stripped)
         
     return new_func 
 
@@ -48,7 +47,7 @@ class AdminsPool():
         """ Find admin for given unique_id
             returns: admin object | None
         """
-        return self.session.query(schema.Admin).filter_by(shib_unique_id = unique_id).first()
+        return self.session.query(schema.Admin).filter_by(shib_unique_id=unique_id).first()
 
     @strip_args
     def add_admin(self, unique_id, surname, 
@@ -318,9 +317,8 @@ class SitesPool():
 
 class ServicesPool():
     
-    def __init__(self, session):
+    def __init__(self, session, valid_types=None):
         self.session = session
-        valid_types = config['acl_service_names']
         if not valid_types:
             self.valid_types = ['CE', 'VOMS', 'VASH', 'GIIS', 'BDII', 'RT', 'other']
         else:
@@ -350,7 +348,7 @@ class ServicesPool():
                 (name, site_name))
 
             raise ACLInsertError("Site does not exist", \
-                "Service '%s' can't be addes to non-existing site '%s'" % \
+                "Service '%s' can't be added to non-existing site '%s'" % \
                 (name, site_name))
 
         service = self.session.query(schema.Service).filter_by(name=name, hostname=hostname).first()

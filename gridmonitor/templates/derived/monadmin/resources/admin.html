@@ -1,2 +1,30 @@
-<%inherit file="/base/monadmin.html"/>
+<%inherit file="/base/monadmin_table.html"/>
+
+<%def name="showUI()">\
+    <script type="text/javascript">$(document).ready(function() { showUI('start_resources_adm') })</script>
+</%def>\
+
+<%def name="list1_head()" >\
+    Admins
+</%def>\
+
+<%def name="list1_container()" >\
+    <% c.listOnChange = "changeRes(this,'admin','show')" %>
+    <% c.list = 'list1' %>
+    <%include file="/derived/monadmin/includes/getadms.mako" />
+</%def>\
+
+<%def name="list1_edit()" >\
+    <a class="edit_list" onclick="changeRes('select#admin_list','admin','new')" href="#">new admin</a><br>
+    <a class="edit_list" onclick="changeRes('select#admin_list','admin','edit')" href="#">edit admin</a><br>
+    <a class="edit_list" onclick="changeRes('select#admin_list','admin','del')" href="#">del admin</a>
+</%def>\
+
+<%def name="change_forms()" >\
+    
+</%def>\
+
+<%def name="status_code()" >\
+    
+</%def>\
 

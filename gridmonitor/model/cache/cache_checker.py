@@ -1,7 +1,7 @@
 from __future__ import with_statement # enables with statement for python 2.5
 import os, os.path
 import logging
-from threading import Thread, Lock, activeCount
+from threading import Thread, Lock
 import time 
 
 __author__="Placi Flury placi.flury@switch.ch"

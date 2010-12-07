@@ -12,7 +12,6 @@ import sqlalchemy.orm as orm
 
 from gridmonitor.model.acl.handler import * 
 import gridmonitor.model.acl.meta as meta
-import gridmonitor.model.acl.schema
 
 if __name__ == '__main__':
     

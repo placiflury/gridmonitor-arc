@@ -33,24 +33,29 @@ class Series(object):
 
     def __init__(self, name, start_t, end_t, resolution=1):
         """
+        Notice. the interval of valid samples spawns the time
+                starting from start_t and ending at end_t. Since sample
+                falling in the time slot end_t need also to be included, 
+                we add the resolution to end_t. 
+
         name: name of time series (variable)
         start_t: time series starting time in epoch
-        end_t: time series ending time in epoch 
+        end_t: time series ending time in epoch  (incl. end_t)
         resolution: in seconds (default 1 second)
         """
         self.name = name
         if start_t < end_t:
             self.start_t = start_t
-            self.end_t = end_t
         else:
             log.warn("Series starting time > ending time. Swapping both!")
             self.start_t = end_t
-            self.end_t = start_t
+            end_t = start_t
         if resolution < 1:
             log.warn("Resolution was < 1 second. Re-setting it to 1 (minimal)")
             self.resolution = 1
         else:
             self.resolution = resolution 
+        self.end_t =end_t + self.resolution
         self.series = dict()
 
         self.stats_ready = False  # flag
@@ -267,7 +272,7 @@ class Series(object):
         """ 
             returns a ',' (collon) delimited string of the values of the 
             series.
-            For each date in 'ref)dates', which hasn't a corresponding value
+            For each date in 'ref dates', which hasn't a corresponding value
             in the time series a ',_' (collon and underscore) characters will
             be entered instead.
             If ref_dates = None or empty, dates will be ignored.

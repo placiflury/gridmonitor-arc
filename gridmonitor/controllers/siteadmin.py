@@ -32,23 +32,23 @@ class SiteadminController(BaseController):
             user_unique_id = session['user_unique_id']
             admin = query.filter_by(shib_unique_id=user_unique_id).first()
             if admin:
-                self.authorized = True  # doesn't mean there are any resources though.
+                self.authorized = True  # doesn't mean there are any resources to view though
                 for site in admin.sites:
                     for service in site.services:
-                        if service.type == 'cluster':
-                            log.info("Access to service %s granted." % service.name)
+                        if service.type == 'CE':
+                            log.info("Access to CE service %s granted." % service.hostname)
                             self.clusters.append(service.hostname)
-                        elif service.type == 'other': # XXX this might change
-                            log.info("Access to service %s granted." % service.name)
+                        else: 
+                            log.info("Access to core service %s granted." % service.hostname)
                             self.cores.append(service.hostname)
                 for service in admin.services:
-                        if service.type == 'cluster':
+                        if service.type == 'CE':
                             if service.hostname not in self.clusters:
-                                log.info("Access to service %s granted." % service.name)
+                                log.info("Access to CE service %s granted." % service.hostname)
                                 self.clusters.append(service.hostname)
-                        elif service.type == 'other': # XXX this might change
+                        else:
                             if service.hostname not in self.cores:
-                                log.info("Access to service %s granted." % service.name)
+                                log.info("Access to core service %s granted." % service.hostname)
                                 self.cores.append(service.hostname)
         
 
@@ -57,11 +57,7 @@ class SiteadminController(BaseController):
         
         overview = [('My Services','/siteadmin/overview/core'),
             ('Reports','/siteadmin/overview/reports')]
-
-        c.top_nav= [('User','/user'),
-            ('Site Admin', '/siteadmin'),
-            ('VO/Grid Admin', '/gridadmin'),
-            ('Help','/help')]
+        
 
         # dynamic menu information
         c.cluster_menu = list()
@@ -84,6 +80,8 @@ class SiteadminController(BaseController):
                     cluster_queues.append((name, cluster_path + '/' + h.str_cannonize(name)))
             c.cluster_menu.append((cluster_display_name,cluster_path, cluster_queues))
          
+        c.top_nav= session['top_nav_bar']
+        
         c.menu = [('Overview', '/siteadmin/overview', overview),
                 ('Clusters','/siteadmin/clusters', c.cluster_menu),
                 ('Jobs','/siteadmin/jobs'),
@@ -98,7 +96,7 @@ class SiteadminController(BaseController):
         
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Overview"
-        if self.authorized == True:
+        if self.authorized == False:
             return render('/derived/siteadmin/error/access_denied.html')        
         return render('/base/siteadmin.html')
   

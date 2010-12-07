@@ -9,10 +9,7 @@ class HelpController(BaseController):
     def __init__(self):
         
         c.menu = [('Overview', '/help')]
-        c.top_nav= [('User','/user'),
-            ('Site Admin', '/siteadmin'),
-            ('VO/Grid Admin', '/gridadmin'),
-            ('Help','/help')]
+        c.top_nav= session['top_nav_bar']
         c.top_nav_active="Help"
     
     def index(self):

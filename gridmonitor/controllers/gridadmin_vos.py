@@ -11,7 +11,6 @@ from gridmonitor.model.statistics.series import Series
 
 from sgas.db import sgas_meta
 from sgas.db import ag_schema # schema of tables of aggregated usage record 
-from sgas.db import sgas_schema  # original SGAS schema
 from sgas.utils import helpers
 
 log = logging.getLogger(__name__)

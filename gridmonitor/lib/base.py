@@ -14,9 +14,12 @@ from hashlib import md5
 
 import gridmonitor.lib.helpers as h
 import gridmonitor.model as model
+from gridmonitor.lib.slcs import SLCS
 from gridmonitor.model.nagios import meta as nagios_meta
 from gridmonitor.model.acl import meta as acl_meta
+from gridmonitor.model.acl import handler
 from sft.db import sft_meta
+
 
 
 import logging
@@ -80,7 +83,8 @@ class BaseController(WSGIController):
                     dn = unicode(request.environ['SSL_CLIENT_S_DN'],'iso-8859-1')
                     ca = unicode(request.environ['SSL_CLIENT_I_DN'],'iso-8859-1')
                     if dn and ca:
-                        session['user_unique_id'] = md5(dn + ca).hexdigest()
+                        unique_id= md5(dn + ca).hexdigest()
+                        session['user_unique_id'] = unique_id 
 
             session['user_name'] = user_name
             session['user_surname'] = user_surname
@@ -99,7 +103,47 @@ class BaseController(WSGIController):
                 session['user_client_ca'] = request.environ['SSL_CLIENT_I_DN'].strip()
 
             session['authenticated'] = True
+
+            # 3. set navigation bar 
+            session['top_nav_bar'] = self.__get_top_nav(unique_id)
             session.save()
+            
+
+    def __get_top_nav(self, unique_id=None):
+        """ creates top navigation bar based on user's access permissions. """
+
+        if not unique_id:
+            return [('User','/user'),
+                    ('VO/Grid Admin','/gridadmin'),
+                    ('Help','/help')]
+
+        monadmin_flag = False
+        top_nav = [('User','/user')]
+        
+        db_session = acl_meta.Session()
+        admins_pool = handler.AdminsPool(db_session)
+        admin = admins_pool.show_admin(unique_id)        
+        if admin: # siteadmin top bar 
+            top_nav.append(('Site Admin','/siteadmin'))
+            top_nav.append(('VO/Grid Admin', '/gridadmin'))
+            for site in admin.sites:
+                if site.name == 'GridMonitor' and site.alias == 'not_a_real_site':
+                    top_nav.append(('Monitor Admin', '/monadmin'))
+                    monadmin_flag = True
+                    break
+            if not monadmin_flag:
+                for service in admin.services:
+                    if service.name in ['ACL','SFT'] and service.site_name == 'GridMonitor': 
+                        top_nav.append(('Monitor Admin', '/monadmin'))
+                        break
+        else:
+            top_nav.append(('VO/Grid Admin', '/gridadmin'))
+        top_nav.append(('Help','/help'))
+            
+        return top_nav
+        
+        
+
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""

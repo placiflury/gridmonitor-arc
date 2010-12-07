@@ -1,3 +1,4 @@
+from gridmonitor.model.errors.handler import HandlerException
 
 class CacheHandlerError(HandlerException):
     """ 

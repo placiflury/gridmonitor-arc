@@ -12,7 +12,8 @@ from gridmonitor.model.nagios import init_model
 from gridmonitor.model.acl import init_acl_model 
 from sft.db import init_model as init_sft_model
 from sft.utils import init_config as init_sft_config
-from sgas.db import init_model as init_sgas_model
+from sgasaggregator import dbinit
+from sgasaggregator.sgascache import session as sgascache_session
 
 
 log = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ def load_environment(global_conf, app_conf):
     init_sft_config(config['sft_config'])
     log.info('SFT DB connection initialized')
     
-    sgas_engine = engine_from_config(config, prefix='sqlalchemy_sgas.')
-    init_sgas_model(sgas_engine)
-    log.info('SGAS DB connection initialized')
+    sgascache_engine = engine_from_config(config, prefix='sqlalchemy_sgascache.')
+    dbinit.init_model(sgascache_session, sgascache_engine)
+    log.info('SGASCACHE DB connection initialized')
 

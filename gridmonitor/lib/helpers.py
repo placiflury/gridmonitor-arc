@@ -4,15 +4,14 @@ Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
 import logging
-import urllib, time, datetime
+import urllib, datetime
 
 from webhelpers import *
-from webhelpers.html.tags import form, select
-from routes.util import url_for
 from gridmonitor.model.nagios import meta
 from gridmonitor.model.nagios import hosttables
 from gridmonitor.model.nagios import servicetables
 from gridmonitor.model.nagios import scheduleddowntimes
+from routes.util import url_for # used in subsequent modules, don't remove
 
 
 

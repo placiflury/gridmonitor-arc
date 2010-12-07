@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import mapper, relationship
-from gridmonitor.model.acl import meta
+
+import meta
 
 """
 The ACL database is used to protect some parts of the GridMonitor portal

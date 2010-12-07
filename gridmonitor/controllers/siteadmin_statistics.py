@@ -55,6 +55,8 @@ class SiteadminStatisticsController(SiteadminController):
                     t = end_t
                     end_t = start_t
                     start_t = t
+                elif end_t == start_t: # same day
+                    start_t = end_t - resolution
             except:
                 c.form_error = "Please enter dates in 'dd.mm.yyyy' format"
                 return render('/derived/siteadmin/statistics/form.html')
@@ -205,18 +207,12 @@ class SiteadminStatisticsController(SiteadminController):
 
         t_series = dict() # [time : {cluster_name: {values}}]     
         n_jobs_max = dict()
-        sum_n_jobs= dict() 
         major_page_faults_max = dict()
-        sum_major_page_faults = dict()
         cpu_duration_max = dict()
-        sum_cpu_duration = dict()
         wall_duration_max = dict()
-        sum_wall_duration = dict()
         user_time_max = dict()
-        sum_user_time = dict()
         kernel_time_max = dict()
-        sum_kernel_time = dict()
-        
+
         # query all machines and not only those of site (minimize # of queries) 
         for rec in sgas_meta.Session.query(ag_schema.Machine).filter(and_(
             ag_schema.Machine.t_epoch >= start_t_epoch,
@@ -238,32 +234,15 @@ class SiteadminStatisticsController(SiteadminController):
                 t_series[rec.t_epoch] = {cluster_name : stats}
             else:
                 t_series[rec.t_epoch][cluster_name] = stats
-          
-            
- 
-            if not n_jobs_max.has_key(cluster_name):
-                n_jobs_max[cluster_name] = rec.n_jobs
-                major_page_faults_max[cluster_name] = rec.major_page_faults
-                wall_duration_max[cluster_name] = rec.wall_duration
-                cpu_duration_max[cluster_name] = rec.cpu_duration
-                user_time_max[cluster_name] = rec.user_time
-                kernel_time_max[cluster_name] = rec.kernel_time
-                continue 
-        
-            if rec.major_page_faults > major_page_faults_max[cluster_name]:
-                major_page_faults_max[cluster_name] = rec.major_page_faults
-            if rec.n_jobs > n_jobs_max[cluster_name]:
-                n_jobs_max[cluster_name] = rec.n_jobs
-            if rec.wall_duration > wall_duration_max[cluster_name]:
-                wall_duration_max[cluster_name] = rec.wall_duration
-            if rec.cpu_duration > cpu_duration_max[cluster_name]:
-                cpu_duration_max[cluster_name] = rec.cpu_duration
-            if rec.user_time > user_time_max[cluster_name]:
-                user_time_max[cluster_name] = rec.user_time
-            if rec.kernel_time > kernel_time_max[cluster_name]:
-                kernel_time_max[cluster_name] = rec.kernel_time
-            
-        
+
+            n_jobs_max[cluster_name]            = max(n_jobs_max.get(cluster_name), rec.n_jobs)
+            major_page_faults_max[cluster_name] = max(major_page_faults_max.get(cluster_name), rec.major_page_faults)
+            wall_duration_max[cluster_name]     = max(wall_duration_max.get(cluster_name), rec.wall_duration)
+            cpu_duration_max[cluster_name]      = max(cpu_duration_max.get(cluster_name), rec.cpu_duration)
+            user_time_max[cluster_name]         = max(user_time_max.get(cluster_name), rec.user_time)
+            kernel_time_max[cluster_name]       = max(kernel_time_max.get(cluster_name), rec.kernel_time)
+
+
         # preparations for plots
 
         c.n_jobs_max = n_jobs_max

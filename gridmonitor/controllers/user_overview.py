@@ -2,7 +2,7 @@ import logging
 
 from gridmonitor.lib.base import *
 from user import UserController 
-from pylons import config, request
+from pylons import config
 
 log = logging.getLogger(__name__)
 

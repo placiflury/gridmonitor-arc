@@ -5,7 +5,6 @@ import sys, time
 from pylons import config
 from gridmonitor.model.factories import DataHandlerFactory
 from gridmonitor.model.errors.handler import * 
-from gridmonitor.model.voms import VOMSConnector
 from gridmonitor.model.errors.voms import * 
 
 class Globals(object):

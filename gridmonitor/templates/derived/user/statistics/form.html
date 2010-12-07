@@ -59,12 +59,7 @@ SELECTED
 %endif
 /> 
 4 weeks </option>
-                     <option value="0"
-%if c.resolution == 0:
-SELECTED
-%endif
-/> No sampling </option>
-                </select>
+</select>
             <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div>
         </div>
@@ -92,19 +87,12 @@ SELECTED
     %endif
     />
             User time & Kernel time <br/>
-<!--
-    <input type="checkbox" name="jobs_status" value="jobs_status"
-    % if c.jobs_status:
-    checked
-    %endif
-    />
-            Jobs Status <br/> -->
     </td>
 </tr>
 <tr>
 <td> 
-                <input type="checkbox" name="plot_table" value="table_only" 
-                %if c.plot_table:
+                <input type="checkbox" name="table_only" value="True" 
+                %if c.table_only:
                 checked
                 %endif
     /> Display table(s) only.
@@ -119,71 +107,75 @@ SELECTED
 plot_order=[['n_jobs','major_page_faults'], ['cpu_duration','wall_duration'], ['kernel_time','user_time']]
 
 %>
-%if c.series:
-    <table>
-    <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
 
-%for p in plot_order:
-    %if not c.series.has_key(p[0]):
-        <!-- do nothing -->
-    %else:
-<%
-v = c.series[p[0]]
-name = v.get_name()
-bp = v.get_box_plot()
-min = v.get_min() 
-max = v.get_max()
-median = v.get_median()
-avg = v.get_average()
-if min != None:
-    min = '%0.2f' % min
-if max != None:
-    max = '%02.f' % max   
-if avg != None:
-    avg = '%0.2f' % avg
-if median != None:
-    median = '%0.2f' % median
-if bp:
-    bp_min = bp['lnot_outliner']
-    bp_max = bp['unot_outliner']
-    lquart =  bp['lquartile']
-    uquart =  bp['uquartile']
-    outliners = bp['l_outliners'] + bp['u_outliners']
-endif
+%if c.table_only:
+XXX to todo
+%else:
+    %if c.series:
+        <table>
+        <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
 
-v_2 = c.series[p[1]]
-name_2 = v_2.get_name()
-bp_2 = v_2.get_box_plot()
-min_2 = v_2.get_min() 
-if min_2 != None:
-    min_2 = '%0.2f' % min_2
-max_2 = v_2.get_max()
-if max_2 != None:
-    max_2 = '%02.f' % max_2   
-avg_2 = v_2.get_average()
-if avg_2 != None:
-    avg_2 = '%0.2f' % avg_2
+    %for p in plot_order:
+        %if not c.series.has_key(p[0]):
+            <!-- do nothing -->
+        %else:
+    <%
+    v = c.series[p[0]]
+    name = v.get_name()
+    bp = v.get_box_plot()
+    min = v.get_min() 
+    max = v.get_max()
+    median = v.get_median()
+    avg = v.get_average()
+    if min != None:
+        min = '%0.2f' % min
+    if max != None:
+        max = '%02.f' % max   
+    if avg != None:
+        avg = '%0.2f' % avg
+    if median != None:
+        median = '%0.2f' % median
+    if bp:
+        bp_min = bp['lnot_outliner']
+        bp_max = bp['unot_outliner']
+        lquart =  bp['lquartile']
+        uquart =  bp['uquartile']
+        outliners = bp['l_outliners'] + bp['u_outliners']
+    endif
 
-median_2 = v_2.get_median()
-if median_2 != None:
-    median_2 = '%0.2f' % median_2
-if bp_2:
-    bp_min_2 = bp_2['lnot_outliner']
-    bp_max_2 = bp_2['unot_outliner']
-    lquart_2 =  bp_2['lquartile']
-    uquart_2 =  bp_2['uquartile']
-    outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
-endif
-%>
-            <tr>
+    v_2 = c.series[p[1]]
+    name_2 = v_2.get_name()
+    bp_2 = v_2.get_box_plot()
+    min_2 = v_2.get_min() 
+    if min_2 != None:
+        min_2 = '%0.2f' % min_2
+    max_2 = v_2.get_max()
+    if max_2 != None:
+        max_2 = '%02.f' % max_2   
+    avg_2 = v_2.get_average()
+    if avg_2 != None:
+        avg_2 = '%0.2f' % avg_2
 
-            <td style="font-size:small"> <b>${name} </b><br/>
-                     min: ${min} max: ${max} <br/>
-                    avg:  ${avg} 
-                    median: ${median}<br/> </td>
-            <td>
-            %if bp: 
-              <!-- box-plot -->
+    median_2 = v_2.get_median()
+    if median_2 != None:
+        median_2 = '%0.2f' % median_2
+    if bp_2:
+        bp_min_2 = bp_2['lnot_outliner']
+        bp_max_2 = bp_2['unot_outliner']
+        lquart_2 =  bp_2['lquartile']
+        uquart_2 =  bp_2['uquartile']
+        outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
+    endif
+    %>
+                <tr>
+
+                <td style="font-size:small"> <b>${name} </b><br/>
+                         min: ${min} max: ${max} <br/>
+                        avg:  ${avg} 
+                        median: ${median}<br/> </td>
+                <td>
+                %if bp: 
+                  <!-- box-plot -->
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 &amp;chs=200x60
 &amp;cht=bhg
@@ -318,14 +310,15 @@ alt="User and Kernel Time Chart"
 &amp;chds=0,${float(max_2) * 1.1}
 &amp;chdh=20
 &amp;alt="Box-Plot of ${name_2} time series."/>
-            %endif
-            </td>
-            </tr>
+                %endif
+                </td>
+                </tr>
 
-        %endif
-    %endfor
-</table>
-%endif
+            %endif
+        %endfor
+    </table>
+    %endif
+%endif <!-- else of table_only -->
 
 
 <script type="text/javascript">

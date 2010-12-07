@@ -1,2 +1,54 @@
-<%inherit file="/base/monadmin.html"/>
+<%inherit file="/base/monadmin_table.html"/>
 
+<%def name="showUI()">
+    <script type="text/javascript">$(document).ready(function() { showUI('start_acl') })</script>
+</%def>
+
+<%def name="list1_head()" >
+    Admins
+</%def>
+
+<%def name="list1_container()" >
+    <% c.listOnChange="map('/monadmin/acl/map_sitoadm/', '#admin_list', '#list2_container', 'map', true);changeRes(this,'admin','show')" %>
+    <% c.list = 'list1' %>
+    <%include file="/derived/monadmin/includes/getadms.mako" />
+</%def>
+
+<%def name="list1_edit()" >
+</%def>
+
+<%def name="list2_head()" >
+    Sites
+</%def>
+
+<%def name="list2_container()" >
+</%def>
+
+<%def name="list2_edit()" >
+    <a class="edit_list" onclick="editAdmAcs()" href="#" id="editAdmAcsClk">edit admin access</a><br>
+    <input type="submit" value="save" id="save_sitoadm">
+</%def>
+
+<%def name="list3_head()" >
+    Sites
+</%def>
+
+<%def name="list3_up_container()" >
+</%def>
+
+<%def name="list3_middle()" >
+</%def>
+
+<%def name="list3_down_container()" >
+</%def>
+
+<%def name="list3_edit()" >
+</%def>
+
+<%def name="change_forms()" >
+    
+</%def>
+
+<%def name="status_code()" >
+    
+</%def>

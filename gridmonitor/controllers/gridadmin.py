@@ -1,10 +1,7 @@
-import logging
-
 from sft.db import sft_meta
 from sft.db import sft_schema
 
 from gridmonitor.lib.base import *
-from gridmonitor.lib.slcs import SLCS
 from gridmonitor.controllers.user import UserController
 
 log = logging.getLogger(__name__)
@@ -72,13 +69,7 @@ class GridadminController(BaseController):
             details = '/gridadmin/sfts/show_details/' + sft_name
             sfts.append((sft_name, show_path, [('details',details)]))
 
-        
-        c.top_nav= [('User','/user'),
-            ('Site Admin', '/siteadmin'),
-            ('VO/Grid Admin', '/gridadmin'),
-            ('Help','/help')]
-        
- 
+        c.top_nav= session['top_nav_bar']
         c.menu = [('Overview', '/gridadmin/overview', overview),
                 ('Clusters','/gridadmin/clusters', c.cluster_menu),
                 ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals),

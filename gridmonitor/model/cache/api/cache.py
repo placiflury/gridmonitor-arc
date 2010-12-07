@@ -8,8 +8,6 @@ __author__="Placi Flury placi.flury@switch.ch"
 __date__="14.4.2009"
 __version__="0.1.0"
 
-import shelve
-import logging
 
 class Cache:
     

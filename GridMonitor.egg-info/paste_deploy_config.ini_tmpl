@@ -72,6 +72,7 @@ sqlalchemy_nagios.url= <DB_URL>
 # db_url syntax: driver://username:password@host:port/database
 sqlalchemy_nagios.pool_recycle = 3600
 # acl databse
+acl_service_types=CE,VOMS,MONITOR,GIIS,RT,other
 sqlalchemy_acl.url= <DB_URL>
 sqlalchemy_acl.pool_recycle = 3600
 # giisdb database
@@ -83,18 +84,24 @@ sqlalchemy_sft.pool_recycle = 3600
 sft_config=/opt/smscg/sft/etc/config.ini
 
 # sgas accounting records database
-sqlalchemy_sgas.url= <DB_URL>
-sqlalchemy_sgas.pool_recycle = 3600
+sqlalchemy_sgascache.url= <DB_URL>
+sqlalchemy_sgascache.pool_recycle = 3600
 
 
 # Logging configuration
 [loggers]
-keys=root,gridmonitor,lib,cache_handler,pylons,routes
+keys=root,gridmonitor,lib,cache_handler,pylons,routes,acl
+
 [handlers]
-keys=rotor
+keys=rotor,console
 
 [formatters]
 keys=generic
+
+[logger_acl]
+level=INFO
+qualname=gridmonitor.model.acl.handler
+handlers=
 
 [logger_root]
 level=INFO
@@ -131,6 +138,12 @@ qualname=gridmonitor.model.cache
 class=handlers.RotatingFileHandler
 level=INFO
 args=('/var/log/smscg/gridmonitor.log','a', 1000000,0)
+formatter=generic
+
+[handler_console]
+class=StreamHandler
+args=(sys.__stdout__,)
+level=DEBUG
 formatter=generic
 
 [formatter_generic]

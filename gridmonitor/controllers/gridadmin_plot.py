@@ -1,4 +1,3 @@
-import logging
 from gridmonitor.lib.base import *
 from gridadmin import GridadminController
 
