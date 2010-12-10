@@ -103,8 +103,8 @@ SELECTED
 </tr>
 <tr>
 <td> 
-                <input type="checkbox" name="plot_table" value="table_only" 
-                %if c.plot_table:
+                <input type="checkbox" name="table_only" value="True" 
+                %if c.table_only:
                 checked
                 %endif
     /> Display table(s) only.
@@ -116,70 +116,171 @@ SELECTED
 
 <!-- DISPLAY STARTING HERE -->
 <% 
-plot_order=[['n_jobs','major_page_faults'], ['cpu_duration','wall_duration'], ['kernel_time','user_time']]
-
-%>
-%if c.series:
-    <table>
-    <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
-
-%for cluster in c.clusters:
-
-%for p in plot_order:
-    %if not c.series[cluster].has_key(p[0]):
-        <!-- do nothing -->
-    %else:
-<%
-v = c.series[cluster][p[0]]
-name = v.get_name() + ' (' +  cluster + ')'
-bp = v.get_box_plot()
-min = v.get_min() 
-max = v.get_max()
-median = v.get_median()
-avg = v.get_average()
-if min != None:
-    min = '%0.2f' % min
-if max != None:
-    max = '%02.f' % max   
-if avg != None:
-    avg = '%0.2f' % avg
-if median != None:
-    median = '%0.2f' % median
-if bp:
-    bp_min = bp['lnot_outliner']
-    bp_max = bp['unot_outliner']
-    lquart =  bp['lquartile']
-    uquart =  bp['uquartile']
-    outliners = bp['l_outliners'] + bp['u_outliners']
+sks=list()
+if c.series.keys():
+    k = c.series.keys()[0]
+    sks = c.series[k].keys() 
+    sks.sort()
 endif
 
-v_2 = c.series[cluster][p[1]]
-name_2 = v_2.get_name() + ' (' +  cluster + ')'
-bp_2 = v_2.get_box_plot()
-min_2 = v_2.get_min() 
-if min_2 != None:
-    min_2 = '%0.2f' % min_2
-max_2 = v_2.get_max()
-if max_2 != None:
-    max_2 = '%02.f' % max_2   
-avg_2 = v_2.get_average()
-if avg_2 != None:
-    avg_2 = '%0.2f' % avg_2
-
-median_2 = v_2.get_median()
-if median_2 != None:
-    median_2 = '%0.2f' % median_2
-if bp_2:
-    bp_min_2 = bp_2['lnot_outliner']
-    bp_max_2 = bp_2['unot_outliner']
-    lquart_2 =  bp_2['lquartile']
-    uquart_2 =  bp_2['uquartile']
-    outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
-endif
+series_display_name = {'A_n_jobs': 'Number of Jobs',
+    'B_major_page_faults': "Major Page Faults",
+    'C_cpu_duration' : 'CPU Duration [hours]',
+    'D_wall_duration': 'Wall Duration [hours]',
+    'E_user_time' : "User Time [hours]",
+    'F_kernel_time' : "Kernel Time [hours]"}
 %>
+
+%if c.table_only:
+    <table border=1 width='750'>
+    <% columns = len(sks) + 1 %> 
+    % for cluster in c.clusters:
+    <tr class="table_head2"> 
+        <th>Date/Time</th>
+        % for k in sks:
+            <th> ${series_display_name[k]}</th>
+        %endfor 
+    </tr>
+    <tr class="table_row_emph">
+        <td colspan=${columns} align='center'>
+            ${cluster}</td>
+    </tr>
+    <!-- stats summary row -->
+    <tr>
+    <td>From: ${c.start_t_str}  <br/>
+        To:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${c.end_t_str}</td>
+        % for k in sks:
+            <%
+            v = c.series[cluster][k]
+            min = v.get_min() 
+            max = v.get_max()
+            sum = v.get_sum()
+            median = v.get_median()
+            tavg = v.get_average_bytime()
+            if min != None:
+                min = '%0.2f' % min
+            if max != None:
+                max = '%0.2f' % max   
+            if sum != None:
+                sum = '%0.2f' % sum
+            if tavg != None:
+                tavg = '%0.2f' % tavg
+            if median != None:
+                median = '%0.2f' % median
+            
+            %> 
+            <td> 
+                MIN: ${min}  <br/>
+                MAX: ${max} <br/>
+                Median: ${median} <br/>
+                AVG: ${tavg} <br/>
+                SUM: ${sum} <br/>
+            </td>
+        %endfor 
+    </tr>
+<!-- 
+        <tr class="table_row_odd"> --> 
+
+        <% 
+        new_row = True 
+        table_row_odd = True
+        %> 
+        % for t_epoch in xrange(c.start_t_epoch + c.resolution , c.end_t_epoch + c.resolution, c.resolution):
+        <% 
+        print_date = True 
+        %> 
+        % if new_row:
+            % if table_row_odd:
+                <tr class="table_row_odd">
+                <% table_row_odd = False %> 
+            % else:
+                <tr>
+                <% table_row_odd = True %> 
+            % endif
+            <% new_row = False %>
+        % endif
+
+            % for k in sks:
+                <% 
+                utc_date, value = c.series[cluster][k].get_sample(t_epoch -1 )
+                if value != None:
+                    value = '%0.2f' % value
+                %> 
+                % if value:
+                    % if print_date:
+                        <td> ${utc_date}</td>
+                        <% 
+                        print_date = False
+                        new_row = True
+                         %> 
+                    % endif
+                    <td> ${value} </td>
+                % endif
+            % endfor    
+
+        % if new_row:
+        </tr>
+        % endif
+        % endfor <!-- end of xrange loop --> 
+        % endfor <!-- end of cluster in c.clusters loop -->
+    </table>
+
+%else:  
+    %if c.series:
+        <table>
+        <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
+        %for cluster in c.clusters:
+          %for i in xrange(0,len(sks),2):
+            <%
+            v = c.series[cluster][sks[i]]
+            dname = series_display_name[sks[i]] + ' (' +  cluster + ')'
+            bp = v.get_box_plot()
+            min = v.get_min() 
+            max = v.get_max()
+            median = v.get_median()
+            avg = v.get_average()
+            if min != None:
+                min = '%0.2f' % min
+            if max != None:
+                max = '%0.2f' % max   
+            if avg != None:
+                avg = '%0.2f' % avg
+            if median != None:
+                median = '%0.2f' % median
+            if bp:
+                bp_min = bp['lnot_outliner']
+                bp_max = bp['unot_outliner']
+                lquart =  bp['lquartile']
+                uquart =  bp['uquartile']
+                outliners = bp['l_outliners'] + bp['u_outliners']
+
+            v_2 = c.series[cluster][sks[i+1]]
+            dname_2 = series_display_name[sks[i+1]] + ' (' +  cluster + ')'
+            bp_2 = v_2.get_box_plot()
+            min_2 = v_2.get_min() 
+            if min_2 != None:
+                min_2 = '%0.2f' % min_2
+            max_2 = v_2.get_max()
+            if max_2 != None:
+                max_2 = '%02.f' % max_2   
+            avg_2 = v_2.get_average()
+            if avg_2 != None:
+                avg_2 = '%0.2f' % avg_2
+
+            median_2 = v_2.get_median()
+            if median_2 != None:
+                median_2 = '%0.2f' % median_2
+            if bp_2:
+                bp_min_2 = bp_2['lnot_outliner']
+                bp_max_2 = bp_2['unot_outliner']
+                lquart_2 =  bp_2['lquartile']
+                uquart_2 =  bp_2['uquartile']
+                outliners_2 = bp_2['l_outliners'] + bp_2['u_outliners']
+            %>
+
             <tr>
 
-            <td style="font-size:small"> <b>${name} </b><br/>
+            <td style="font-size:small"> <b>${dname} </b><br/>
                      min: ${min} max: ${max} <br/>
                     avg:  ${avg} 
                     median: ${median}<br/> </td>
@@ -194,20 +295,20 @@ endif
 |${outliner}
 %endfor
 &amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
-%for i in xrange(0,len(outliners)):
-|o,055670,${i+5},-1,5
+%for j in xrange(0,len(outliners)):
+|o,055670,${j+5},-1,5
 %endfor
 &amp;chxt=x
 &amp;chxr=0,0,${float(max) * 1.1}
 &amp;chds=0,${float(max) * 1.1}
 &amp;chdh=20
-&amp;alt="Box-Plot of ${name} time series."/>
+&amp;alt="Box-Plot of ${dname} time series."/>
             %endif
             </td>
             <td rowspan=2>  
             %if bp: 
               <!-- time series plot -->  
-                %if p[0] == 'n_jobs': 
+             %if sks[i] == 'A_n_jobs': 
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
@@ -221,8 +322,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.n_job_series[cluster]}|${c.major_page_faults_series[cluster]}
-&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['n_jobs'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['major_page_faults'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['n_jobs'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['A_n_jobs'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['B_major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['A_n_jobs'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['B_major_page_faults'].get_max().to_eng_string()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -235,7 +336,7 @@ cht=bvg
 &amp;chdlp=b"     
 alt="Number of Jobs and Major Page Faults Chart"
 />
-                %elif p[0] == 'cpu_duration':
+                %elif sks[i] == 'C_cpu_duration':
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
@@ -249,8 +350,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.cpu_duration_series[cluster]}|${c.wall_duration_series[cluster]}
-&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['cpu_duration'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['wall_duration'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['cpu_duration'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['C_cpu_duration'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['D_wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['C_cpu_duration'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['D_wall_duration'].get_max().to_eng_string()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -259,11 +360,11 @@ cht=bvg
 %if c.start_chm:
 &amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
 %endif
-&amp;chdl=CPU%20Duration%20[minutes]|Wall%20Duration%20[minutes]
+&amp;chdl=CPU%20Duration%20[hours]|Wall%20Duration%20[hours]
 &amp;chdlp=b"     
 alt="CPU and Wall Duration Chart"
 />
-                %elif p[0] == 'kernel_time':
+                %elif sks[i] == 'E_user_time':
 <img style="border: 1px solid black;" src="http://chart.apis.google.com/chart?
 cht=bvg
 &amp;chma=30,30,30,30
@@ -277,8 +378,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.user_time_series[cluster]}|${c.kernel_time_series[cluster]}
-&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['user_time'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['kernel_time'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['user_time'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series[cluster]['E_user_time'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series[cluster]['F_kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series[cluster]['E_user_time'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series[cluster]['F_kernel_time'].get_max().to_eng_string()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -287,7 +388,7 @@ cht=bvg
 %if c.start_chm:
 &amp;chm=V,FF0000,0,${c.start_chm},1|V,FF0000,0,${c.end_chm},1
 %endif
-&amp;chdl=user%20time%20[minutes]|kernel%20time%20[minutes]
+&amp;chdl=user%20time%20[hours]|kernel%20time%20[hours]
 &amp;chdlp=b"     
 alt="User and Kernel Time Chart"
 />
@@ -298,7 +399,7 @@ alt="User and Kernel Time Chart"
 
             </tr>
             <tr>
-            <td style="font-size:small"> <b>${name_2} </b><br/>
+            <td style="font-size:small"> <b>${dname_2} </b><br/>
                      min: ${min_2} max: ${max_2} <br/>
                     avg:  ${avg_2} 
                     median: ${median_2}<br/> </td>
@@ -312,22 +413,22 @@ alt="User and Kernel Time Chart"
 |${outliner}
 %endfor
 &amp;chm=F,4682B4,0,1,30|H,055670,0,1,1:20|H,055670,4,1,1:30|H,055670,3,1,1:20
-%for i in xrange(0,len(outliners_2)):
-|o,055670,${i+5},-1,5
+%for j in xrange(0,len(outliners_2)):
+|o,055670,${j+5},-1,5
 %endfor
 &amp;chxt=x
 &amp;chxr=0,0,${float(max_2) * 1.1}
 &amp;chds=0,${float(max_2) * 1.1}
 &amp;chdh=20
-&amp;alt="Box-Plot of ${name_2} time series."/>
+&amp;alt="Box-Plot of ${dname_2} time series."/>
             %endif
             </td>
             </tr>
-        %endif
-        %endfor
-    %endfor
+        %endfor <!-- for row -->
+    %endfor <!-- for cluster in cluster --> 
 </table>
 %endif
+%endif  <!-- end of table only --> 
 
 
 <script type="text/javascript">

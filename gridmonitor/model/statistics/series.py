@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 from decimal import Decimal, getcontext
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class Series(object):
         resolution: in seconds (default 1 second)
         """
         self.name = name
-        if start_t < end_t:
+        if start_t <= end_t:
             self.start_t = start_t
         else:
             log.warn("Series starting time > ending time. Swapping both!")
@@ -55,7 +56,7 @@ class Series(object):
             self.resolution = 1
         else:
             self.resolution = resolution 
-        self.end_t =end_t + self.resolution
+        self.end_t = end_t + self.resolution
         self.series = dict()
 
         self.stats_ready = False  # flag
@@ -109,6 +110,20 @@ class Series(object):
         
         self.stats_ready = False
 
+    def get_sample(self,t):
+        """
+        t: sample epoch time
+        returns  utc_date, value pair  - if sample exists
+                 None, None - if there is no sample at that time
+        """
+        # XXX raise exception if t not within time boundaries of series
+        
+        if self.series.has_key(t):
+            value = self.series[t] * self.scale_factor
+            utc_date = datetime.utcfromtimestamp(t)
+            return utc_date, value
+        else:
+            return None, None
 
     def __refresh_stats(self):
         """ triggers (re-)computation of  statistics. """
@@ -287,16 +302,18 @@ class Series(object):
         if not ref_dates:
             series_dates.sort()
             for k in series_dates:
+                val = series[k] * self.scale_factor
                 if str:
-                    str += ',%0.2f' % series[k]
+                    str += ',%0.2f' % val
                 else:
-                    str = '%0.2f' % series[k]
+                    str = '%0.2f' % val
 
         else:
             ref_dates.sort()
             for k in ref_dates:
                 if series.has_key(k):
-                    val = '%0.2f' % series[k]
+                    val_  = series[k] * self.scale_factor
+                    val = '%0.2f' % val_
                 else:
                     val = '_'
                 if str:
