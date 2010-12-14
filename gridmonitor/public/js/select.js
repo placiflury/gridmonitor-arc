@@ -79,3 +79,45 @@ function showUserClusters(access_type) {
 } 
 
 
+function showTable(display_type) {
+    var allElems = document.getElementsByTagName('*');
+
+    for (var i = 0; i < allElems.length; i++) {
+        var el= allElems[i];
+
+        if (!(el.className) ||  !(el.className == 'table_absolute' || el.className == 'table_site_ratio' || el.className == 'table_vo_ratio')){
+            continue;
+        }
+        if (display_type == 'absolute'){
+            if (el.className == "table_site_ratio" || el.className == 'table_vo_ratio'){
+                el.style.display = 'none'; 
+                continue;
+            }
+            if (el.className =='table_absolute'){
+                el.style.display='';
+                continue;
+            }
+        }
+        if (display_type == 'site_ratio'){
+            if (el.className == "table_absolute" || el.className == 'table_vo_ratio'){
+                el.style.display = 'none'; 
+                continue;
+            }
+            if (el.className =='table_site_ratio'){
+                el.style.display='';
+                continue;
+            }
+        }
+        if (display_type == 'vo_ratio'){
+            if (el.className == "table_absolute" || el.className == 'table_site_ratio'){
+                el.style.display = 'none'; 
+                continue;
+            }
+            if (el.className =='table_vo_ratio'){
+                el.style.display='';
+            }
+        }
+   }      
+} 
+
+

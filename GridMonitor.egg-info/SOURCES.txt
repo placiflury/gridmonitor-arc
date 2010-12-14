@@ -216,6 +216,7 @@ gridmonitor/public/img/korn_bg.jpg
 gridmonitor/public/img/logo.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
+gridmonitor/public/js/.select.js.swp
 gridmonitor/public/js/pop.js
 gridmonitor/public/js/select.js
 gridmonitor/public/js/wz_jsgraphics.js
@@ -262,7 +263,11 @@ gridmonitor/templates/derived/gridadmin/sfts/nochange.html
 gridmonitor/templates/derived/gridadmin/sfts/results.html
 gridmonitor/templates/derived/gridadmin/sfts/sft.html
 gridmonitor/templates/derived/gridadmin/sfts/show_details.html
+gridmonitor/templates/derived/gridadmin/statistics/.form.html.swp
+gridmonitor/templates/derived/gridadmin/statistics/form.html
 gridmonitor/templates/derived/gridadmin/statistics/index.html
+gridmonitor/templates/derived/gridadmin/statistics/rrd.html
+gridmonitor/templates/derived/gridadmin/statistics/votables.html
 gridmonitor/templates/derived/gridadmin/testjobs/form.html
 gridmonitor/templates/derived/gridadmin/testjobs/index.html
 gridmonitor/templates/derived/gridadmin/testjobs/test.html
@@ -281,10 +286,7 @@ gridmonitor/templates/derived/siteadmin/jobs/index.html
 gridmonitor/templates/derived/siteadmin/overview/core.html
 gridmonitor/templates/derived/siteadmin/overview/index.html
 gridmonitor/templates/derived/siteadmin/overview/report.html
-gridmonitor/templates/derived/siteadmin/statistics/.form.html.swp
 gridmonitor/templates/derived/siteadmin/statistics/form.html
-gridmonitor/templates/derived/siteadmin/statistics/form.html.T
-gridmonitor/templates/derived/siteadmin/statistics/index.html
 gridmonitor/templates/derived/siteadmin/testjobs/index.html
 gridmonitor/templates/derived/siteadmin/users/index.html
 gridmonitor/templates/derived/siteadmin/vos/index.html

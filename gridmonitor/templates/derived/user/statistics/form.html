@@ -115,7 +115,7 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
 
 %if c.table_only:
     <table border=1 width='750'>
-    <tr class="table_head2"> 
+    <tr class="table_head"> 
         <th>Date/Time</th>
         % for k in sks:
             <th> ${series_display_name[k]}</th>
@@ -204,7 +204,7 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
 %else:
     %if c.series:
         <table>
-        <tr class="table_head2"> 
+        <tr class="table_head"> 
         <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
         
         %for i  in xrange(0,len(sks),2):

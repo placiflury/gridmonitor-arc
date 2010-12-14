@@ -297,12 +297,12 @@ class Series(object):
         str  = None
 
         series_dates = self.get_series().keys()
-        series = self.get_series()
+        series = self.get_series() 
 
         if not ref_dates:
             series_dates.sort()
             for k in series_dates:
-                val = series[k] * self.scale_factor
+                val = series[k] 
                 if str:
                     str += ',%0.2f' % val
                 else:
@@ -312,8 +312,7 @@ class Series(object):
             ref_dates.sort()
             for k in ref_dates:
                 if series.has_key(k):
-                    val_  = series[k] * self.scale_factor
-                    val = '%0.2f' % val_
+                    val = '%0.2f' % series[k]
                 else:
                     val = '_'
                 if str:
@@ -337,7 +336,6 @@ if __name__ == '__main__':
     ser.add_sample(127, Decimal('0'))
     ser.add_sample(124, Decimal('0'))
     ser.add_sample(133, Decimal('0'))
-    """ 
     ser.add_sample(124, Decimal('4'))
     ser.add_sample(125, Decimal('12'))
     ser.add_sample(128, Decimal('11'))
@@ -356,7 +354,6 @@ if __name__ == '__main__':
     ser2.add_sample(128, Decimal(7))
     
     ser.merge(ser2)
-    """
     print 'min',  ser.get_min()
     print 'max', ser.get_max()
     print 'median', ser.get_median()
@@ -372,7 +369,6 @@ if __name__ == '__main__':
     ser.set_scaling_factor(Decimal(1)/Decimal(60))
     print ser.get_series2str()
     
-    """
     dates = range(120,234,1)
     ser.set_scaling_factor('0.5')
     print 'min',  ser.get_min()
@@ -390,4 +386,3 @@ if __name__ == '__main__':
     ser.set_scaling_factor('0.5')
     print ser.get_series()
     print ser.get_series2str(dates)
-   """

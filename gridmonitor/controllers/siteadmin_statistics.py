@@ -9,7 +9,6 @@ from siteadmin import SiteadminController
 
 
 from sgasaggregator.utils import helpers 
-from sgasaggregator.sgascache import session as sgascache_session
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +39,8 @@ class SiteadminStatisticsController(SiteadminController):
                 series[cluster]['B_major_page_faults'] = Series('major_page_faults',start_t, end_t,resolution)
                 series[cluster]['C_cpu_duration'] = Series('cpu_duration',start_t, end_t,resolution)
                 series[cluster]['D_wall_duration'] = Series('wall_duration',start_t, end_t,resolution)
+                series[cluster]['C_cpu_duration'].set_scaling_factor(SCALING_FACTOR)
+                series[cluster]['D_wall_duration'].set_scaling_factor(SCALING_FACTOR)
             c.n_jobs_page_faults = True
             c.cpu_wall_duration = True
         else: 

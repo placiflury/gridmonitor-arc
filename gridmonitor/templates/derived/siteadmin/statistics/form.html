@@ -59,13 +59,8 @@ SELECTED
 %endif
 /> 
 4 weeks </option>
-                     <option value="0"
-%if c.resolution == 0:
-SELECTED
-%endif
-/> No sampling </option>
-                </select>
-            <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+</select>
+<span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </div>
         </div>
     </div>
@@ -135,7 +130,7 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
     <table border=1 width='750'>
     <% columns = len(sks) + 1 %> 
     % for cluster in c.clusters:
-    <tr class="table_head2"> 
+    <tr class="table_head"> 
         <th>Date/Time</th>
         % for k in sks:
             <th> ${series_display_name[k]}</th>
@@ -228,7 +223,7 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
 %else:  
     %if c.series:
         <table>
-        <tr> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
+        <tr class="table_head"> <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
         %for cluster in c.clusters:
           %for i in xrange(0,len(sks),2):
             <%

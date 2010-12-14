@@ -6,8 +6,8 @@ from decimal import Decimal
 from gridmonitor.lib.base import *
 from gridmonitor.model.statistics.series import Series
 from user import UserController 
+
 from sgasaggregator.utils import helpers 
-from sgasaggregator.sgascache import session as sgascache_session
 
 log = logging.getLogger(__name__)
 
@@ -175,14 +175,6 @@ class UserStatisticsController(UserController):
                 d2.day, d2.month, d2.year%100,
                 d3.day, d3.month, d3.year%100, 
                 d4.day, d4.month, d4.year%100)
-
-        return render('/derived/user/statistics/form.html')
-
-
-
-    def test(self):
-        c.title = "Selection of statistics."
-        c.menu_active = "Statistics about my Jobs"
 
         return render('/derived/user/statistics/form.html')
 

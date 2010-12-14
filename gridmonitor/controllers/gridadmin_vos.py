@@ -9,20 +9,13 @@ from gridadmin import GridadminController
 
 from gridmonitor.model.statistics.series import Series
 
-from sgas.db import sgas_meta
-from sgas.db import ag_schema # schema of tables of aggregated usage record 
-from sgas.utils import helpers
+from sgasaggregator.sgascache import session as sgascache_session
+from sgasaggregator.sgascache import ag_schema
+from sgasaggregator.utils import helpers
 
 log = logging.getLogger(__name__)
 
 class GridadminVosController(GridadminController):
-    def __compare(self,a,b):
-        if len(a) > len(b):
-            return 1
-        elif len(a) < len(b):
-            return -1
-        else:
-            return 0
 
     def index(self):
 	
@@ -36,29 +29,38 @@ class GridadminVosController(GridadminController):
 
         # XXX allow more resolutions
         # and allow for several days  
-        now = int(time.time())
-        start_t_epoch = now - (now % resolution)
-        end_t_epoch = now
         
+        
+        _end_t= int(time.time())  # now
+        _start_t = _end_t - resolution  
+            
+        start_t_epoch, end_t_epoch = helpers.get_sampling_interval(_start_t,_end_t, resolution)
+
         start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t_epoch))
-        end_t_str = time.strftime("%d.%m.%Y", time.gmtime(now))
+        end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t_epoch))
 
         log.debug("VO usage statistics from %s to %s (UTC)" % (start_t_str, end_t_str))
+
+        # get VO names
+        vos = list()
+        for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
+            vos.append(arec.vo_name)
+
         
-        for vo in  sgas_meta.Session.query(ag_schema.ReducedVoInfo).all():
-            if not vo.vo_name:
-                vo_name = '-- no VO --'
+        for vo in vos:
+            if not vo:
+                vo_name = ' -- No VO --'
             else:
-                vo_name = vo.vo_name
+                vo_name = vo
+
             series[vo_name] = dict()
             series[vo_name]['n_jobs'] = Series('n_jobs', start_t_epoch, end_t_epoch, resolution)
             series[vo_name]['wall_duration'] = Series('wall_duration', start_t_epoch, end_t_epoch, resolution)
        
-            vo_id = vo.id
-            for rec in sgas_meta.Session.query(ag_schema.Vo).filter(and_(
+            for rec in sgascache_session.Session.query(ag_schema.Vo).filter(and_(
                 ag_schema.Vo.t_epoch >= start_t_epoch,
                 ag_schema.Vo.t_epoch < end_t_epoch,
-                ag_schema.Vo.vo_id == vo_id,
+                ag_schema.Vo.vo_name == vo,
                 ag_schema.Vo.resolution == resolution)):
            
                 series[vo_name]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
@@ -112,35 +114,36 @@ class GridadminVosController(GridadminController):
         
         resolution = 86400
         series = dict()
-
-        # XXX allow more resolutions
-        # and allow for several days  
-        now = int(time.time())
-        start_t_epoch = now - (now % resolution)
-        end_t_epoch = now
         
+        _end_t= int(time.time())  # now
+        _start_t = _end_t - resolution  
+            
+        start_t_epoch, end_t_epoch = helpers.get_sampling_interval(_start_t,_end_t, resolution)
+
         start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t_epoch))
-        end_t_str = time.strftime("%d.%m.%Y", time.gmtime(now))
-
-        log.debug("VO usage statistics from %s to %s (UTC) for %s" % (start_t_str, end_t_str, hostname))
-
-        m_id = helpers.get_cluster_id(hostname)
+        end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t_epoch))
         
-        for vo in  sgas_meta.Session.query(ag_schema.ReducedVoInfo).all():
-            if not vo.vo_name:
-                vo_name = '-- no VO --'
+        # get VO names
+        vos = list()
+        for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
+            vos.append(arec.vo_name)
+
+        
+        for vo in vos:
+            if not vo:
+                vo_name = ' -- No VO --'
             else:
-                vo_name = vo.vo_name
+                vo_name = vo
+        
             series[vo_name] = dict()
             series[vo_name]['n_jobs'] = Series('n_jobs', start_t_epoch, end_t_epoch, resolution)
             series[vo_name]['wall_duration'] = Series('wall_duration', start_t_epoch, end_t_epoch, resolution)
        
-            vo_id = vo.id
-            for rec in sgas_meta.Session.query(ag_schema.VoMachine).filter(and_(
+            for rec in sgascache_session.Session.query(ag_schema.VoMachine).filter(and_(
                 ag_schema.VoMachine.t_epoch >= start_t_epoch,
                 ag_schema.VoMachine.t_epoch < end_t_epoch,
-                ag_schema.VoMachine.vo_id == vo_id,
-                ag_schema.VoMachine.m_id == m_id,
+                ag_schema.VoMachine.vo_name == vo,
+                ag_schema.VoMachine.machine_name == hostname,
                 ag_schema.VoMachine.resolution == resolution)):
            
                 series[vo_name]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)

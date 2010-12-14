@@ -52,6 +52,8 @@ class GridadminController(BaseController):
                     vo_cluster_queues.append((name, vo_path + '/' + h.str_cannonize(name)))
             c.cluster_menu.append((cluster_display_name,cluster_path, cluster_queues))
             vo_menu.append((cluster_display_name, vo_path))
+
+
         log.debug("finished building up cluster menu...\n %r" % c.cluster_menu)
  
 
@@ -61,6 +63,9 @@ class GridadminController(BaseController):
         infosys_intervals = [('last 24 hours', '/gridadmin/infosys/show/h24'),
                     ('last week', '/gridadmin/infosys/show/w1'),
                     ('last year', '/gridadmin/infosys/show/y1')]
+        
+        statistics_menu =[('RRD Plots', '/gridadmin/statistics/rrd'),
+            ('Usage Tables', '/gridadmin/statistics/sgas')]
         
         sfts = list()
         for sft in  sft_meta.Session.query(sft_schema.SFTTest).all():
@@ -74,7 +79,7 @@ class GridadminController(BaseController):
                 ('Clusters','/gridadmin/clusters', c.cluster_menu),
                 ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals),
                 ('VO Usage', '/gridadmin/vos', vo_menu),
-                ('Grid Statistics', '/gridadmin/statistics'),
+                ('Grid Statistics', '/gridadmin/statistics', statistics_menu),
                 ('SFTs', '/gridadmin/sfts', sfts),
                 ('SFTs User', '/gridadmin/sfts/user_mgnt'),
                 ('Nagios', nagios_server_url)]
