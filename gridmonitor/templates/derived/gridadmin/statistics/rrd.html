@@ -1,0 +1,38 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<h3> Statistics about Grid Jobs </h3>
+
+<table>
+    <tr  class="table_row_emph"> <th>Last 24  Hours </th></tr>
+    <tr> 
+        <td>
+        <img src="/rrd/grid_final_jobsnj_h24.png" alt="Number of Jobs in final state (last 24 hours)">    
+        </td>
+    <tr>
+        <td>
+        <img src="/rrd/grid_final_jobswj_h24.png" alt="Walltime of Jobs in final state (last 24 hours)">    
+        </td>
+    </tr>
+    <tr class="table_row_emph"> <th> Last week </th> </tr>
+    <tr>
+        <td>
+            <img src="/rrd/grid_final_jobsnj_w1.png" alt="Number of Jobs in final state (last week)">    
+        </td>
+    </tr>
+    <tr>  
+        <td>
+            <img src="/rrd/grid_final_jobswj_w1.png" alt="Walltime of Jobs in final state (last week)">    
+        </td>
+    </tr>
+    <tr class="table_row_emph"> <th >Last Year </th> </tr>
+    <tr> 
+        <td>
+            <img src="/rrd/grid_final_jobsnj_y1.png" alt="Number of Jobs in final state (last year)">    
+        </td>
+    </tr>
+    <tr> 
+        <td>
+        <img src="/rrd/grid_final_jobswj_y1.png" alt="Walltime of Jobs in final state (last year)">    
+        </td>
+    </tr>
+</table>

@@ -4,11 +4,9 @@ from gridmonitor.model.acl import *
 from gridmonitor.model.acl.name_mapping import *
 import simplejson as json
 
-
 log = logging.getLogger(__name__)
 
 class MonadminController(BaseController):
-    
 
     def __init__(self):
         self.admin = None

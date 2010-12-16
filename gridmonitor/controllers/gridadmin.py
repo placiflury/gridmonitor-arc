@@ -2,6 +2,7 @@ from sft.db import sft_meta
 from sft.db import sft_schema
 
 from gridmonitor.lib.base import *
+from gridmonitor.model.acl import *
 from gridmonitor.controllers.user import UserController
 
 log = logging.getLogger(__name__)
@@ -9,13 +10,23 @@ log = logging.getLogger(__name__)
 class GridadminController(BaseController):
     
     def __init__(self):
+        self.admin = None
+        self.authorized = False
 
-        # authorization and mapping
-        # info about user  XXX finish ACL implementation 
         self.__before__() # call base class for authentication info
         c.user_name = session['user_name']
         c.user_surname = session['user_surname']
         
+        if session.has_key('user_unique_id'):
+            user_unique_id = session['user_unique_id']
+            db_session = meta.Session()
+            admins_pool = handler.AdminsPool(db_session)
+        
+            sites = admins_pool.list_admin_sites(user_unique_id)
+            if sites:  # XXX we may want to extend this in the future
+                self.authorized = True 
+            
+            
         nagios_server = config['nagios']
         if nagios_server == 'localhost':
             nagios_server_url = '/nagios'
@@ -77,12 +88,13 @@ class GridadminController(BaseController):
         c.top_nav= session['top_nav_bar']
         c.menu = [('Overview', '/gridadmin/overview', overview),
                 ('Clusters','/gridadmin/clusters', c.cluster_menu),
-                ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals),
-                ('VO Usage', '/gridadmin/vos', vo_menu),
-                ('Grid Statistics', '/gridadmin/statistics', statistics_menu),
-                ('SFTs', '/gridadmin/sfts', sfts),
-                ('SFTs User', '/gridadmin/sfts/user_mgnt'),
-                ('Nagios', nagios_server_url)]
+                ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals)]
+        
+        if self.authorized:
+                c.menu.append(('Grid Statistics', '/gridadmin/statistics', statistics_menu))
+        c.menu.append(('SFTs', '/gridadmin/sfts', sfts))
+        c.menu.append(('SFTs User', '/gridadmin/sfts/user_mgnt'))
+        c.menu.append(('Nagios', nagios_server_url))
 
         c.top_nav_active="VO/Grid Admin"
 

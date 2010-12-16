@@ -1,0 +1,487 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<!--begin custom header content for this example-->
+<style type="text/css">
+#fromContainer { display:none; position:absolute; left:327px; top:5px; z-index:2}
+#toContainer { display:none; position:absolute; left:327px; top:245px; z-index:1}
+#inlinetable {width:240px}
+.cell_left {text-align:right; float:left; width:5em;}
+.cell_right {text-align:left; float:left;}
+</style>
+
+%if c.form_error:
+    <p>
+    <b style='color:red;'> Form error: ${c.form_error}</b></br>
+</p>
+
+%endif
+
+<form name="get_gridadmin_stats" method="post" action="/gridadmin/statistics/sgas">
+<table border=1 width='750'>
+<tr class="table_head2"> 
+    <th>Time Intervall and Resolution</th>
+    <th>Display Selection </th>
+</tr>
+<tr>
+    <td rowspan=2>
+    <div id="inlinetable">
+        <div> 
+            <div class="cell_left"> From: </div>
+            <div class="cell_right"> 
+                <input id='start_t_from' type="text" name='start_t_str' size='8'value="${c.start_t_str}"/>  
+                <button id="fromBtn" type="button">change</button>
+                <div id="fromContainer" style='display:none'></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> To: </div>
+            <div class="cell_right"> 
+                <input id='end_t' type="text" name='end_t_str' size='8'value="${c.end_t_str}"/>
+                <button id="toBtn" type="button">change</button>
+                <div id="toContainer"></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> Resolution:</div>
+            <div class="cell_right"> 
+                <select name="resolution" size="1">
+                     <option value="86400"> 1 day </option>
+                     <option value="604800" 
+
+%if c.resolution == 604800:
+SELECTED
+%endif
+/> 1 week </option>
+                     <option value="2419200"
+%if c.resolution == 2419200:
+SELECTED
+%endif
+/> 
+4 weeks </option>
+</select>
+            <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+        </div>
+    </div>
+    </td>
+
+    <td>
+    <input type="radio" name="plotORtable" value="plot" 
+    % if c.plot:
+    checked
+    %endif
+    />
+            Plots <br/>
+    <input type="radio" name="plotORtable" value="table"
+    % if c.table:
+    checked
+    %endif
+    />
+            Table(s) <br/>
+    </td>
+</tr>
+<tr>
+<td> <input type="submit" value="Fetch Statistics"></td>
+</tr>
+</table>
+</form>
+
+<!-- DISPLAY STARTING HERE -->
+% if c.table:
+<h3> Usage Valued Display Choice </h3>
+<ul>
+<li> <span class="table_absolute" style="display:''"> &rArr; </span><a href="javascript:showTable('absolute')">Absolute Usage Values</a> 
+        </li> 
+<li><span class="table_site_ratio" style="display:none">&rArr; </span><a href="javascript:showTable('site_ratio')">Cluster Usage Distribution (ratio per cluster)</a> 
+        </li>
+<li><span class="table_vo_ratio" style="display:none">&rArr; </span><a href="javascript:showTable('vo_ratio')">VO Usage Distribution (ratio per VO)</a> 
+        </li>
+</ul>
+
+<% 
+if not c.vo_series:
+    vks = None
+else:
+    vks = c.vo_series.keys()
+    vks.sort()
+
+if not c.vo_cluster_series:
+    cks = None
+else:
+    cks = c.vo_cluster_series.keys()
+    cks.sort()
+%>
+
+<table width=950>
+<tr class="table_head"> 
+    <th rowspan=2> Cluster\VO </th>
+
+    % for vo in vks:
+        %if not vo:
+            <th colspan=2> -- No VO -- </th>
+        %else:
+            <th colspan=2> ${vo}</th>
+        %endif  
+    %endfor
+    <th colspan=2> Total </th>
+</tr>
+
+<tr class="table_head"> 
+    % for i in xrange(0, len(vks)+1):
+            <th > # jobs</th>
+            <th > walltime [hours]</th>
+    %endfor
+</tr>
+
+<% 
+table_row_odd = False
+%> 
+%for hostname in cks:
+% if table_row_odd:
+    <tr class="table_row_odd">
+    <% table_row_odd = False %> 
+% else:
+    <tr>
+    <% table_row_odd = True %> 
+% endif
+
+<%
+tot_jobs = 0
+tot_wall = 0
+%>
+    <td>${c.cluster_map[hostname]}<br/>
+        (${hostname}) 
+    </td> 
+
+   
+     % for vo in vks:
+        <% 
+        js = c.vo_cluster_series[hostname][vo]['n_jobs']
+        wd = c.vo_cluster_series[hostname][vo]['wall_duration']
+    
+        vo_js = c.vo_series[vo]['n_jobs']
+        vo_wd = c.vo_series[vo]['wall_duration']
+        hst_js = c.cluster_series[hostname]['n_jobs']
+        hst_wd = c.cluster_series[hostname]['wall_duration']
+
+        jobs = 0
+        wall = 0
+        vo_js_ratio = 0
+        hst_js_ratio = 0
+        d_jobs = ''
+        f_wall = ''
+        p_hst_js_ratio = ''
+        p_hst_wd_ratio= ''
+        p_vo_js_ratio = ''
+        p_vo_wd_ratio= ''
+        if js:
+            jobs = js.get_sum() 
+            tot_jobs += jobs
+            vo_js_sum = vo_js.get_sum()
+            hst_js_sum = hst_js.get_sum()
+            if vo_js_sum:
+                vo_js_ratio = jobs / vo_js_sum * 100
+            if hst_js_sum:
+                hst_js_ratio = jobs / hst_js_sum * 100
+        if wd:
+            wall = wd.get_sum()
+            tot_wall += wall 
+            vo_wd_sum = vo_wd.get_sum()
+            hst_wd_sum = hst_wd.get_sum()
+            if vo_wd_sum:
+                vo_wd_ratio = wall/ vo_wd_sum * 100
+            if hst_wd_sum:
+                hst_wd_ratio = wall / hst_wd_sum * 100
+        
+        if jobs:
+            d_jobs = "%d" % jobs
+            p_vo_js_ratio = "%0.2f" % vo_js_ratio
+            p_hst_js_ratio = "%0.2f" % hst_js_ratio
+        if wall:
+            f_wall = "%0.2f" % wall
+            p_vo_wd_ratio = "%0.2f" % vo_wd_ratio
+            p_hst_wd_ratio = "%0.2f" % hst_wd_ratio
+        %>
+        <td> 
+        % if d_jobs:
+            <div class="table_absolute" style="display:''">${d_jobs} </div>
+            <div class="table_site_ratio" style="display:none">${p_hst_js_ratio}% </div>
+            <div class="table_vo_ratio" style="display:none">${p_vo_js_ratio}%</div>
+        % endif
+        </td>
+        <td> 
+        % if f_wall:
+            <div class="table_absolute" style="display:''">${f_wall} </div>
+            <div class="table_site_ratio" style="display:none">${p_hst_wd_ratio}% </div>
+            <div class="table_vo_ratio" style="display:none">${p_vo_wd_ratio}%</div>
+        % endif
+    %endfor
+        <% 
+        d_tot_jobs = "%d" % tot_jobs
+        p_tot_jobs_ratio = ''
+        f_tot_wall = "%0.2f" % tot_wall
+        p_tot_wall_ratio = ''
+
+        if tot_jobs:
+            tot_jobs_ratio = tot_jobs / c.tot_n_jobs * 100
+            p_tot_jobs_ratio = "%0.2f" % tot_jobs_ratio
+
+        if f_tot_wall:
+            tot_wall_ratio = tot_wall / c.tot_wall * 100
+            p_tot_wall_ratio = "%0.2f" % tot_wall_ratio
+
+        %>
+        <td class="table_cell_emph"> 
+        % if tot_jobs > 0:
+            <div class="table_absolute" style="display:''">${d_tot_jobs} </div>
+            <div class="table_site_ratio" style="display:none">${p_tot_jobs_ratio}% </div>
+            <div class="table_vo_ratio" style="display:none">${p_tot_jobs_ratio}%</div>
+        % endif
+        </td>
+        <td class="table_cell_emph"> 
+        % if tot_wall > 0:
+            <div class="table_absolute" style="display:''">${f_tot_wall} </div>
+            <div class="table_site_ratio" style="display:none">${p_tot_wall_ratio}% </div>
+            <div class="table_vo_ratio" style="display:none">${p_tot_wall_ratio}%</div>
+
+        % endif
+        </td>
+
+</tr>      
+%endfor
+<!-- sum-up -->
+<tr style="border-top-style: double;" class="table_row_emph">
+<td> Total </td>
+<%
+tot_jobs = 0
+tot_wall = 0
+%>
+
+% for vo in vks:
+<%
+js = c.vo_series[vo]['n_jobs'] 
+wd = c.vo_series[vo]['wall_duration'] 
+jobs = 0
+wall = 0
+p_jobs_ratio = ''
+p_wall_ratio = ''
+if js:
+    jobs = js.get_sum() 
+    tot_jobs += jobs
+    if jobs > 0:
+        jobs_ratio = jobs / c.tot_n_jobs * 100
+        p_jobs_ratio = "%0.2f" % jobs_ratio
+if wd:
+    wall = wd.get_sum()
+    tot_wall += wall 
+    if wall > 0:
+        wall_ratio = wall / c.tot_wall * 100
+        p_wall_ratio = "%0.2f" % wall_ratio
+
+d_jobs = "%d" % jobs
+f_wall = "%0.2f" % wall
+%>
+<td> 
+    %if jobs > 0:
+        <div class="table_absolute" style="display:''">${d_jobs} </div>
+        <div class="table_site_ratio" style="display:none">${p_jobs_ratio}% </div>
+        <div class="table_vo_ratio" style="display:none">${p_jobs_ratio}%</div>
+    % endif 
+    </td>
+<td> 
+    % if wall > 0:
+        <div class="table_absolute" style="display:''">${f_wall} </div>
+        <div class="table_site_ratio" style="display:none">${p_wall_ratio}% </div>
+        <div class="table_vo_ratio" style="display:none">${p_wall_ratio}%</div>
+
+    % endif
+
+</td>
+% endfor
+
+<% 
+f_tot_jobs = "%d" % tot_jobs
+f_tot_wall = "%0.2f" % tot_wall
+p_x_jobs_check = ''
+p_x_wall_check = ''
+if tot_jobs:
+    tot_jobs_ratio = c.tot_n_jobs / tot_jobs * 100 
+    p_x_jobs_check = '%0.2f' % tot_jobs_ratio
+if tot_wall:
+    tot_wall_ratio = c.tot_wall / tot_wall * 100 
+    p_x_wall_check = '%0.2f' % tot_wall_ratio
+%>
+<td> 
+        <div class="table_absolute" style="display:''">${f_tot_jobs} </div>
+        <div class="table_site_ratio" style="display:none">${p_x_jobs_check}% </div>
+        <div class="table_vo_ratio" style="display:none">${p_x_jobs_check}%</div>
+</td>
+<td> 
+        <div class="table_absolute" style="display:''">${f_tot_wall} </div>
+        <div class="table_site_ratio" style="display:none">${p_x_wall_check}% </div>
+        <div class="table_vo_ratio" style="display:none">${p_x_wall_check}%</div>
+    </td>
+</tr>
+</table>
+
+<!-- c.tables -->
+% else:
+
+<%num = len(c.walltime_data) %>
+</p>
+<table width='${c.num_vos*55 + 125}' border="1">
+<tr class="table_head"><th> Overall 'current' Usage/VO </th>
+</tr>
+<tr><td>
+<! -- notice there is a limitation in the size a picture can take ... -->
+<%
+if c.walltime_max ==0:
+    c.walltime_max = 1
+if c.job_max == 0:
+    c.job_max = 1
+%>
+<img src="http://chart.apis.google.com/chart?
+chs=${c.num_vos*55 + 120}x300
+&amp;cht=bvg
+&amp;chco=FF9000,5D7CBA
+&amp;chxt=x,y,r
+&amp;chxl=0:${c.vo_labels}
+&amp;chd=t:${c.jobs_data}|${c.walltime_data}
+&amp;chds=0,${'%0.2f' % (c.job_max * 1.1)},0,${'%0.2f' %(c.walltime_max * 1.2)}
+&amp;chxr=2,0,${'%0.2f' %(c.walltime_max * 1.2)}|1,0,${'%02.f' % (c.job_max * 1.1)}
+&amp;chdl=jobs|walltime[hours]
+&amp;chdlp=t
+&amp;chm=N&nbsp;*c0*,FF9000,0,-1,11|N&nbsp;&nbsp;*c0*,5D7CBA,1,-1,11
+&amp;alt="Number of jobs and duration per VO."/>
+</td>
+</tr>
+</table>
+
+<table width='550' border="1">
+<tr class="table_head"><th> Overall 'current' Usage/Cluster </th>
+</tr>
+<tr><td>
+<! -- notice there is a limitation in the size a picture can take ... -->
+<%
+if c.walltime_max ==0:
+    c.walltime_max = 1
+if c.job_max == 0:
+    c.job_max = 1
+%>
+<img src="http://chart.apis.google.com/chart?
+chs=350x${c.num_clusters*55 +90}
+&amp;cht=bhg
+&amp;chco=FF9000,5D7CBA
+&amp;chxt=x,t,r
+&amp;chxl=2:${c.cl_labels}
+&amp;chd=t:${c.cl_jobs_data}|${c.cl_walltime_data}
+&amp;chds=0,${'%0.2f' % (c.cl_job_max * 1.3)},0,${'%0.2f' %(c.cl_walltime_max * 1.3)}
+&amp;chxr=0,0,${'%0.2f' %(c.cl_walltime_max * 1.3)}|1,0,${'%02.f' % (c.cl_job_max * 1.3)}
+&amp;chdl=jobs|walltime[hours]
+&amp;chdlp=t
+&amp;chm=N&nbsp;*c0*,FF9000,0,-1,11|N&nbsp;&nbsp;*c0*,5D7CBA,1,-1,11
+&amp;alt="Number of jobs and duration per Cluster."/>
+</td>
+</tr>
+</table>
+
+% endif  <!-- c.tables -->
+
+
+<!-- some YUI stuff -->
+<script type="text/javascript">
+    YAHOO.namespace("smscg.calendar");
+    var Dom = YAHOO.util.Dom
+    
+    var inEl = Dom.get('inlinetable')
+    
+    YAHOO.smscg.calendar.init = function() {
+    
+        function handleSelectFrom(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtfrom = document.getElementById("start_t_from");
+            txtfrom.value = day + "." + month + "." + year;
+        }
+        
+        function handleSelectTo(type,args,obj) {
+            var dates = args[0]; 
+            var date = dates[0];
+            var year = date[0], month = date[1], day = date[2];
+            
+            var txtto = document.getElementById("end_t");
+            txtto.value = day + "." + month + "." + year;
+        }
+        
+        function hideme(e) {
+            var el = YAHOO.util.Event.getTarget(e);
+            if (el != inEl && !Dom.isAncestor(inEl, el)) {
+                document.getElementById("fromContainer").style.display='none';
+                document.getElementById("toContainer").style.display='none';
+            }
+        }
+
+        YAHOO.util.Event.addListener(document, "click", hideme);
+
+
+        YAHOO.smscg.calendar.cal1 = new YAHOO.widget.Calendar("fromBtn","fromContainer", { 
+                                    title:"Starting from:", close:true});
+
+        // Correct formats for Germany: dd.mm.yyyy, dd.mm, mm.yyyy
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal1.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+
+        YAHOO.smscg.calendar.cal1.selectEvent.subscribe(handleSelectFrom, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.smscg.calendar.cal1.render();
+        
+        
+        YAHOO.smscg.calendar.cal2 = new YAHOO.widget.Calendar("toBtn","toContainer", { title:"Until:", close:true} );
+        
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
+
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_DAY_POSITION", 1);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_MONTH_POSITION", 2);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_YEAR_POSITION", 3);
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("mindate", '1.1.2009');
+        YAHOO.smscg.calendar.cal2.cfg.setProperty("maxdate", '${c.end_t_str_max}');
+
+        YAHOO.smscg.calendar.cal2.selectEvent.subscribe(handleSelectTo, YAHOO.smscg.calendar.cal2, true);
+        YAHOO.smscg.calendar.cal2.render();
+
+        // Listener to show the 1-up Calendar when the button is clicked
+        YAHOO.util.Event.addListener("fromBtn", "click", YAHOO.smscg.calendar.cal1.show, YAHOO.smscg.calendar.cal1, true);
+        YAHOO.util.Event.addListener("toBtn", "click", YAHOO.smscg.calendar.cal2.show, YAHOO.smscg.calendar.cal2, true);
+        
+        
+    }
+    YAHOO.util.Event.onDOMReady(YAHOO.smscg.calendar.init);
+    
+</script>
+<script type="text/javascript">
+    // Hide Calendar if we click anywhere in the document other than the calendar
+
+</script>
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/yui/build/fonts/fonts-min.css', 'screen')}
+    ${self.css_link('/css/yui/build/calendar/assets/skins/sam/calendar.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="/js/select.js"></script>
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
+    <script type="text/javascript" src="/js/yui//build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/build/calendar/calendar-min.js"></script>
+</%def>
+
+

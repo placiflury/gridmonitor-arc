@@ -216,7 +216,6 @@ gridmonitor/public/img/korn_bg.jpg
 gridmonitor/public/img/logo.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
-gridmonitor/public/js/.select.js.swp
 gridmonitor/public/js/pop.js
 gridmonitor/public/js/select.js
 gridmonitor/public/js/wz_jsgraphics.js
@@ -251,6 +250,7 @@ gridmonitor/templates/base/user.html
 gridmonitor/templates/components/jobstable.mako
 gridmonitor/templates/components/menu.mako
 gridmonitor/templates/components/votable.mako
+gridmonitor/templates/derived/gridadmin/error/access_denied.html
 gridmonitor/templates/derived/gridadmin/infosys/details.html
 gridmonitor/templates/derived/gridadmin/infosys/index.html
 gridmonitor/templates/derived/gridadmin/overview/index.html

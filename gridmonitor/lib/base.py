@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 class BaseController(WSGIController):
 
     requires_authN = True 
+    requires_authZ = False
 
     def __before__(self):
         """ Try to get user identity (weak authN), which is basically

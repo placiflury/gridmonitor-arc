@@ -1,0 +1,166 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<p>
+Below you can see the usage statistics of the last 100 days.
+</p>
+
+<% 
+if not c.vo_series:
+    vks = None
+else:
+    vks = c.vo_series.keys()
+    vks.sort()
+
+if not c.vo_cluster_series:
+    cks = None
+else:
+    cks = c.vo_cluster_series.keys()
+    cks.sort()
+%>
+
+<table width=950>
+<tr class="table_head"> 
+    <th rowspan=2> Cluster\VO </th>
+
+    % for vo in vks:
+        %if not vo:
+            <th colspan=2> -- No VO -- </th>
+        %else:
+            <th colspan=2> ${vo}</th>
+        %endif  
+    %endfor
+    <th colspan=2> Total </th>
+</tr>
+
+<tr class="table_head"> 
+    % for i in xrange(0, len(vks)+1):
+            <th > # jobs</th>
+            <th > walltime [hours]</th>
+    %endfor
+</tr>
+
+<% 
+table_row_odd = False
+%> 
+%for hostname in cks:
+% if table_row_odd:
+    <tr class="table_row_odd">
+    <% table_row_odd = False %> 
+% else:
+    <tr>
+    <% table_row_odd = True %> 
+% endif
+
+<%
+tot_jobs = 0
+tot_wall = 0
+%>
+    <td>${c.cluster_map[hostname]}<br/>
+        (${hostname}) 
+    </td> 
+
+   
+     % for vo in vks:
+        <% 
+        js = c.vo_cluster_series[hostname][vo]['n_jobs']
+        wd = c.vo_cluster_series[hostname][vo]['wall_duration']
+    
+        vo_js = c.vo_series[vo]['n_jobs']
+        vo_wd = c.vo_series[vo]['wall_duration']
+        hst_js = c.cluster_series[hostname]['n_jobs']
+        hst_wd = c.cluster_series[hostname]['wall_duration']
+
+        jobs = 0
+        wall = 0
+        vo_js_ratio = 0
+        hst_js_ratio = 0
+        d_jobs = ''
+        f_wall = ''
+        p_hst_js_ratio = ''
+        p_hst_wd_ratio= ''
+        p_vo_js_ratio = ''
+        p_vo_wd_ratio= ''
+        if js:
+            jobs = js.get_sum() 
+            tot_jobs += jobs
+            vo_js_sum = vo_js.get_sum()
+            hst_js_sum = hst_js.get_sum()
+            if vo_js_sum:
+                vo_js_ratio = jobs / vo_js_sum * 100
+            if hst_js_sum:
+                hst_js_ratio = jobs / hst_js_sum * 100
+        if wd:
+            wall = wd.get_sum()
+            tot_wall += wall 
+            vo_wd_sum = vo_wd.get_sum()
+            hst_wd_sum = hst_wd.get_sum()
+            if vo_wd_sum:
+                vo_wd_ratio = wall/ vo_wd_sum * 100
+            if hst_wd_sum:
+                hst_wd_ratio = wall / hst_wd_sum * 100
+        
+        if jobs:
+            d_jobs = "%d" % jobs
+            p_vo_js_ratio = "%0.2f" % vo_js_ratio
+            p_hst_js_ratio = "%0.2f" % hst_js_ratio
+        if wall:
+            f_wall = "%0.2f" % wall
+            p_vo_wd_ratio = "%0.2f" % vo_wd_ratio
+            p_hst_wd_ratio = "%0.2f" % hst_wd_ratio
+        %>
+        <td> 
+        % if d_jobs:
+            ${d_jobs} <br/>(${p_hst_js_ratio}%|${p_vo_js_ratio}%)
+        % endif
+        </td>
+        <td> 
+        % if f_wall:
+            ${f_wall} <br/> (${p_hst_wd_ratio}%|${p_vo_wd_ratio}%)</td>
+        % endif
+    %endfor
+        <% 
+        d_tot_jobs = "%d" % tot_jobs
+        f_tot_wall = "%0.2f" % tot_wall
+        %>
+        <td class="table_cell_emph"> ${d_tot_jobs}</td>
+        <td class="table_cell_emph"> ${f_tot_wall} </td>
+
+</tr>      
+%endfor
+<!-- sum-up -->
+<tr style="border-top-style: double;" class="table_row_emph">
+<td> Total </td>
+<%
+tot_jobs = 0
+tot_wall = 0
+%>
+
+% for vo in vks:
+<%
+js = c.vo_series[vo]['n_jobs'] 
+wd = c.vo_series[vo]['wall_duration'] 
+jobs = 0
+wall = 0
+if js:
+    jobs = js.get_sum() 
+    tot_jobs += jobs
+if wd:
+    wall = wd.get_sum()
+    tot_wall += wall 
+d_jobs = "%d" % jobs
+f_wall = "%0.2f" % wall
+%>
+<td> ${d_jobs}</td>
+<td> ${f_wall}</td>
+% endfor
+
+<% 
+f_tot_jobs = "%d" % tot_jobs
+f_tot_wall = "%0.2f" % tot_wall
+%>
+<td> ${f_tot_jobs}</td>
+<td> ${f_tot_wall}</td>
+</tr>
+
+
+</table>

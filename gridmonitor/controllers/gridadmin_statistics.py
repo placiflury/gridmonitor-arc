@@ -7,8 +7,8 @@ import calendar
 
 from gridmonitor.lib.base import *
 from gridadmin import GridadminController
-
 from gridmonitor.model.statistics.series import Series
+
 from sgasaggregator.sgascache import session as sgascache_session
 from sgasaggregator.sgascache import ag_schema
 from sgasaggregator.utils import helpers
@@ -27,7 +27,7 @@ class GridadminStatisticsController(GridadminController):
         c.blacklisted = meta.Session.query(ng_schema.Grisblacklist).all()
         c.giises = meta.Session.query(ng_schema.Giis).all()
         """
-
+        
         return render('/derived/gridadmin/statistics/index.html')
 
     def sgas(self):
@@ -37,7 +37,10 @@ class GridadminStatisticsController(GridadminController):
         
         c.title = "Monitoring System: VO/Grid Admin Statistics -- Usage Tables --"
         c.menu_active = "VO/Cluster Usage"
-        
+       
+        if not self.authorized:
+            return render('/derived/gridadmin/error/access_denied.html')
+ 
         resolution = 86400
         tot_n_jobs = 0 
         tot_wall = 0
@@ -76,7 +79,8 @@ class GridadminStatisticsController(GridadminController):
         if request.params.has_key('plotORtable') and request.params['plotORtable'] == 'plot':
             c.table = False
             c.plot = True
-            # get VO names
+
+            # PLOT 1 DATA: VO - plot (i.e. usage per VO)
             series = dict()
             vos = list()
             for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
@@ -108,7 +112,7 @@ class GridadminStatisticsController(GridadminController):
             walltime_max = 0
             job_max = 0
             c.num_vos = len(series.keys())
-            
+            rvos = list()
             for vo in series.keys():
                 njob = series[vo]['n_jobs'].get_sum()    
                 series[vo]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
@@ -120,7 +124,12 @@ class GridadminStatisticsController(GridadminController):
                     job_max = njob
                 walltime_data.append(wall)
                 jobs_data.append(njob)
+        
 
+            # vo names must be sorted in reverse order
+            rvos = series.keys()
+            rvos.reverse()
+            for vo in rvos:
                 vo_labels+="|"
                 vo_labels += vo
             
@@ -131,7 +140,62 @@ class GridadminStatisticsController(GridadminController):
             jobs_data.reverse()
             c.jobs_data = h.list2string(jobs_data)
             c.job_max = float(job_max)
+           
+
+            # PLOT 2 DATA:  cluster plot (i.e usage per cluster)
+            cluster_series = dict()
             
+            for cluster in c.cluster_menu:
+                hostname = cluster[1].split('/')[-1]
+                cluster_series[hostname] = dict()
+                cluster_series[hostname]['n_jobs'] = \
+                        Series('n_jobs', start_t, end_t, resolution)
+                cluster_series[hostname]['wall_duration'] = \
+                        Series('wall_duration', start_t, end_t, resolution)
+                cluster_series[hostname]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
+
+                for rec in sgascache_session.Session.query(ag_schema.Machine).filter(and_(
+                    ag_schema.Machine.t_epoch >= start_t,
+                    ag_schema.Machine.t_epoch < end_t,
+                    ag_schema.Machine.machine_name == hostname,
+                    ag_schema.Machine.resolution == resolution)):
+
+                    cluster_series[hostname]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
+                    cluster_series[hostname]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
+
+            # plot...
+            # XXX if number of clusters >= 14, we going to get problems with the size of the plot
+            # google charts, won't plot anymore -> break up in smaller plots
+            cl_walltime_max = 0
+            cl_job_max = 0
+            cl_walltime_data = list()
+            cl_jobs_data = list()
+            cl_labels = ''
+            
+            for cluster in cluster_series.keys():
+                njob = cluster_series[cluster]['n_jobs'].get_sum()    
+                cluster_series[cluster]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
+                wall = cluster_series[cluster]['wall_duration'].get_sum()
+                
+                if cl_walltime_max < wall:
+                    cl_walltime_max = wall
+                if cl_job_max < njob:
+                    cl_job_max = njob
+                cl_walltime_data.append(wall)
+                cl_jobs_data.append(njob)
+                
+                cl_labels+="|"
+                cl_labels += cluster
+
+            c.cl_labels = cl_labels
+            cl_walltime_data.reverse()
+            c.cl_walltime_data = h.list2string(cl_walltime_data)
+            c.cl_walltime_max = float(cl_walltime_max)
+            cl_jobs_data.reverse()
+            c.cl_jobs_data = h.list2string(cl_jobs_data)
+            c.cl_job_max = float(cl_job_max)
+            c.num_clusters = len(c.cluster_menu)
+ 
             return render('/derived/gridadmin/statistics/form.html')
 
         else:

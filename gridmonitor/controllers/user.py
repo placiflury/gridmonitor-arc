@@ -48,8 +48,7 @@ class UserController(BaseController):
         for state in job_states:
           jobs.append((state,'/user/jobs/show/%s' % state))		
         
-        overview = [('Core Services','/user/overview/core'),
-            ('Reports','/user/overview/reports')]
+        overview = [('Core Services','/user/overview/core')]
 
         c.top_nav= session['top_nav_bar']
 
