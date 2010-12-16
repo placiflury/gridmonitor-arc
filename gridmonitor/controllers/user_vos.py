@@ -42,4 +42,4 @@ class UserVosController(UserController):
         c.voms_connector = self.voms
         return render('/derived/user/vos/index.html')
  
-	 
+

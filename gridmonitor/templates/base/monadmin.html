@@ -1,4 +1,50 @@
 <%inherit file="/base/index.html"/>
+
+<%def name="js()" >
+	<script type="text/javascript">
+	// Prototypal Inheritance
+	if (typeof Object.create !== 'function') {
+	    Object.create = function (o) {
+	        function F() {}
+	        F.prototype = o;
+	        return new F();
+	    };
+	}
+
+	</script>
+	${parent.js_link('/js/jquery-1.4.4.min.js')}
+	${parent.js_link('/js/LC_prototypes.js')}
+	${parent.js()}
+	<script type="text/javascript">
+	## UI Controller:
+	var MA_UI_Controller = {
+		start_ui: null,
+		start_hid: null,
+		old_ui: null,
+		old_hid: null,
+		init: function() {
+			if (!(this.start_hid) && !(this.start_ui)) {
+				this.start_ui = $('#ui').find(':visible');
+				this.start_hid = $('#ui').find('[style*="display"]').filter(':hidden');
+			} else {
+				this.start_ui.show();
+				this.start_hid.hide();
+			}
+			this.set();
+		},
+		set: function() {
+			this.old_ui = $('#ui').find(':visible');
+			this.old_hid = $('#ui').find('[style*="display"]').filter(':hidden');
+		},
+		restore: function() {
+			this.old_ui.show();
+			this.old_hid.hide();
+		}
+	}
+	</script>
+	
+</%def>
+
 <%namespace name="menu_nav" file="/components/menu.mako"/>
 
 <script type="text/javascript">
@@ -8,7 +54,9 @@
 		hidedelay: 750,
 		lazyload: true});
     oMenu.render();
-    oMenu.show();});
+    oMenu.show();
+	${self.dom_ready()}
+	});
 </script>
 
 ${next.body()}
@@ -28,5 +76,10 @@ ${c.user_name} ${c.user_surname}
 
 <%def name="css()">
   ${parent.css()}
+  ${parent.css_link('/css/LC_prototypes.css', 'screen')}
 </%def>
+
+<%def name="dom_ready()" ></%def>
+
+
 

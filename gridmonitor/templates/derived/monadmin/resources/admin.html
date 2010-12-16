@@ -1,30 +1,22 @@
-<%inherit file="/base/monadmin_table.html"/>
+<%inherit file="/base/monadmin.html"/>
 
-<%def name="showUI()">\
-    <script type="text/javascript">$(document).ready(function() { showUI('start_resources_adm') })</script>
-</%def>\
+<%def name="dom_ready()" >\
+	var MA_adm_list = Object.create(ListController);
+	MA_adm_list.container = $('#MA_adm_list_container');
+	MA_adm_list.set_title('Admins:');
+	MA_adm_list.set_link('new', 'Add admin');
+	MA_adm_list.set_link('edit', 'Change admin');
+	MA_adm_list.set_link('del', 'Remove admin');
+	MA_adm_list.init('MA_adm_list', 'getadms');
+	var MA_adm_editor = Object.create(ListEditor);
+	MA_adm_editor.container = $('#MA_adm_editor_container');
+	MA_adm_editor.status_container = $('#MA_status');
+	MA_adm_editor.url = 'changeadm';
+	MA_adm_editor.click = true;
+	MA_adm_editor.init(MA_adm_list);
+	
+</%def>
 
-<%def name="list1_head()" >\
-    Admins
-</%def>\
-
-<%def name="list1_container()" >\
-    <% c.listOnChange = "changeRes(this,'admin','show')" %>
-    <% c.list = 'list1' %>
-    <%include file="/derived/monadmin/includes/getadms.mako" />
-</%def>\
-
-<%def name="list1_edit()" >\
-    <a class="edit_list" onclick="changeRes('select#admin_list','admin','new')" href="#">new admin</a><br>
-    <a class="edit_list" onclick="changeRes('select#admin_list','admin','edit')" href="#">edit admin</a><br>
-    <a class="edit_list" onclick="changeRes('select#admin_list','admin','del')" href="#">del admin</a>
-</%def>\
-
-<%def name="change_forms()" >\
-    
-</%def>\
-
-<%def name="status_code()" >\
-    
-</%def>\
-
+<div id="MA_adm_list_container"></div>
+<div id="MA_adm_editor_container"></div>
+<div id="MA_status"></div>

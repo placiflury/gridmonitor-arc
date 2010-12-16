@@ -1,54 +1,228 @@
-<%inherit file="/base/monadmin_table.html"/>
+<%inherit file="/base/monadmin.html"/>
 
-<%def name="showUI()">
-    <script type="text/javascript">$(document).ready(function() { showUI('start_acl') })</script>
+<%def name="dom_ready()" >\
+	## Initialization of the Controllers:
+	var MA_admin_list = Object.create(ListController);
+	MA_admin_list.container = $('#MA_admin_list_container');
+	MA_admin_list.set_title('Admins:');
+	MA_admin_list.init('MA_adm_list', '../resources/getadms');
+	var MA_admin_list_editor = Object.create(ListEditor);
+	MA_admin_list_editor.container = $('#MA_admin_editor_container');
+	MA_admin_list_editor.click = true;
+	MA_admin_list_editor.init(MA_admin_list);
+	
+	var MA_site_list = Object.create(ListController);
+	MA_site_list.container = $('#MA_site_list_container');
+	MA_site_list.multiple = true;
+	MA_site_list.click = false;
+	MA_site_list.set_title('Sites:');
+	MA_site_list.init('MA_site_list', '../resources/getsites');
+	MA_site_list.hide();
+	var MA_site_list_editor = Object.create(ListEditor);
+	MA_site_list_editor.container = $('#MA_site_editor_container');
+	MA_site_list_editor.hover = true;
+	MA_site_list_editor.flush_container = true;
+	MA_site_list_editor.init(MA_site_list);
+	
+	var MA_site_mapper = Object.create(ListMapper);
+	MA_site_mapper.init(MA_admin_list, MA_site_list);
+	
+	var MA_service_list = Object.create(ListControllerSub);
+	MA_service_list.container = $('#MA_service_list_container');
+	MA_service_list.multiple = true;
+	MA_service_list.click = false;
+	MA_service_list.set_title('Services:');
+	MA_service_list.set_link('exchange', 'edit access');
+	MA_service_list.set_link('save');
+	MA_service_list.links.find('#save').hide();
+	MA_service_list.set_link('cancel');
+	MA_service_list.links.find('#cancel').hide();
+	MA_service_list.init('MA_service_list', '../resources/getservices');
+	MA_service_list.hide();
+	var MA_service_list_editor = Object.create(ListEditor);
+	MA_service_list_editor.container = $('#MA_site_editor_container');
+	MA_service_list_editor.hover = true;
+	MA_service_list_editor.flush_container = true;
+	MA_service_list_editor.init(MA_service_list);
+	
+	var MA_service_mapper = Object.create(ListMapper);
+	MA_service_mapper.init(MA_admin_list, MA_service_list);
+	
+	var MA_site_list_inactive = Object.create(ListController);
+	MA_site_list_inactive.container = $('#MA_site_list_inactive_container');
+	MA_site_list_inactive.multiple = true;
+	MA_site_list_inactive.set_title('Inactive Sites:');
+	MA_site_list_inactive.init('MA_site_list', '../resources/getsites');
+	MA_site_list_inactive.hide();
+	var MA_site_list_inactive_editor = Object.create(ListEditor);
+	MA_site_list_inactive_editor.container = $('#MA_site_editor_container');
+	MA_site_list_inactive_editor.hover = true;
+	MA_site_list_inactive_editor.flush_container = true;
+	MA_site_list_inactive_editor.init(MA_site_list_inactive);
+	
+	var MA_site_mapper_inverse = Object.create(ListMapperInverse);
+	MA_site_mapper_inverse.init(MA_admin_list, MA_site_list_inactive);
+	
+	var MA_service_list_inactive = Object.create(ListControllerSub);
+	MA_service_list_inactive.container = $('#MA_service_list_inactive_container');
+	MA_service_list_inactive.multiple = true;
+	MA_service_list_inactive.set_title('Inactive services:');
+	MA_service_list_inactive.init('MA_service_list', '../resources/getservices');
+	MA_service_list_inactive.hide();
+	var MA_service_list_inactive_editor = Object.create(ListEditor);
+	MA_service_list_inactive_editor.container = $('#MA_site_editor_container');
+	MA_service_list_inactive_editor.hover = true;
+	MA_service_list_inactive_editor.flush_container = true;
+	MA_service_list_inactive_editor.init(MA_service_list_inactive);
+	
+	var MA_service_mapper_inverse = Object.create(ListMapperInverse);
+	MA_service_mapper_inverse.init(MA_admin_list, MA_service_list_inactive);
+	
+	var MA_site_list_exchanger = Object.create(ListExchanger);
+	MA_site_list_exchanger.init(MA_site_list, MA_site_list_inactive);
+	MA_site_list_exchanger.toggle(false);
+	var MA_service_list_exchanger = Object.create(ListExchangerSub);
+	MA_service_list_exchanger.init(MA_service_list, MA_service_list_inactive);
+	MA_service_list_exchanger.toggle(false);
+	$('#MA_exchange_ltr').click(function() {
+		MA_site_list_exchanger.ltr();
+		MA_service_list_exchanger.ltr();
+	});
+	$('#MA_exchange_rtl').click(function() {
+		MA_site_list_exchanger.rtl();
+		MA_service_list_exchanger.rtl();
+	});
+	$('#MA_exchange_links').hide();
+	
+	var MA_userinterface = Object.create(MA_UI_Controller);
+	MA_userinterface.init();
+	
+	## Functionality
+	var toggle_lock = function(container, force) {
+		$(container).css('z-index',function(index,value) {
+			if (force == false) {
+				return Math.abs(value);
+			} else if (force == true) {
+				return (-1) * Math.abs(value);
+			}
+			return value * (-1); 
+		});
+	}
+	var MA_lock = $('#MA_lock') .css('z-index', '-1')
+								.css('width', 1092)
+								.text(' ')
+								.css('height', $('#yui-main').height())
+								.css('top', $('#yui-main').css('top'));
+	$('#MA_site_list_container').css('z-index', '2');
+	$('#MA_service_list_container').css('z-index', '2');
+	$('#MA_admin_list_container').css('z-index', '2');
+	$('#MA_site_list_inactive_container').css('z-index', '2');
+	$('#MA_service_list_inactive_container').css('z-index', '2');
+	$('#ui').css('height', $('#yui-main').height());
+	
+	
+	MA_service_list.links.delegate('a#exchange', 'click', function() {
+		MA_site_list_exchanger.toggle(true);
+		MA_service_list_exchanger.toggle(true);
+		MA_site_list.click = true;
+		MA_service_list.click = true;
+		toggle_lock($('#MA_admin_list_container'), true);
+		MA_userinterface.set();
+		MA_site_list_inactive.show();
+		MA_service_list_inactive.show();
+		$('#MA_exchange_links').show();
+		MA_service_list.links.find('#exchange').hide();
+		MA_service_list.links.find('#save').show();
+		MA_service_list.links.find('#cancel').show();
+	});
+	MA_service_list.links.delegate('a#cancel', 'click', function() {
+		MA_site_mapper.map();
+		MA_service_mapper.map();
+		MA_site_mapper_inverse.map();
+		MA_service_mapper_inverse.map();
+		MA_site_list_exchanger.toggle(false);
+		MA_service_list_exchanger.toggle(false);
+		MA_site_list.click = false;
+		MA_service_list.click = false;
+		toggle_lock($('#MA_admin_list_container'), false);
+		MA_userinterface.restore();
+	});
+	MA_service_list.links.delegate('a#save', 'click', function() {
+		var site_diff = MA_site_list_exchanger.get_diff();
+		site_diff['source_id'] = 'MA_adm_list';
+		site_diff['target_id'] = 'MA_site_list';
+		site_diff['source'] = MA_admin_list.get_selected().data('info');
+		$.post(
+				'save',
+				site_diff,
+				function(data) {
+					MA_site_mapper.map();
+					MA_site_mapper_inverse.map();
+					var answer = data.split(';;;');
+					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
+					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
+					$('#MA_status').text(answer[1]);
+					$('#MA_status').fadeIn().delay(3000).fadeOut();
+				},
+				"text"
+		);
+		debug(site_diff)
+		
+		var service_diff = MA_service_list_exchanger.get_diff();
+		service_diff['source_id'] = 'MA_adm_list';
+		service_diff['target_id'] = 'MA_service_list';
+		service_diff['source'] = MA_admin_list.get_selected().data('info');
+		$.post(
+				'save',
+				service_diff,
+				function(data) {
+					MA_service_mapper.map();
+					MA_service_mapper_inverse.map();
+					var answer = data.split(';;;');
+					if (answer[0] == 'OK') { $('#MA_status2').attr('class', 'ok') }
+					else if (answer[0] == 'ERROR') { $('#MA_status2').attr('class', 'critical') }
+					$('#MA_status2').text(answer[1]);
+					$('#MA_status2').fadeIn().delay(3000).fadeOut();
+				},
+				"text"
+		);
+		debug(service_diff)
+		MA_site_list_exchanger.toggle(false);
+		MA_service_list_exchanger.toggle(false);
+		MA_site_list.click = false;
+		MA_service_list.click = false;
+		toggle_lock($('#MA_admin_list_container'), false);
+		MA_userinterface.restore();
+	});
+
+
+	
 </%def>
 
-<%def name="list1_head()" >
-    Admins
-</%def>
+<div id="MA_lock" style="position:absolute; background-color: #FFFFFF; opacity: 0.5; filter: alpha(opacity = 50);"></div>
 
-<%def name="list1_container()" >
-    <% c.listOnChange="map('/monadmin/acl/map_sitoadm/', '#admin_list', '#list2_container', 'map', true);changeRes(this,'admin','show')" %>
-    <% c.list = 'list1' %>
-    <%include file="/derived/monadmin/includes/getadms.mako" />
-</%def>
+<div id="ui">
+	<div id="MA_admin_list_container" style="position:relative;"></div>
+	<div style="float:left;">
+		<div id="MA_site_list_container" style="position:relative;"></div>
+		<div id="MA_service_list_container" style="position:relative; clear:both;"></div>
+	</div>
+	<div id="MA_exchange_links" style="position:relative;">
+		<div id="MA_exchange_rtl" style="position:relative; top:250px;">&larr;</div>
+		<div id="MA_exchange_ltr" style="position:relative; top:250px;">&rarr;</div>
+	</div>
+	<div style="float:left;">
+		<div id="MA_site_list_inactive_container" style="position:relative;"></div>
+		<div id="MA_service_list_inactive_container" style="position:relative; clear:both;"></div>
+	</div>
+	<div id="MA_editor_container" style="position:relative;">
+		<div id="MA_admin_editor_container" style="position:relative;"></div>
+		<p>&nbsp;</p>
+		<div id="MA_site_editor_container" style="position:relative;"></div>
+	</div>
+</div>
 
-<%def name="list1_edit()" >
-</%def>
+<div id="MA_status" style="display:none;"></div>
+<div id="MA_status2" style="display:none;"></div>
 
-<%def name="list2_head()" >
-    Sites
-</%def>
 
-<%def name="list2_container()" >
-</%def>
-
-<%def name="list2_edit()" >
-    <a class="edit_list" onclick="editAdmAcs()" href="#" id="editAdmAcsClk">edit admin access</a><br>
-    <input type="submit" value="save" id="save_sitoadm">
-</%def>
-
-<%def name="list3_head()" >
-    Sites
-</%def>
-
-<%def name="list3_up_container()" >
-</%def>
-
-<%def name="list3_middle()" >
-</%def>
-
-<%def name="list3_down_container()" >
-</%def>
-
-<%def name="list3_edit()" >
-</%def>
-
-<%def name="change_forms()" >
-    
-</%def>
-
-<%def name="status_code()" >
-    
-</%def>

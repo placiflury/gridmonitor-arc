@@ -5,6 +5,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <% self.seen_css = set() %>
+	<% self.seen_js = set() %>
     <title>${self.title(c.title)}</title>
     ${self.css()}
     ${self.js()}
@@ -50,10 +51,18 @@
 <%def name="css_link(path,media='')">
 	## making sure each css only gets included once 
 	% if path not in self.seen_css:
-	    <link rel="stylesheet" type="text/css" href="${path|h}" media="${media}"></link>\
+	    <link rel="stylesheet" type="text/css" href="${path|h}" media="${media}" />\
 	% endif
 	<% self.seen_css.add(path) %>\
 </%def>
+
+<%def name="js_link(path)">\
+        ## making sure each js only gets included once
+        % if path not in self.seen_js:
+            <script type="text/javascript" src="${path}"></script>\
+        % endif
+        <% self.seen_js.add(path) %>\
+</%def>\
 
 <%def name="css()">	
    ${css_link('/css/yui/build/reset/reset.css','screen')}
@@ -68,10 +77,10 @@
 </%def>
 
 <%def name="js()">
-    <script type="text/javascript" src="/js/yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-    <script type="text/javascript" src="/js/yui/build/container/container_core-min.js"></script>
-    <script type="text/javascript" src="/js/yui/build/menu/menu-min.js"></script>
-    <script type="text/javascript" src="/js/yui/build/event/event-min.js"></script>
+	${js_link("/js/yui/build/yahoo-dom-event/yahoo-dom-event.js")}
+	${js_link("/js/yui/build/container/container_core-min.js")}
+	${js_link("/js/yui/build/menu/menu-min.js")}
+	${js_link("/js/yui/build/event/event-min.js")}
 </%def>
 
 <%def name="top_nav()"></%def>

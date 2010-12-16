@@ -137,27 +137,23 @@ class AdminsPool():
         """ List all sites where admin has administrator rights.
             Params: unique_id -- unique id of admin
             Return: list of site objects 
-            Raises ALCNoError -- if admin does not exist
         """
         admin = self.session.query(schema.Admin).filter_by(shib_unique_id = unique_id).first()
         if admin:
             return admin.sites
-        raise ACLNoRecError("Admin does not exist", 
-            "The admin with unique_id >%s< does not exist." % unique_id)
+        return list()
     
     @strip_args
     def list_admin_services(self, unique_id):
         """ List all services where admin has administrator rights.
             Params: unique_id -- unique id of admin
             Return: list of service objects 
-            Raises ALCNoError -- if admin does not exist
         """
         
         admin = self.session.query(schema.Admin).filter_by(shib_unique_id = unique_id).first()
         if admin:
             return admin.services
-        raise ACLNoRecError("Admin does not exist", \
-            "The admin with unique_id >%s< does not exist." % unique_id)
+        return list()
 
 
 class SitesPool():
@@ -334,7 +330,6 @@ class ServicesPool():
                     alias   -- alias ofr service (optional)
             Raise   ACLInsertError - it type invalid, site does not exist etc.
         """
-        
         if type not in self.valid_types:
             log.error("Invalid type '%s' for service '%s' of site '%s'" % \
                 (type, name, site_name))
