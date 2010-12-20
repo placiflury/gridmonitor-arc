@@ -17,7 +17,9 @@ class MonadminResourcesController(MonadminController):
         for item in data_list:
             item_dict = dict()
             for k in keymap.keys():
-                item_dict[k] = item.__dict__[k]
+                # If the database encoding is latin-1 --> convert string to unicode_string
+                # More info: http://wiki.python.de/Von%20Umlauten,%20Unicode%20und%20Encodings
+                item_dict[k] = item.__dict__[k].decode('latin-1')
             if opt_params['id_key'] == 'hash':
                 item_dict['hash'] = hash(item_dict.__str__())
             json_data['members'].append(item_dict)

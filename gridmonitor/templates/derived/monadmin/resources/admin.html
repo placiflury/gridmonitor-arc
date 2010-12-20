@@ -13,6 +13,14 @@
 	MA_adm_editor.status_container = $('#MA_status');
 	MA_adm_editor.url = 'changeadm';
 	MA_adm_editor.click = true;
+	MA_adm_editor.edit_child = function(fields, that) {
+		var that = that || this;
+		var shib_unique_id = MA_adm_list.get_selected().data('info').shib_unique_id;
+		var fields = {};
+		fields['shib_unique_id'] = $('<div id="shib_unique_id"/>');
+		that.__proto__.edit_child(fields, that);
+		fields['shib_unique_id'].val(undefined).text(shib_unique_id);
+	};
 	MA_adm_editor.init(MA_adm_list);
 	
 </%def>

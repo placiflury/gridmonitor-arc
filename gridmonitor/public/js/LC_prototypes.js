@@ -442,18 +442,18 @@ var ListEditor = {
 		row.children('td').last().append(save_button);
 		row.children('td').last().append(cancel_button);
 	},
-	edit_child: function(fields) {
-		var that = this;
-		var field_names = this.list_contr.list.data().fields;
+	edit_child: function(fields, that) {
+		var that = that || this;
+		var field_names = that.list_contr.list.data().fields;
 		var fields = fields || {};
 		for (var k in field_names) {
 			if (field_names.hasOwnProperty(k) && !(fields[k])) {
 				fields[k] = $('<input type="text" id="' + k + '" />');
 			}
 		}
-		this.show(fields);
+		that.show(fields);
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
-		this.table.append(row);
+		that.table.append(row);
 		var save_button = $('<input id="LE_save" type="button" value="save"/>')
 									.click(function() {
 										that.commit('save');
