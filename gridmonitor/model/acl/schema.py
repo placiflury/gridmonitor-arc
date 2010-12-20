@@ -18,8 +18,8 @@ site table:
     alias: alias for site name (optional)
 """
 t_site = sa.Table("site", meta.metadata,
-        sa.Column("name", sa.types.VARCHAR(128), primary_key=True),
-        sa.Column("alias", sa.types.VARCHAR(128))
+        sa.Column("name", sa.types.VARCHAR(128, convert_unicode=True), primary_key=True),
+        sa.Column("alias", sa.types.VARCHAR(128, convert_unicode=True))
 )
 
 """
@@ -31,18 +31,18 @@ service table:
     alias: an alias (optional) e.g. an DNS alias
 """
 t_service = sa.Table("service", meta.metadata,
-        sa.Column("name", sa.types.VARCHAR(128), primary_key=True, nullable=False),
-        sa.Column("hostname", sa.types.VARCHAR(128), primary_key=True, nullable=False),
+        sa.Column("name", sa.types.VARCHAR(128, convert_unicode=True), primary_key=True, nullable=False),
+        sa.Column("hostname", sa.types.VARCHAR(128, convert_unicode=True), primary_key=True, nullable=False),
         sa.Column("site_name", None, sa.ForeignKey("site.name"), nullable=False),        
-        sa.Column("type", sa.types.VARCHAR(64), nullable=False),
-        sa.Column("alias", sa.types.VARCHAR(128))
+        sa.Column("type", sa.types.VARCHAR(64, convert_unicode=True), nullable=False),
+        sa.Column("alias", sa.types.VARCHAR(128, convert_unicode=True))
 )
 
 t_admin = sa.Table("admin", meta.metadata,
-        sa.Column("shib_unique_id", sa.types.VARCHAR(255), primary_key=True, nullable=False),
-        sa.Column("shib_surname", sa.types.VARCHAR(255), nullable=False),
-        sa.Column("shib_given_name", sa.types.VARCHAR(255), nullable=False),
-        sa.Column("shib_email", sa.types.VARCHAR(255), nullable=False))
+        sa.Column("shib_unique_id", sa.types.VARCHAR(255, convert_unicode=True), primary_key=True, nullable=False),
+        sa.Column("shib_surname", sa.types.VARCHAR(255, convert_unicode=True), nullable=False),
+        sa.Column("shib_given_name", sa.types.VARCHAR(255, convert_unicode=True), nullable=False),
+        sa.Column("shib_email", sa.types.VARCHAR(255, convert_unicode=True), nullable=False))
 
 t_service_acl = sa.Table("service_acl", meta.metadata,
         sa.Column("id", sa.types.Integer, primary_key=True),

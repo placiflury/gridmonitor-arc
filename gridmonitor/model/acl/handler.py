@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Interface for ACL of GridMonitor portal 
 """
@@ -32,7 +33,7 @@ def strip_args(func):
                     kwargs_stripped[k] = unicode(v.strip())
                 else:
                     kwargs_stripped[k] = v
-                
+               
         return func(*args_stripped, **kwargs_stripped)
         
     return new_func 

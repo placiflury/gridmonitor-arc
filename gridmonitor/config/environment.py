@@ -45,7 +45,7 @@ def load_environment(global_conf, app_conf):
     nagios_engine = engine_from_config(config, 'sqlalchemy_nagios.')
     init_model(nagios_engine)
     log.info('Nagios DB connection initialized')
-    acl_engine = engine_from_config(config, prefix='sqlalchemy_acl.')
+    acl_engine = engine_from_config(config, prefix='sqlalchemy_acl.', encoding='utf-8')
     init_acl_model(acl_engine)
     log.info('ACL DB connection initialized')
     handler_type = config['data_handler_type'].lower().strip()
