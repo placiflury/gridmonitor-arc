@@ -17,9 +17,7 @@ class MonadminResourcesController(MonadminController):
         for item in data_list:
             item_dict = dict()
             for k in keymap.keys():
-                # If the database encoding is latin-1 --> convert string to unicode_string
-                # More info: http://wiki.python.de/Von%20Umlauten,%20Unicode%20und%20Encodings
-                item_dict[k] = item.__dict__[k].decode('latin-1')
+                item_dict[k] = item.__dict__[k]
             if opt_params['id_key'] == 'hash':
                 item_dict['hash'] = hash(item_dict.__str__())
             json_data['members'].append(item_dict)
@@ -103,9 +101,10 @@ class MonadminResourcesController(MonadminController):
                                                 request.POST['shib_given_name'], \
                                                 request.POST['shib_email'] )
                 return "OK;;;Changed admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
-        # TODO Error Handling
-        except:
-            return "ERROR;;;Something."
+        except ACLError, e:
+            return "ERROR;;;%s" % e.message
+        except Exception, e1:
+            return "ERROR;;;%r" % e1
         
     def getsites(self):
         try:
@@ -143,9 +142,10 @@ class MonadminResourcesController(MonadminController):
             elif request.POST['button'] == 'save':
                 self.sites_pool.add_site(request.POST['name'], request.POST['alias'])
                 return "OK;;;Changed site " + request.POST['name'] + " successfully."
-        # TODO Error Handling
-        except:
-            return "ERROR;;;Something."
+        except ACLError, e:
+            return "ERROR;;;%s" % e.message
+        except Exception, e1:
+            return "ERROR;;;%r" % e1
 
     def getservices(self):
         try:
@@ -201,9 +201,10 @@ class MonadminResourcesController(MonadminController):
                                                 request.POST['hostname'], \
                                                 request.POST['alias'])
                 return "OK;;;Changed service " + request.POST['name'] + " successfully."
-        # TODO Error Handling
-        except:
-            return "ERROR;;;Something."
+        except ACLError, e:
+            return "ERROR;;;%s" % e.message
+        except Exception, e1:
+            return "ERROR;;;%r" % e1
     
 
 
