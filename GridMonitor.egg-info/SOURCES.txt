@@ -68,6 +68,7 @@ gridmonitor/model/acl/__init__.py
 gridmonitor/model/acl/errors.py
 gridmonitor/model/acl/handler.py
 gridmonitor/model/acl/meta.py
+gridmonitor/model/acl/name_mapping.py
 gridmonitor/model/acl/schema.py
 gridmonitor/model/api/__init__.py
 gridmonitor/model/api/cluster_api.py
@@ -97,6 +98,7 @@ gridmonitor/model/nagios/scheduleddowntimes.py
 gridmonitor/model/nagios/servicetables.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
+gridmonitor/public/css/LC_prototypes.css
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
 gridmonitor/public/css/nav.css
@@ -216,6 +218,8 @@ gridmonitor/public/img/korn_bg.jpg
 gridmonitor/public/img/logo.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
+gridmonitor/public/js/LC_prototypes.js
+gridmonitor/public/js/jquery-1.4.4.min.js
 gridmonitor/public/js/pop.js
 gridmonitor/public/js/select.js
 gridmonitor/public/js/wz_jsgraphics.js
@@ -263,7 +267,6 @@ gridmonitor/templates/derived/gridadmin/sfts/nochange.html
 gridmonitor/templates/derived/gridadmin/sfts/results.html
 gridmonitor/templates/derived/gridadmin/sfts/sft.html
 gridmonitor/templates/derived/gridadmin/sfts/show_details.html
-gridmonitor/templates/derived/gridadmin/statistics/.form.html.swp
 gridmonitor/templates/derived/gridadmin/statistics/form.html
 gridmonitor/templates/derived/gridadmin/statistics/index.html
 gridmonitor/templates/derived/gridadmin/statistics/rrd.html
@@ -277,6 +280,7 @@ gridmonitor/templates/derived/help/index.html
 gridmonitor/templates/derived/monadmin/acl/admin2site.html
 gridmonitor/templates/derived/monadmin/acl/index.html
 gridmonitor/templates/derived/monadmin/acl/site2admin.html
+gridmonitor/templates/derived/monadmin/error/access_denied.html
 gridmonitor/templates/derived/monadmin/resources/admin.html
 gridmonitor/templates/derived/monadmin/resources/index.html
 gridmonitor/templates/derived/monadmin/resources/site_services.html

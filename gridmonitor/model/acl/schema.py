@@ -105,7 +105,7 @@ mapper(Site, t_site,
         primaryjoin = t_site.c.name == t_site_acl.c.site_name,
         secondaryjoin = t_site_acl.c.admin_id == t_admin.c.shib_unique_id,
          backref='sites'),
-        services = relationship(Service, backref='site'))
+        services = relationship(Service, backref='site', cascade='all'))
 )
 
 mapper(Service, t_service,

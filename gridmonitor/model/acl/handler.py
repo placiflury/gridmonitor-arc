@@ -12,7 +12,9 @@ log = logging.getLogger(__name__)
 
 def strip_args(func):
     """ Decorator that strips the input parameters 
-        of a function.
+        of a function. If arg is a string
+        it gets explicitly passed to the function 
+        as 'unicode'.
     """
     def new_func(*args, **kwargs):
         args_stripped = list()
@@ -20,14 +22,14 @@ def strip_args(func):
 
         for arg in args:    
             if type(arg) == str:
-                args_stripped.append(arg.strip())
+                args_stripped.append(unicode(arg.strip()))
             else:
                 args_stripped.append(arg)
         
         if kwargs:
             for k, v in kwargs.items():
                 if type(v) == str:
-                    kwargs_stripped[k] = v.strip()
+                    kwargs_stripped[k] = unicode(v.strip())
                 else:
                     kwargs_stripped[k] = v
                 
