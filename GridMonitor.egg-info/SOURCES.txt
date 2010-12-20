@@ -31,11 +31,11 @@ gridmonitor/controllers/gridadmin_plot.py
 gridmonitor/controllers/gridadmin_sfts.py
 gridmonitor/controllers/gridadmin_statistics.py
 gridmonitor/controllers/gridadmin_testjobs.py
-gridmonitor/controllers/gridadmin_vos.py
 gridmonitor/controllers/help.py
 gridmonitor/controllers/monadmin.py
 gridmonitor/controllers/monadmin_acl.py
 gridmonitor/controllers/monadmin_resources.py
+gridmonitor/controllers/monadmin_sft.py
 gridmonitor/controllers/siteadmin.py
 gridmonitor/controllers/siteadmin_clusters.py
 gridmonitor/controllers/siteadmin_jobs.py
@@ -274,8 +274,6 @@ gridmonitor/templates/derived/gridadmin/statistics/votables.html
 gridmonitor/templates/derived/gridadmin/testjobs/form.html
 gridmonitor/templates/derived/gridadmin/testjobs/index.html
 gridmonitor/templates/derived/gridadmin/testjobs/test.html
-gridmonitor/templates/derived/gridadmin/vos/index.html
-gridmonitor/templates/derived/gridadmin/vos/show.html
 gridmonitor/templates/derived/help/index.html
 gridmonitor/templates/derived/monadmin/acl/admin2site.html
 gridmonitor/templates/derived/monadmin/acl/index.html
@@ -284,6 +282,7 @@ gridmonitor/templates/derived/monadmin/error/access_denied.html
 gridmonitor/templates/derived/monadmin/resources/admin.html
 gridmonitor/templates/derived/monadmin/resources/index.html
 gridmonitor/templates/derived/monadmin/resources/site_services.html
+gridmonitor/templates/derived/monadmin/sft/index.html
 gridmonitor/templates/derived/siteadmin/clusters/index.html
 gridmonitor/templates/derived/siteadmin/error/access_denied.html
 gridmonitor/templates/derived/siteadmin/jobs/index.html

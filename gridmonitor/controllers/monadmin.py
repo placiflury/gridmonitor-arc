@@ -51,8 +51,8 @@ class MonadminController(BaseController):
     
         acl_editor = [('Admin to Site', '/monadmin/acl/admin2site'),
                       ('Site to Admin', '/monadmin/acl/site2admin')]
-        sft_editor = [('View SFTs (dummy)', '/monadmin/sft/bla'),
-                      ('Edit SFTs (dummy)', '/monadmin/sft/blub')]
+        sft_editor = [('View SFTs (dummy)', '/monadmin/sft/list'),
+                      ('Edit SFTs (dummy)', '/monadmin/sft/edit')]
         
         c.top_nav= session['top_nav_bar']
         

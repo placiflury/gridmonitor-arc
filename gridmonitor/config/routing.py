@@ -50,8 +50,6 @@ def make_map():
     map.connect('gridadmin/clusters/:action', controller='gridadmin_clusters')
     map.connect('gridadmin/clusters/:action/:id', controller='gridadmin_clusters')
     map.connect('gridadmin/clusters/:action/:id/:queue', controller='gridadmin_clusters')
-    map.connect('gridadmin/vos/:action', controller='gridadmin_vos')
-    map.connect('gridadmin/vos/:action/:hostname', controller='gridadmin_vos')
     map.connect('gridadmin/sfts/:action', controller='gridadmin_sfts')
     map.connect('gridadmin/sfts/:action/:name', controller='gridadmin_sfts')
     map.connect('gridadmin/sfts/:action/:name/:cluster_name', controller='gridadmin_sfts')
@@ -70,6 +68,8 @@ def make_map():
     map.connect('monadmin/resources/:action/:id', controller='monadmin_resources')
     map.connect('monadmin/acl/:action', controller='monadmin_acl')
     map.connect('monadmin/acl/:action/:id', controller='monadmin_acl')
+    map.connect('monadmin/sft/:action', controller='monadmin_sft')
+    map.connect('monadmin/sft/:action/:id', controller='monadmin_sft')
 
     # CUSTOM ROUTES HERE
     map.connect(':controller/:action/:id')

@@ -157,6 +157,7 @@ def list_admins(session):
     admins = AdminsPool(session)
     print '\n', 10 * '-', 'Listing of existing users:', 10 * '-', '\n'
     for admin in admins.list_admins():
+        print 'XXX read type', type(admin.shib_surname)
         print " - unique_id=%s, surname=%s, given_name=%s, email=%s " % \
             (admin.shib_unique_id, admin.shib_surname, admin.shib_given_name, admin.shib_email)
     print '\n' 
