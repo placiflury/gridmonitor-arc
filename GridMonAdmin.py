@@ -43,7 +43,7 @@ don't worry).
 import ConfigParser
 import os.path
 from hashlib import md5
-from socket import gethostname
+from socket import gethostname, gethostbyaddr
 
 import sqlalchemy as sa
 import sqlalchemy.orm as orm 
@@ -142,7 +142,7 @@ def add_admin(session):
     admins.add_admin(unique_id, surname, given_name, email)
     sites = SitesPool(session)    
     sites.add_site('GridMonitor','not_a_real_site')
-    hostname = gethostname()
+    hostname = gethostbyaddr(gethostname())[0]
     services = ServicesPool(session, valid_service_types)
     services.add_service('ACL','GridMonitor','MONITOR', hostname)
     services.add_service('SFT','GridMonitor','MONITOR', hostname)
@@ -157,7 +157,6 @@ def list_admins(session):
     admins = AdminsPool(session)
     print '\n', 10 * '-', 'Listing of existing users:', 10 * '-', '\n'
     for admin in admins.list_admins():
-        print 'XXX read type', type(admin.shib_surname)
         print " - unique_id=%s, surname=%s, given_name=%s, email=%s " % \
             (admin.shib_unique_id, admin.shib_surname, admin.shib_given_name, admin.shib_email)
     print '\n' 
