@@ -108,13 +108,14 @@ class MonadminResourcesController(MonadminController):
                 self.admins_pool.remove_admin(request.POST['shib_unique_id'])
                 return "OK;;;Deleted admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
             elif request.POST['button'] == 'save':
-                # If AAI enabled:
-                if request.environ.has_key(config['shib_given_name']):
+                # If NOT AAI enabled:
+                if not(request.environ.has_key(config['shib_given_name'])):
                     dn = request.POST['aai-DN']
                     ca = request.POST['aai-CA']
                     if dn and ca:
                         shib_unique_id = md5(dn + ca).hexdigest()
                     log.info('DN: %r, CA: %r, UID: %r' % (dn, ca, shib_unique_id))
+                # AAI enabled:
                 else:
                     shib_unique_id = request.POST['shib_unique_id']
                 self.admins_pool.update_admin(  shib_unique_id, \
