@@ -29,7 +29,7 @@ class SiteadminStatisticsController(SiteadminController):
 
         if not request.params.has_key('start_t_str'): # setting defaults
             _end_t= int(time.time())  # now
-            _start_t = _end_t - 27 * 86400  # 4 weeks back (0-27 days)
+            _start_t = _end_t - 28 * 86400  # 4 weeks back 
             
             start_t, end_t = helpers.get_sampling_interval(_start_t,_end_t, resolution)
         
@@ -87,8 +87,7 @@ class SiteadminStatisticsController(SiteadminController):
         
         c.end_t_str_max = time.strftime("%d.%m.%Y", time.gmtime())
         c.start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t))        
-        c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t - 86400))   # hack to avoid increasing date 
-                                                                            # upon form resubmission
+        c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t))  
 
         for cluster in self.clusters:
             for acrec in  helpers.get_cluster_acrecords(cluster, _start_t, _end_t, resolution):

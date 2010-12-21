@@ -57,7 +57,6 @@ class MonadminController(BaseController):
         c.top_nav= session['top_nav_bar']
         
         c.menu = list()
-        log.info('XXX %r' % authorized_sections)
         if 'ACL' in authorized_sections:
                 c.menu.append(('Manage Resources', '/monadmin/resources', mng_resources))
                 c.menu.append(('Map','/monadmin/acl', acl_editor))
