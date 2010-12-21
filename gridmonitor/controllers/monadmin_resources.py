@@ -1,4 +1,5 @@
 from monadmin import *
+from hashlib import md5 
 
 log = logging.getLogger(__name__)
 
@@ -17,13 +18,16 @@ class MonadminResourcesController(MonadminController):
         for item in data_list:
             item_dict = dict()
             for k in keymap.keys():
-                item_dict[k] = item.__dict__[k]
+                try:
+                    item_dict[k] = item.__dict__[k]
+                except:
+                    pass
+            log.info('Key: %s' % k)
             if opt_params['id_key'] == 'hash':
                 item_dict['hash'] = hash(item_dict.__str__())
             json_data['members'].append(item_dict)
         for p in opt_params:
             json_data[p] = opt_params[p]
-
         return json.dumps(json_data)
 
     def index(self):
@@ -85,6 +89,14 @@ class MonadminResourcesController(MonadminController):
                 adm_list = self.sites_pool.list_admins(request.GET['name'])
         elif source_id == None:
             adm_list = self.admins_pool.list_admins()
+        # If NOT AAI enabled:
+        if not(request.environ.has_key(config['shib_given_name'])):
+            ADMIN_KEYMAP['aai-DN'] = ["DN:"]
+            ADMIN_KEYMAP['aai-CA'] = ["CA:"]
+            ADMIN_KEYMAP_ORDER.pop(0)
+            ADMIN_KEYMAP_ORDER.insert(0, 'aai-DN')
+            ADMIN_KEYMAP_ORDER.insert(1, 'aai-CA')
+        # AAI enabled:
         return self.__build_json__(adm_list, ADMIN_KEYMAP, ADMIN_KEYMAP_ORDER, { \
                             'id_key': 'shib_unique_id', \
                             'show_keys': ['shib_given_name', 'shib_surname'], \
@@ -96,7 +108,16 @@ class MonadminResourcesController(MonadminController):
                 self.admins_pool.remove_admin(request.POST['shib_unique_id'])
                 return "OK;;;Deleted admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
             elif request.POST['button'] == 'save':
-                self.admins_pool.update_admin(  request.POST['shib_unique_id'], \
+                # If AAI enabled:
+                if request.environ.has_key(config['shib_given_name']):
+                    dn = request.POST['aai-DN']
+                    ca = request.POST['aai-CA']
+                    if dn and ca:
+                        shib_unique_id = md5(dn + ca).hexdigest()
+                    log.info('DN: %r, CA: %r, UID: %r' % (dn, ca, shib_unique_id))
+                else:
+                    shib_unique_id = request.POST['shib_unique_id']
+                self.admins_pool.update_admin(  shib_unique_id, \
                                                 request.POST['shib_surname'], \
                                                 request.POST['shib_given_name'], \
                                                 request.POST['shib_email'] )

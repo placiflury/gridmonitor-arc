@@ -403,7 +403,7 @@ var ListEditor = {
 				row.children('td').first().text(this.list_contr.list.data().fields[keys[k]]);
 				var field = fields[keys[k]];
 				field.text(info[keys[k]]);
-				try { 
+				try {
 					field.val(info[keys[k]]); 
 					} catch(err) {
 
