@@ -1,2 +1,22 @@
 <%inherit file="/base/monadmin.html"/>
 
+<%def name="dom_ready()" >\
+	var MA_adm_list = Object.create(ListController);
+	MA_adm_list.container = $('#MA_adm_list_container');
+	MA_adm_list.click = false;
+	MA_adm_list.set_title('Admins:');
+	MA_adm_list.set_link('manage_admins', 'edit site/service access');
+	MA_adm_list.links.find('#manage_admins').attr('href', '/monadmin/acl/site2admin')
+	MA_adm_list.init('MA_adm_list', '/monadmin/resources/getadms');
+	
+	var MA_service_list = Object.create(ListControllerSub);
+	MA_service_list.container = $('#MA_site_list_container');
+	MA_service_list.click = false;
+	MA_service_list.set_title('Sites and Services:');
+	MA_service_list.set_link('manage_sites', 'edit admin access');
+	MA_service_list.links.find('#manage_sites').attr('href', '/monadmin/acl/admin2site');
+	MA_service_list.init('MA_service_list', '/monadmin/resources/getservices');
+</%def>
+
+<div id="MA_adm_list_container"></div>
+<div id="MA_site_list_container"></div>
