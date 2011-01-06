@@ -126,9 +126,17 @@ class UserJobsController(UserController):
         return render('/derived/user/jobs/index.html')
  
     def show(self, status):
+         
+        slcs_dn = None       
+        browser_dn = None
+ 
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            slcs_dn = user_slcs_obj.get_dn()
         
-        slcs_dn = c.user_slcs_obj.get_dn()
-        browser_dn = c.user_client_dn
+        if session.has_key('user_client_dn'):
+            browser_dn = session['user_client_dn']
+        
         c.job_list = list()  # double list        
 
         c.job_status = status
