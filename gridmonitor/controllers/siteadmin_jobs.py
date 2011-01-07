@@ -9,7 +9,9 @@ USER_NAME_LEN = 11
 
 class SiteadminJobsController(SiteadminController):    
 
-    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED', 'FETCHED','INLRMS: R']
+    JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED','INLRMS: R']
+    JOB_FETCHED = ['FIN_FETCHED','FLD_FETCHED','KIL_FETCHED']
+    JOB_DELETED = ['FIN_DELETED','FLD_DELETED','KIL_DELETED','DELETED']
 
     def index(self):
         c.title = "Monitoring System: Site Admin View"
@@ -46,11 +48,17 @@ class SiteadminJobsController(SiteadminController):
                     users_bag[user]=dict()
                     for state in SiteadminJobsController.JOB_STATES:
                         users_bag[user][state] = 0
+                    users_bag[user]['FETCHED'] = 0
+                    users_bag[user]['DELETED'] = 0
                     users_bag[user]['other'] = 0
                     users_bag[user]['total'] = 0
                 
                 if status in SiteadminJobsController.JOB_STATES:
                     users_bag[user][status]+=1
+                elif status in SiteadminJobsController.JOB_FETCHED:
+                    users_bag[user]['FETCHED']+=1
+                elif status in SiteadminJobsController.JOB_DELETED:
+                    users_bag[user]['DELETED']+=1
                 else:
                     users_bag[user]['other']+=1
                 users_bag[user]['total']+=1

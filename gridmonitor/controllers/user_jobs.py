@@ -13,7 +13,19 @@ class UserJobsController(UserController):
             'FETCHED'] # FETCHED state is a meta-state for FINISHED_FETCHED etc..
 
     def __init__(self): 
-        UserController()
+        UserController.__init__(self)
+        c.user_slcs_dn = None       
+        c.user_client_dn = None
+        
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            c.user_slcs_dn = user_slcs_obj.get_dn()
+            c.user_slcs_ca = user_slcs_obj.get_ca()
+
+        if session.has_key('user_client_dn'):
+            c.user_client_dn = session['user_client_dn']
+            if session.has_key('user_client_ca'):
+                c.user_client_ca = session['user_client_ca']
     
     def index(self):
         
@@ -21,48 +33,39 @@ class UserJobsController(UserController):
         c.menu_active = "My Jobs"
         c.heading = "Information about User Jobs"
          
-        slcs_dn = None       
-        browser_dn = None
- 
-        if session.has_key('user_slcs_obj'):
-            user_slcs_obj = session['user_slcs_obj']
-            slcs_dn = user_slcs_obj.get_dn()
-        
-        if session.has_key('user_client_dn'):
-            browser_dn = session['user_client_dn']
 
 
-        all_jobs = g.get_user_jobs(slcs_dn) + g.get_user_jobs(browser_dn)
-        allowed_clusters = g.data_handler.get_user_clusters(slcs_dn) + \
-                g.data_handler.get_user_clusters(browser_dn)
+        all_jobs = g.get_user_jobs(c.user_slcs_dn) + g.get_user_jobs(c.user_client_dn)
+        allowed_clusters = g.data_handler.get_user_clusters(c.user_slcs_dn) + \
+                g.data_handler.get_user_clusters(c.user_client_dn)
         
         allowed_clusters = {}
-        allowed_clusters[slcs_dn] = g.data_handler.get_user_clusters(slcs_dn)
-        allowed_clusters[browser_dn] = g.data_handler.get_user_clusters(browser_dn)
+        allowed_clusters[c.user_slcs_dn] = g.data_handler.get_user_clusters(c.user_slcs_dn)
+        allowed_clusters[c.user_client_dn] = g.data_handler.get_user_clusters(c.user_client_dn)
 
         # settings for creation of cluster-jobs table
         c.max_tot_jobs = 0
         cluster_bag = dict()
         sum_jobs_allowed_clusters = 0
 
-        for cluster_name in allowed_clusters[slcs_dn] + allowed_clusters[browser_dn]: 
+        for cluster_name in allowed_clusters[c.user_slcs_dn] + allowed_clusters[c.user_client_dn]: 
             if cluster_bag.has_key(cluster_name):
                 continue
             cluster_bag[cluster_name] = dict()
             
             sum_state_jobs = 0
             for state in UserJobsController.JOB_STATES:
-                num = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name,status=state) + \
-                    g.data_handler.get_num_user_jobs(browser_dn,cluster_hostname=cluster_name,status=state)
+                num = g.data_handler.get_num_user_jobs(c.user_slcs_dn,cluster_hostname=cluster_name,status=state) + \
+                    g.data_handler.get_num_user_jobs(c.user_client_dn,cluster_hostname=cluster_name,status=state)
                 cluster_bag[cluster_name][state] = num
                 sum_state_jobs += num
             
-            orphaned = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name,status='orphaned') + \
-                g.data_handler.get_num_user_jobs(browser_dn,cluster_hostname=cluster_name,status='orphaned')
+            orphaned = g.data_handler.get_num_user_jobs(c.user_slcs_dn,cluster_hostname=cluster_name,status='orphaned') + \
+                g.data_handler.get_num_user_jobs(c.user_client_dn,cluster_hostname=cluster_name,status='orphaned')
             cluster_bag[cluster_name]['orphaned'] = orphaned
           
-            total = g.data_handler.get_num_user_jobs(slcs_dn,cluster_hostname=cluster_name) + \
-                    g.data_handler.get_num_user_jobs(browser_dn, cluster_hostname=cluster_name)
+            total = g.data_handler.get_num_user_jobs(c.user_slcs_dn,cluster_hostname=cluster_name) + \
+                    g.data_handler.get_num_user_jobs(c.user_client_dn, cluster_hostname=cluster_name)
             if c.max_tot_jobs < total:
                 c.max_tot_jobs = total
             
@@ -72,8 +75,8 @@ class UserJobsController(UserController):
         
 
         # Fetch number of jobs of clusters that are not anymore listed 
-        num_all_user_jobs = g.data_handler.get_num_user_jobs(slcs_dn) + \
-                            g.data_handler.get_num_user_jobs(browser_dn)
+        num_all_user_jobs = g.data_handler.get_num_user_jobs(c.user_slcs_dn) + \
+                            g.data_handler.get_num_user_jobs(c.user_client_dn)
 
         if sum_jobs_allowed_clusters != num_all_user_jobs: # there are more orphaned 
             orphaned = num_all_user_jobs - sum_jobs_allowed_clusters
@@ -127,15 +130,6 @@ class UserJobsController(UserController):
  
     def show(self, status):
          
-        slcs_dn = None       
-        browser_dn = None
- 
-        if session.has_key('user_slcs_obj'):
-            user_slcs_obj = session['user_slcs_obj']
-            slcs_dn = user_slcs_obj.get_dn()
-        
-        if session.has_key('user_client_dn'):
-            browser_dn = session['user_client_dn']
         
         c.job_list = list()  # double list        
 
@@ -148,18 +142,18 @@ class UserJobsController(UserController):
             else:
                 c.heading = "Jobs in status: '%s'" % c.job_status
                 c.title = c.heading
-            jl = g.get_user_jobs(slcs_dn,status)
+            jl = g.get_user_jobs(c.user_slcs_dn,status)
             c.job_list.append(jl)
-            if browser_dn:
-                jl = g.get_user_jobs(browser_dn,status)
+            if c.user_client_dn:
+                jl = g.get_user_jobs(c.user_client_dn,status)
                 c.job_list.append(jl)
         else:
             c.heading = "All of Your Jobs"
             c.title = "All of Your Jobs"
-            jl = g.get_user_jobs(slcs_dn)
+            jl = g.get_user_jobs(c.user_slcs_dn)
             c.job_list.append(jl)
-            if browser_dn:
-                jl=g.get_user_jobs(browser_dn)
+            if c.user_client_dn:
+                jl=g.get_user_jobs(c.user_client_dn)
                 c.job_list.append(jl)
             
             log.debug(c.job_list)

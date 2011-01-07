@@ -19,8 +19,8 @@
     ${votable.vo_table(c.user_client_dn, c.user_client_ca,c.vo_list,c.voms_connector,type)}
 %endif
 
-%if c.slcs_dn:
-    ${votable.vo_table(c.slcs_dn, c.slcs_ca, c.vo_list,c.voms_connector)}
+%if c.user_slcs_dn:
+    ${votable.vo_table(c.user_slcs_dn, c.user_slcs_ca, c.vo_list,c.voms_connector)}
 %endif
 
 

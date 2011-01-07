@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 class UserVosController(UserController):
     
     def __init__(self):
-        UserController()
+        UserController.__init__(self)
         try:
             self.voms = VOMSConnector()
         except VOMSException, e:
@@ -20,23 +20,21 @@ class UserVosController(UserController):
         c.title = "Monitoring System: User View"
         c.menu_active = "VOs"
         c.heading = "Virtual Organizations Membership"
-        c.slsc_dn = None
+        c.user_slsc_dn = None
         
         if not self.voms:
             return render('/derived/user/error/voms_error.html')
  
         if session.has_key('user_slcs_obj'):
             user_slcs_obj = session['user_slcs_obj']
-            c.slcs_dn = user_slcs_obj.get_dn()
-            c.slcs_ca = user_slcs_obj.get_ca()
-            log.info("Got SLCS identity '%s'" % c.slcs_dn)
+            c.user_slcs_dn = user_slcs_obj.get_dn()
+            c.user_slcs_ca = user_slcs_obj.get_ca()
+            log.info("Got SLCS identity '%s'" % c.user_slcs_dn)
 
         if session.has_key('user_client_dn'):
-            browser_dn = session['user_client_dn']
-            c.user_client_dn = browser_dn
+            c.user_client_dn = session['user_client_dn']
             if session.has_key('user_client_ca'):
-                browser_ca = session['user_client_ca']
-                c.user_client_ca = browser_ca
+                c.user_client_ca = session['user_client_ca']
 
         c.vo_list = self.voms.get_vos()    
         c.voms_connector = self.voms

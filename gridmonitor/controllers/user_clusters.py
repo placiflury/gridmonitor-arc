@@ -9,32 +9,29 @@ QUEUE_NAME_LEN=11   # default len of queue names. Names will either be padded or
 
 class UserClustersController(UserController):
     
+    def __init__(self): 
+        UserController.__init__(self)
+        c.user_slcs_dn = None       
+        c.user_client_dn = None
+        
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            c.user_slcs_dn = user_slcs_obj.get_dn()
+
+        if session.has_key('user_client_dn'):
+            c.user_client_dn = session['user_client_dn']
+
     def index(self):
         c.title = "Monitoring System: User View - Clusters"
         c.menu_active = "Clusters"
         c.heading = "Grid Clusters for %s %s" % (c.user_name, c.user_surname)
        
-        slcs_dn = ''
-        browser_dn = ''     
-
-
-        # collect access information
-        if session.has_key('user_slcs_obj'):
-            user_slcs_obj = session['user_slcs_obj']
-            slcs_dn = user_slcs_obj.get_dn()
-        c.slcs_dn = slcs_dn
-
-
-        if session.has_key('user_client_dn'):
-            browser_dn = session['user_client_dn']
-            c.user_client_dn = browser_dn
-    
         
         c.allowed_clusters = {}
-        c.allowed_clusters[slcs_dn] = g.data_handler.get_user_clusters(slcs_dn)
-        c.allowed_clusters[browser_dn] = g.data_handler.get_user_clusters(browser_dn)
-        c.allowed_clusters['slcs_browser'] =  [sc for sc in c.allowed_clusters[slcs_dn] \
-            for bc in c.allowed_clusters[browser_dn] if sc==bc] # list comprehension
+        c.allowed_clusters[c.user_slcs_dn] = g.data_handler.get_user_clusters(c.user_slcs_dn)
+        c.allowed_clusters[c.user_client_dn] = g.data_handler.get_user_clusters(c.user_client_dn)
+        c.allowed_clusters['slcs_browser'] =  [sc for sc in c.allowed_clusters[c.user_slcs_dn] \
+            for bc in c.allowed_clusters[c.user_client_dn] if sc==bc] # list comprehension
                         
         
         c.tot_cpus = g.get_grid_stats('stats_cpus')
@@ -43,12 +40,12 @@ class UserClustersController(UserController):
         # vars for 3D pie charts -> we'll create one for ALL clusters, and one for SLCS and Browser DN access 
         c.cl_pie_chart_labels = dict()
         c.cl_pie_chart_labels['all'] = dict()
-        c.cl_pie_chart_labels[slcs_dn] = dict()
-        c.cl_pie_chart_labels[browser_dn] = dict()
+        c.cl_pie_chart_labels[c.user_slcs_dn] = dict()
+        c.cl_pie_chart_labels[c.user_client_dn] = dict()
         c.cl_pie_chart_data = dict()
         c.cl_pie_chart_data['all'] = dict()
-        c.cl_pie_chart_data[slcs_dn] = dict()
-        c.cl_pie_chart_data[browser_dn] = dict()
+        c.cl_pie_chart_data[c.user_slcs_dn] = dict()
+        c.cl_pie_chart_data[c.user_client_dn] = dict()
         
         # vars for cluster and queue bar charts
         c.cl_bar_chart = list()  # [(displayname,grid_running,running,cpu),...]
@@ -69,20 +66,20 @@ class UserClustersController(UserController):
                 c.max_cpus = cpus
             
             # populate pie-charts
-            if hostname in c.allowed_clusters[slcs_dn]:
-                if not c.cl_pie_chart_labels[slcs_dn]:
-                    c.cl_pie_chart_labels[slcs_dn] = display_name
-                    c.cl_pie_chart_data[slcs_dn] = "t:%s" % str(cpus)
+            if hostname in c.allowed_clusters[c.user_slcs_dn]:
+                if not c.cl_pie_chart_labels[c.user_slcs_dn]:
+                    c.cl_pie_chart_labels[c.user_slcs_dn] = display_name
+                    c.cl_pie_chart_data[c.user_slcs_dn] = "t:%s" % str(cpus)
                 else:
-                    c.cl_pie_chart_labels[slcs_dn] += "|%s" % display_name
-                    c.cl_pie_chart_data[slcs_dn] += ",%s" % str(cpus)
-            if hostname in c.allowed_clusters[browser_dn]:
-                if not c.cl_pie_chart_labels[browser_dn]:
-                    c.cl_pie_chart_labels[browser_dn] = display_name
-                    c.cl_pie_chart_data[browser_dn] = "t:%s" % str(cpus)
+                    c.cl_pie_chart_labels[c.user_slcs_dn] += "|%s" % display_name
+                    c.cl_pie_chart_data[c.user_slcs_dn] += ",%s" % str(cpus)
+            if hostname in c.allowed_clusters[c.user_client_dn]:
+                if not c.cl_pie_chart_labels[c.user_client_dn]:
+                    c.cl_pie_chart_labels[c.user_client_dn] = display_name
+                    c.cl_pie_chart_data[c.user_client_dn] = "t:%s" % str(cpus)
                 else:
-                    c.cl_pie_chart_labels[browser_dn] += "|%s" % display_name
-                    c.cl_pie_chart_data[browser_dn] += ",%s" % str(cpus)
+                    c.cl_pie_chart_labels[c.user_client_dn] += "|%s" % display_name
+                    c.cl_pie_chart_data[c.user_client_dn] += ",%s" % str(cpus)
             if not c.cl_pie_chart_labels['all']:
                 c.cl_pie_chart_labels['all'] = display_name
                 c.cl_pie_chart_data['all'] = "t:%s" % str(cpus)

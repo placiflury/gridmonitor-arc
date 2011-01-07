@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='GridMonitor',
-    version="0.8.2",
+    version="0.8.2-1",
     description='A monitor for Grids based on the NorduGrid ARC middleware',
     long_description=""" \
 	The GridMonitor, which has been developed within the AAA/SWITCH SMSCG project,
