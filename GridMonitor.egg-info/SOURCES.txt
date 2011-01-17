@@ -268,6 +268,7 @@ gridmonitor/templates/derived/gridadmin/sfts/results.html
 gridmonitor/templates/derived/gridadmin/sfts/sft.html
 gridmonitor/templates/derived/gridadmin/sfts/show_details.html
 gridmonitor/templates/derived/gridadmin/statistics/form.html
+gridmonitor/templates/derived/gridadmin/statistics/form.html.0
 gridmonitor/templates/derived/gridadmin/statistics/index.html
 gridmonitor/templates/derived/gridadmin/statistics/rrd.html
 gridmonitor/templates/derived/gridadmin/statistics/votables.html

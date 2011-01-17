@@ -16,17 +16,13 @@ from sgasaggregator.utils import helpers
 log = logging.getLogger(__name__)
 
 class GridadminStatisticsController(GridadminController):
+
+    NO_VO = '-- No VO --' # string to use if no VO info required but not available
     
     def index(self):
         c.title = "Monitoring System: VO/Grid Admin Statistics"
         c.menu_active = "Grid Statistics"
         c.heading = "VO/Grid Statistics"
-        """
-        query = meta.Session.query(ng_schema.Cluster)
-        c.dbclusters = query.filter_by(status='active').all()
-        c.blacklisted = meta.Session.query(ng_schema.Grisblacklist).all()
-        c.giises = meta.Session.query(ng_schema.Giis).all()
-        """
         
         return render('/derived/gridadmin/statistics/index.html')
 
@@ -47,7 +43,7 @@ class GridadminStatisticsController(GridadminController):
         
         if not request.params.has_key('start_t_str'): # setting defaults
             _end_t= int(time.time())  # now
-            _start_t = _end_t - 27 * 86400  # 4 weeks back
+            _start_t = _end_t - 28 * 86400  # 4 weeks back (including endding day)
         else: 
             start_t_str = request.params['start_t_str'] 
             end_t_str = request.params['end_t_str'] 
@@ -63,60 +59,79 @@ class GridadminStatisticsController(GridadminController):
             except:
                 c.form_error = "Please enter dates in 'dd.mm.yyyy' format"
                 return render('/derived/gridadmin/statistics/form.html')
-      
+     
+        
  
-        start_t, end_t = helpers.get_sampling_interval(_start_t,_end_t, resolution)
+        start_t, end_t = helpers.get_sampling_interval(_start_t, _end_t, resolution) # incl. endding day
         
         c.resolution = resolution
         c.end_t_str_max = time.strftime("%d.%m.%Y", time.gmtime())
         c.start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t))        
-        c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t - 86400))   # hack to avoid increasing date 
-                                                                            # upon form resubmission
+        c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t))  
         
         c.heading = "VO and cluster usage numbers from (%s - %s)" % (c.start_t_str, c.end_t_str)
         
+        vo_series = dict()
+        vos = list()
+        for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
+            vo = arec.vo_name
+            vos.append(vo)   # i.e. vo can be  NULL/None
+
+            vo_series[vo] = dict()
+            vo_series[vo]['n_jobs'] = Series('n_jobs', start_t, end_t, resolution)
+            vo_series[vo]['wall_duration'] = Series('wall_duration', start_t, end_t, resolution)
+       
+            for rec in sgascache_session.Session.query(ag_schema.Vo).filter(and_(
+                ag_schema.Vo.t_epoch >= start_t,
+                ag_schema.Vo.t_epoch < end_t,
+                ag_schema.Vo.vo_name == vo,
+                ag_schema.Vo.resolution == resolution)):
+           
+                vo_series[vo]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
+                vo_series[vo]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
+                vo_series[vo]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
+                
+                tot_n_jobs += rec.n_jobs
+                tot_wall += rec.wall_duration
+        
+        cluster_series = dict()
+        clusters = list()
+        for arec in sgascache_session.Session.query(ag_schema.Machine.machine_name).distinct():
+            hostname = arec.machine_name
+            cluster_series[hostname] = dict()
+            cluster_series[hostname]['n_jobs'] = \
+                    Series('n_jobs', start_t, end_t, resolution)
+            cluster_series[hostname]['wall_duration'] = \
+                    Series('wall_duration', start_t, end_t, resolution)
+            cluster_series[hostname]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
+
+            for rec in sgascache_session.Session.query(ag_schema.Machine).filter(and_(
+                ag_schema.Machine.t_epoch >= start_t,
+                ag_schema.Machine.t_epoch < end_t,
+                ag_schema.Machine.machine_name == hostname,
+                ag_schema.Machine.resolution == resolution)):
+
+                cluster_series[hostname]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
+                cluster_series[hostname]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
+
+
         # plot or tables
         if request.params.has_key('plotORtable') and request.params['plotORtable'] == 'plot':
             c.table = False
             c.plot = True
 
             # PLOT 1 DATA: VO - plot (i.e. usage per VO)
-            series = dict()
-            vos = list()
-            for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
-                vos.append(arec.vo_name)
-            
-            for vo in vos:
-                if not vo:
-                    vo_name = ' -- No VO --'
-                else:
-                    vo_name = vo
-
-                series[vo_name] = dict()
-                series[vo_name]['n_jobs'] = Series('n_jobs', start_t, end_t, resolution)
-                series[vo_name]['wall_duration'] = Series('wall_duration', start_t, end_t, resolution)
-           
-                for rec in sgascache_session.Session.query(ag_schema.Vo).filter(and_(
-                    ag_schema.Vo.t_epoch >= start_t,
-                    ag_schema.Vo.t_epoch < end_t,
-                    ag_schema.Vo.vo_name == vo,
-                    ag_schema.Vo.resolution == resolution)):
-               
-                    series[vo_name]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
-                    series[vo_name]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
-     
-            # preparing data for plot 
             walltime_data = list()
             jobs_data = list()
             vo_labels = ''
             walltime_max = 0
             job_max = 0
-            c.num_vos = len(series.keys())
+            c.num_vos = len(vo_series.keys())
             rvos = list()
-            for vo in series.keys():
-                njob = series[vo]['n_jobs'].get_sum()    
-                series[vo]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
-                wall = series[vo]['wall_duration'].get_sum()
+            for vo in vo_series.keys():
+                njob = vo_series[vo]['n_jobs'].get_sum()    
+                vo_series[vo]['wall_duration']
+                wall = vo_series[vo]['wall_duration'].get_sum()
                 
                 if walltime_max < wall:
                     walltime_max = wall
@@ -124,14 +139,16 @@ class GridadminStatisticsController(GridadminController):
                     job_max = njob
                 walltime_data.append(wall)
                 jobs_data.append(njob)
-        
 
             # vo names must be sorted in reverse order
-            rvos = series.keys()
+            rvos = vo_series.keys()
             rvos.reverse()
             for vo in rvos:
                 vo_labels+="|"
-                vo_labels += vo
+                if not vo:
+                    vo_labels += GridadminStatisticsController.NO_VO
+                else:
+                    vo_labels += vo
             
             c.vo_labels = vo_labels
             walltime_data.reverse()
@@ -143,26 +160,6 @@ class GridadminStatisticsController(GridadminController):
            
 
             # PLOT 2 DATA:  cluster plot (i.e usage per cluster)
-            cluster_series = dict()
-            
-            for cluster in c.cluster_menu:
-                hostname = cluster[1].split('/')[-1]
-                cluster_series[hostname] = dict()
-                cluster_series[hostname]['n_jobs'] = \
-                        Series('n_jobs', start_t, end_t, resolution)
-                cluster_series[hostname]['wall_duration'] = \
-                        Series('wall_duration', start_t, end_t, resolution)
-                cluster_series[hostname]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
-
-                for rec in sgascache_session.Session.query(ag_schema.Machine).filter(and_(
-                    ag_schema.Machine.t_epoch >= start_t,
-                    ag_schema.Machine.t_epoch < end_t,
-                    ag_schema.Machine.machine_name == hostname,
-                    ag_schema.Machine.resolution == resolution)):
-
-                    cluster_series[hostname]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
-                    cluster_series[hostname]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
-
             # plot...
             # XXX if number of clusters >= 14, we going to get problems with the size of the plot
             # google charts, won't plot anymore -> break up in smaller plots
@@ -201,63 +198,19 @@ class GridadminStatisticsController(GridadminController):
         else:
             c.table = True
             c.plot =  False
-        
-            # get VO names and VO time series -> VO aggregate records
-            vos = list()
-            vo_series = dict()
-
-            for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
-                vos.append(arec.vo_name)
-
-            for vo in vos:
-                vo_series[vo] = dict()
-                vo_series[vo]['n_jobs'] = Series('n_jobs', start_t, end_t, resolution)
-                vo_series[vo]['wall_duration'] = Series('wall_duration', start_t, end_t, resolution)
-                vo_series[vo]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
-           
-                for rec in sgascache_session.Session.query(ag_schema.Vo).filter(and_(
-                    ag_schema.Vo.t_epoch >= start_t,
-                    ag_schema.Vo.t_epoch < end_t,
-                    ag_schema.Vo.vo_name == vo,
-                    ag_schema.Vo.resolution == resolution)):
-                    vo_series[vo]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
-                    vo_series[vo]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
-                    tot_n_jobs += rec.n_jobs
-                    tot_wall += rec.wall_duration
-
-            # get cluster names and cluster series -> machine aggregate records
-            cluster_series = dict()
-            for cluster in c.cluster_menu:
-                hostname = cluster[1].split('/')[-1]
-                cluster_series[hostname] = dict()
-                cluster_series[hostname]['n_jobs'] = \
-                        Series('n_jobs', start_t, end_t, resolution)
-                cluster_series[hostname]['wall_duration'] = \
-                        Series('wall_duration', start_t, end_t, resolution)
-                cluster_series[hostname]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
-
-                for rec in sgascache_session.Session.query(ag_schema.Machine).filter(and_(
-                    ag_schema.Machine.t_epoch >= start_t,
-                    ag_schema.Machine.t_epoch < end_t,
-                    ag_schema.Machine.machine_name == hostname,
-                    ag_schema.Machine.resolution == resolution)):
-
-                    cluster_series[hostname]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
-                    cluster_series[hostname]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
 
             # get VO *and* cluster time series -> VoMachine aggregate records
             vo_cluster_series = dict() 
             c.cluster_map = dict()
 
-            for cluster in c.cluster_menu:
+            for cluster in c.cluster_menu:   # used for reverse mapping
                 hostname = cluster[1].split('/')[-1]
                 display_name = cluster[0]
                 c.cluster_map[hostname] = display_name
             
+            for hostname in cluster_series.keys():
                 vo_cluster_series[hostname] = dict()
-
                 for vo in vos:
-                    vo_cluster_series[hostname][vo] = dict()
                     vo_cluster_series[hostname][vo] = dict()
                     vo_cluster_series[hostname][vo]['n_jobs'] = \
                         Series('n_jobs', start_t, end_t, resolution)
@@ -274,8 +227,6 @@ class GridadminStatisticsController(GridadminController):
                    
                         vo_cluster_series[hostname][vo]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
                         vo_cluster_series[hostname][vo]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
-
-           
 
             c.tot_n_jobs = tot_n_jobs
             c.tot_wall = tot_wall * SCALING_FACTOR

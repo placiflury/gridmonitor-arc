@@ -149,9 +149,14 @@ table_row_odd = False
 tot_jobs = 0
 tot_wall = 0
 %>
-    <td>${c.cluster_map[hostname]}<br/>
+<td>
+% if c.cluster_map.has_key(hostname):
+${c.cluster_map[hostname]}<br/>
         (${hostname}) 
-    </td> 
+% else:
+        ${hostname}
+% endif
+</td> 
 
    
      % for vo in vks:
