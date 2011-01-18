@@ -1,4 +1,5 @@
 // Debug Flag:
+// Set LC_debug to true if you want to see notifications on the console.
 var LC_debug = true;
 debug = function (log_txt) {
     if (window.console != undefined && LC_debug) {
@@ -30,6 +31,7 @@ debug = function (log_txt) {
 // List Controller for simple listing of admins, sites, services, clusters, vos, tests
 /************************************************************************************
 url: 				[String],
+click: 				[Boolean]
 container: 			[jQuery Object],
 title_proto 		[jQuery Object]
 title: 				[jQuery Object],
@@ -40,6 +42,7 @@ link_proto: 		[jQuery Object],
 links: 				[jQuery Object],
 multiple: 			[Boolean],
 name_tag: 			[String],
+identifier: 		[String]
 **************************************************************************************
 Usage: 		(* means optional)
 	var test = Object.create(ListController);
@@ -48,20 +51,28 @@ Usage: 		(* means optional)
 	*test.list_proto = “another list prototype“;  		// should be some <ul> element
 	*test.child_proto = “another child prototype“;		// should be some <li> element
 	*test.link_proto = “another link prototype“;
-	*test.multiple = true/false;
+	*test.multiple = true/false;						// select multiple list elements
+	*test.click = true/false; 							// List elements selectable
 	*test.set_link(string id, string link_text, bool remove) 	// 	id= "new", "edit",
 	*test.set_link(string id, bool remove)						//	"del" have special
 	*test.set_link(string id, string link_text)					//	meanings
-	*test.set_title('Titelzeile');
+	*test.set_title('Titelzeile:');
 	test.init(name_tag, url); 			// name_tag: identifier for the generated list.
-										// url: valid url where data is stored
-Returned data format of URL:
+										// url: valid url where data is stored (JSON)
+JSON data format url should return:
 	{
-	"id_key": "keyX",					// id_key "hash" has a special meaning, 
-										// but has to be an existing key
+	"id_key": "keyX",					// id_key should be a key that uniquely
+										// identifies the list element.
+										// id_key has to be an existing key,
+										// id_key "hash" has a special meaning (key "hash" must exist)
 	"show_keys": ["keyX","keyY", ...],
+										// show_keys sets the text of the list element
+	"order_keys": ["keyY", "keyZ", "keyX", ...],
+										// order_keys sets the order of the keys (used by ListEditor)
 	"names": {"key1": "Text for key1", "key2": "Text for key2", ...},
-	"memebers": [{"key1": "Some", "key2": "thing"},{...},{...}, ...]
+										// names maps a human readable string to every key
+	"members": [{"key1": "Some", "key2": "thing"},{...},{...}, ...]
+										// members is an array of 'key:value' pairs
 	}
 
 *************************************************************************************/
@@ -80,14 +91,14 @@ var ListController = {
 	name_tag: undefined,
 	identifier: undefined,
 	init: function(name_tag, url, that) {
-		this.identifier = Math.random();
+		var that = that || this; 
+		that.identifier = Math.random();
 		if (!name_tag || typeof name_tag != 'string') {
 			throw 'A ListController object has to be initiated with a valid name_tag.';
 		}
 		if (!url || typeof url != 'string') {
 			throw 'A URL is needed to fetch JSON data.';
 		}
-		var that = that || this; 
 		that.name_tag = name_tag;
 		that.url = url;
 		
@@ -240,42 +251,27 @@ var ListController = {
 
 // List Controller for simple listing of admins, sites, services, clusters, vos, tests
 // appended with the functionality of sub categories
+// Only difference to ListController is documented here:
 /************************************************************************************
-url: 				[String],
-container: 			[jQuery Object],
-title_proto 		[jQuery Object]
-title: 				[jQuery Object],
-list_proto: 		[jQuery Object],
-list: 				[jQuery Object],
-child_proto:		[jQuery Object],
-link_proto: 		[jQuery Object],
-links: 				[jQuery Object],
-multiple: 			[Boolean],
-name_tag: 			[String],
+	subchild_proto: 		[jQuery Object]
+	child_proto: 			[jQuery Object]
 **************************************************************************************
 Usage: 		(* means optional)
-	var test = Object.create(ListControllerSub);
-	*test.container = “DOM Element”;
-	*test.title_proto = “another title prototype“;
-	*test.list_proto = “another list prototype“; 			// should be some <ul> element
-	*test.child_proto = “another child prototype“;  		// should be some <ul> element
-	*test.subchild_proto = “another subchild prototype”; 	// should be some <li> element
-	*test.link_proto = “another link prototype“;
-	*test.multiple = true/false;
-	*test.set_link(string id, string link_text, bool remove) 	// 	id= "new", "edit",
-	*test.set_link(string id, bool remove)						//	"del" have special
-	*test.set_link(string id, string link_text)					//	meanings
-	*test.set_title('Titelzeile');
-	test.init(name_tag, url); 			// name_tag: identifier for the generated list.
-										// url: valid url where data is stored
-Returned data format of URL:
+	same as ListController
+The url in the init function should return the following JSON structure:
 	{
-	"id_key": "keyX", 					// id_key "hash" has a special meaning, 
-										// but has to be an existing key
-	"show_keys": ["keyX","keyY", ...],
-	"parent_key": "keyX",
-	"names": {"key1": "Text for key1", "key2": "Text for key2", ...},
-	"memebers": [{"key1": "Some", "key2": "thing"},{...},{...}, ...]
+		"order_keys": ["keyZ", "keyX", "keyY", ... ],
+							// the order of the keys when using ListEditorSub
+		"parent_key": "keyZ",
+							// the key to form groups
+		"show_keys": ["keyX", ... ],
+							// set the text of the sub list element
+		"names": { "keyX": "Name for keyX", ... },
+							// Mapping of human readable strings to every key
+		"members": [{"keyX":"valueX"},{"keyY":"valueY"}, {}, {}, ... ],
+							// 'key:value' pairs with actual data
+		"id_key": "keyX"
+							// Should uniquely identify the sub list element.
 	}
 
 *************************************************************************************/
@@ -329,6 +325,52 @@ var ListControllerSub = Object.create(ListController);
 
 
 // Prototype of ListEditor
+/************************************************************************************
+	url: 					[String],
+	status_container: 		[jQuery Object],
+	list_contr: 			[ListController Object],
+	selected_item: 			[jQuery Object],
+	container: 				[jQuery Object],
+	flush_container: 		[Boolean],
+	table_proto: 			[jQuery Object],
+	table: 					[jQuery Object],
+	new_link: 				[Boolean],
+	edit_link: 				[Boolean],
+	del_link: 				[Boolean],
+	click: 					[Boolean],
+	hover: 					[Boolean],
+**************************************************************************************
+Usage:  		(* means optional)
+	var editor = Object.create(ListEditor);
+	*editor.url = "http://my.domain.com/somewhere/";
+									// IMPORTANT: Save, change and delete are sent to
+									// this url --> set it if you want to change data
+	*editor.status_container = $('#my_status_container');
+									// set this to steer where the status messages are
+									// shown, otherwise they are displayed in the body
+	*editor.container = $('my_editor_container');
+									// set this to steer where the editor table should
+									// appear, otherwise it's appended to the body
+	*editor.flush_container = true;
+									// Set this to delete the content of editor.container
+									// before setting it.
+									// WARNING: Only do this if you have set editor.container
+	*editor.new_link = true;
+	*editor.edit_link = true;
+	*editor.del_link = true;
+									// If you set these, the links will be generated
+									// --> you don't need to do it by hand.
+	*editor.click = true;
+									// Allows to show the editor by just clicking on
+									// a list element.
+									// IMPORTANT: Sets the ListController.multiple to false
+	*editor.hover = true;
+									// Allows to show the editor by just mouseover on
+									// a list element.
+	editor.init(my_list_controller);
+
+
+************************************************************************************/
 var ListEditor = {
 	url: undefined,
 	status_container: null,
@@ -351,7 +393,7 @@ var ListEditor = {
 			throw 'Argument list_contr has to be inherited from ListController.';
 		}
 		that.url = that.url || list_contr.url;
-		// Only allow to select one object in a list with a ListEditor Object pointing to it.
+		// Only allow to select exactly one object in a list with a ListEditor Object pointing to it.
 		that.list_contr.multiple = false;
 
 		that.table = that.table_proto.clone();
@@ -571,6 +613,17 @@ var ListEditor = {
 
 
 // Prototype of ListMapper
+/************************************************************************************
+	source: 			[ListController object]
+	target: 			[ListController object]
+*************************************************************************************
+Usage:
+	var my_mapper = Object.create(ListMapper)
+	my_mapper.init(my_listcontroller_1, my_listcontroller_2)
+	
+INFO: 	The whole selected source object is sent to the server side via HTTP GET request
+		to the url of the target object. The whole logic is on the server side.
+************************************************************************************/
 var ListMapper = {
 	source: null,		// has to be derived from ListController
 	target: null,		// has to be derived from ListController
@@ -623,6 +676,25 @@ ListMapperInverse.map = function() {
 
 
 // Prototype of List Exchanger
+/************************************************************************************
+	left: 			[ListController object],			// has to be derived from ListController
+	right: 			[ListController object],		// has to be derived from ListController
+	doubleclick: 	[Boolean],
+	enabled: 		[Boolean],
+*************************************************************************************
+Usage: 		(* means optional)
+	var my_listexchanger = Object.create(ListExchanger)
+	*my_listexchanger.doubleclick = false;
+	my_listexchanger.init(my_listcontroller_1, my_listcontroller_2)
+	*my_listexchanger.toggle(false);
+					// If you want to inactivate the controller for some reason.
+	*var my_ltr_button = $('<a href="#">left_to_right</a>').appendTo('body');
+	*my_ltr_button.click(function() {my_listexchanger.ltr()});
+					// If you want to have a button for left to right functionality
+	*var my_ltr_button = $('<div>right_to_left</div>').appendTo('body');
+	*my_ltr_button.click(function() {my_listexchanger.ltr()});
+					// If you want to have a button for left to right functionality
+************************************************************************************/
 var ListExchanger = {
 	left: null,			// has to be derived from ListController
 	right: null,		// has to be derived from ListController
@@ -726,6 +798,12 @@ var ListExchanger = {
 }
 
 // Prototype of ListExchangerSub
+/************************************************************************************
+Usage:
+	Exactly the same as ListExchanger:
+	var my_listexchanger = Object.create(ListExchangerSub)
+	my_listexchanger.init(my_listcontrollersub_1, my_listcontrollersub_2)
+************************************************************************************/
 var ListExchangerSub = Object.create(ListExchanger);
 	ListExchangerSub.exchange = function(item, contr) {
 		if (contr == this.left) {
