@@ -4,19 +4,33 @@
 	## Initialization of the Controllers:
 	var MA_admin_list = Object.create(ListController);
 	MA_admin_list.container = $('#MA_admin_list_container');
+	MA_admin_list.set_link('new', 'Add admin');
+	MA_admin_list.set_link('edit', 'Change admin');
+	MA_admin_list.set_link('del', 'Remove admin');
 	MA_admin_list.set_title('Admins:');
-	MA_admin_list.init('MA_adm_list', '../resources/getadms');
+	MA_admin_list.init('MA_adm_list', 'getadms');
 	var MA_admin_list_editor = Object.create(ListEditor);
 	MA_admin_list_editor.container = $('#MA_admin_editor_container');
+	MA_admin_list_editor.status_container = $('#MA_status');
+	MA_admin_list_editor.url = 'changeadm';
 	MA_admin_list_editor.click = true;
+	MA_admin_list_editor.edit_child = function(fields, that) {
+		var that = that || this;
+		var shib_unique_id = MA_admin_list.get_selected().data('info').shib_unique_id;
+		var fields = {};
+		fields['shib_unique_id'] = $('<div id="shib_unique_id"/>');
+		that.__proto__.edit_child(fields, that);
+		fields['shib_unique_id'].val(undefined).text(shib_unique_id);
+	}
 	MA_admin_list_editor.init(MA_admin_list);
 	
 	var MA_site_list = Object.create(ListController);
 	MA_site_list.container = $('#MA_site_list_container');
 	MA_site_list.multiple = true;
 	MA_site_list.click = false;
+	MA_site_list.toggle = true;
 	MA_site_list.set_title('Sites:');
-	MA_site_list.init('MA_site_list', '../resources/getsites');
+	MA_site_list.init('MA_site_list', 'getsites');
 	MA_site_list.hide();
 	var MA_site_list_editor = Object.create(ListEditor);
 	MA_site_list_editor.container = $('#MA_site_editor_container');
@@ -31,13 +45,14 @@
 	MA_service_list.container = $('#MA_service_list_container');
 	MA_service_list.multiple = true;
 	MA_service_list.click = false;
+	MA_service_list.toggle = true;
 	MA_service_list.set_title('Services:');
-	MA_service_list.set_link('exchange', 'edit access');
+	MA_service_list.set_link('exchange', 'Edit ACLs');
 	MA_service_list.set_link('save');
 	MA_service_list.links.find('#save').hide();
 	MA_service_list.set_link('cancel');
 	MA_service_list.links.find('#cancel').hide();
-	MA_service_list.init('MA_service_list', '../resources/getservices');
+	MA_service_list.init('MA_service_list', 'getservices');
 	MA_service_list.hide();
 	var MA_service_list_editor = Object.create(ListEditor);
 	MA_service_list_editor.container = $('#MA_site_editor_container');
@@ -51,8 +66,9 @@
 	var MA_site_list_inactive = Object.create(ListController);
 	MA_site_list_inactive.container = $('#MA_site_list_inactive_container');
 	MA_site_list_inactive.multiple = true;
+	MA_site_list_inactive.toggle = true;
 	MA_site_list_inactive.set_title('Inactive Sites:');
-	MA_site_list_inactive.init('MA_site_list', '../resources/getsites');
+	MA_site_list_inactive.init('MA_site_list', 'getsites');
 	MA_site_list_inactive.hide();
 	var MA_site_list_inactive_editor = Object.create(ListEditor);
 	MA_site_list_inactive_editor.container = $('#MA_site_editor_container');
@@ -66,8 +82,9 @@
 	var MA_service_list_inactive = Object.create(ListControllerSub);
 	MA_service_list_inactive.container = $('#MA_service_list_inactive_container');
 	MA_service_list_inactive.multiple = true;
+	MA_service_list_inactive.toggle = true;
 	MA_service_list_inactive.set_title('Inactive services:');
-	MA_service_list_inactive.init('MA_service_list', '../resources/getservices');
+	MA_service_list_inactive.init('MA_service_list', 'getservices');
 	MA_service_list_inactive.hide();
 	var MA_service_list_inactive_editor = Object.create(ListEditor);
 	MA_service_list_inactive_editor.container = $('#MA_site_editor_container');
@@ -109,9 +126,10 @@
 		});
 	}
 	var MA_lock = $('#MA_lock') .css('z-index', '-1')
-								.css('width', 1092)
+								.css('width', $('#yui-main').width())
 								.text(' ')
 								.css('height', $('#yui-main').height())
+								.css('left', 0)
 								.css('top', $('#yui-main').css('top'));
 	$('#MA_site_list_container').css('z-index', '2');
 	$('#MA_service_list_container').css('z-index', '2');
@@ -120,6 +138,11 @@
 	$('#MA_service_list_inactive_container').css('z-index', '2');
 	$('#ui').css('height', $('#yui-main').height());
 	
+	
+	MA_admin_list.links.delegate('a', 'click', function() {
+		MA_site_list.hide();
+		MA_service_list.hide();
+	});
 	
 	MA_service_list.links.delegate('a#exchange', 'click', function() {
 		MA_site_list_exchanger.toggle(true);
@@ -134,6 +157,7 @@
 		MA_service_list.links.find('#exchange').hide();
 		MA_service_list.links.find('#save').show();
 		MA_service_list.links.find('#cancel').show();
+		$('#MA_lock').css('height', $('#yui-main').height());
 	});
 	MA_service_list.links.delegate('a#cancel', 'click', function() {
 		MA_site_mapper.map();
@@ -161,7 +185,7 @@
 					var answer = data.split(';;;');
 					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
 					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
-					$('#MA_status').text(answer[1]);
+					$('#MA_status').empty().text(answer[1]);
 					$('#MA_status').fadeIn().delay(3000).fadeOut();
 				},
 				"text"
@@ -181,7 +205,7 @@
 					var answer = data.split(';;;');
 					if (answer[0] == 'OK') { $('#MA_status2').attr('class', 'ok') }
 					else if (answer[0] == 'ERROR') { $('#MA_status2').attr('class', 'critical') }
-					$('#MA_status2').text(answer[1]);
+					$('#MA_status2').empty().text(answer[1]);
 					$('#MA_status2').fadeIn().delay(3000).fadeOut();
 				},
 				"text"

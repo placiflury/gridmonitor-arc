@@ -24,4 +24,4 @@ SERVICE_KEYMAP = {
     'type'              :  ['Type:'],
     'alias'             :  ['Alias']
 }
-SERVICE_KEYMAP_ORDER = ['name', 'hostname', 'site_name', 'type', 'alias']
+SERVICE_KEYMAP_ORDER = ['site_name', 'name', 'hostname', 'type', 'alias']

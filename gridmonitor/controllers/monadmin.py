@@ -46,11 +46,8 @@ class MonadminController(BaseController):
 
                 
         # static menu information
-        mng_resources = [('Admins','/monadmin/resources/admins'),
-                        ('Sites & Services', '/monadmin/resources/site_services')]
-    
-        acl_editor = [('Admin to Site', '/monadmin/acl/admin2site'),
-                      ('Site to Admin', '/monadmin/acl/site2admin')]
+        acl_editor = [('Sites & Services', '/monadmin/acl/admin2site'),
+                      ('Administrators', '/monadmin/acl/site2admin')]
         sft_editor = [('View SFTs (dummy)', '/monadmin/sft/list'),
                       ('Edit SFTs (dummy)', '/monadmin/sft/edit')]
         
@@ -58,8 +55,7 @@ class MonadminController(BaseController):
         
         c.menu = list()
         if 'ACL' in authorized_sections:
-                c.menu.append(('Manage Resources', '/monadmin/resources', mng_resources))
-                c.menu.append(('Map','/monadmin/acl', acl_editor))
+                c.menu.append(('ACL Manager','/monadmin/acl', acl_editor))
 
         if 'SFT' in authorized_sections: 
                 c.menu.append(('SFTs','/monadmin/sft', sft_editor))

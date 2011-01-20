@@ -5,19 +5,27 @@
 #LE_change, #LE_change *	{ width:220px;}
 #LE_change input { width:100%;}
 .selected 		{ background-color:#B3D4FF;}
-.LC_list_ul 	{ margin:0; padding:0; list-style-type:none; min-height: 200px; }
+.LC_list_ul 	{ margin:0; padding:0; list-style-type:none; min-height: 200px; max-height:400px; overflow:auto; }
 .LC_list_ul ul	{ margin:0; padding:0; }
-.LC_list_ul li	{ margin:0; padding:0; list-style-type:none; cursor:pointer;cursor:hand}
+.LC_list_ul li	{ margin:0; padding:0; list-style-type:none; cursor:pointer;cursor:hand;}
 .LC_list_ul ul li	{ padding-left:20px; }
 #LC_title 		{ margin:0; padding:0; }
 #LC_list 		{ margin:0; padding:0; background-color:#EDF5FF;}
 #LC_links 		{ margin:0; padding:0; }
+
+a               {color:blue; text-decoration:underline;cursor:pointer;cursor:hand;}
 
 #MA_exchange_links 	{ height:100%; margin-right:20px; float:left; z-index:2;}
 #MA_exchange_ltr 	{ margin:1px; padding:0; text-align:center; float:left; border:1px solid black; width:25px; height:16px; }
 #MA_exchange_rtl	{ margin:1px; padding:0; text-align:center; float:left; border:1px solid black; width:25px; height:16px; }
 #MA_exchange_ltr:hover { background-color:#B3D4FF; cursor:e-resize; }
 #MA_exchange_rtl:hover { background-color:#B3D4FF; cursor:w-resize; }
+
+#MA_exchange_links2 	{ height:100%; margin-right:20px; float:left; z-index:2;}
+#MA_exchange_ltr2 	{ margin:1px; padding:0; text-align:center; float:left; border:1px solid black; width:25px; height:16px; }
+#MA_exchange_rtl2	{ margin:1px; padding:0; text-align:center; float:left; border:1px solid black; width:25px; height:16px; }
+#MA_exchange_ltr2:hover { background-color:#B3D4FF; cursor:e-resize; }
+#MA_exchange_rtl2:hover { background-color:#B3D4FF; cursor:w-resize; }
 
 #MA_status 		{ text-align_left; clear:both; }
 

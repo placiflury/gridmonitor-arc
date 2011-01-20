@@ -43,6 +43,7 @@ links: 				[jQuery Object],
 multiple: 			[Boolean],
 name_tag: 			[String],
 identifier: 		[String]
+toggle: 			[Boolean]
 **************************************************************************************
 Usage: 		(* means optional)
 	var test = Object.create(ListController);
@@ -90,6 +91,7 @@ var ListController = {
 	multiple: false,
 	name_tag: undefined,
 	identifier: undefined,
+	toggle: false,
 	init: function(name_tag, url, that) {
 		var that = that || this; 
 		that.identifier = Math.random();
@@ -173,6 +175,7 @@ var ListController = {
 		var that = this;
 		var http_get_params = http_get_params || '';
 		$.getJSON(this.url + http_get_params, function(data) {
+			that.list.empty();
 			that.list.data('fields', data['names']);
 			that.list.data('order_keys', data['order_keys']);
 			var mem = data['members']
@@ -213,10 +216,10 @@ var ListController = {
 									.text(child_text);
 	},
 	show: function() {
-		this.list.parents('table').show();
+		this.container.show();
 	},
 	hide: function() {
-		this.list.parents('table').hide();
+		this.container.hide();
 	},
 	get_selected: function() {
 		var child_selected = this.list.find('li.selected');
@@ -240,9 +243,17 @@ var ListController = {
 			if (this.multiple == false) {
 				var state = $(clicked).hasClass('selected');
 				this.list.find('li').toggleClass('selected', false);
-				$(clicked).toggleClass('selected', !state);
+				if (this.toggle) {
+					$(clicked).toggleClass('selected', !state);
+				} else {
+					$(clicked).toggleClass('selected', true);
+				}
 			} else {
-				$(clicked).toggleClass('selected');
+				if (this.toggle) {
+					$(clicked).toggleClass('selected');
+				} else {
+					$(clicked).toggleClass('selected', true);
+				}
 			}
 		}
 	},
@@ -415,8 +426,8 @@ var ListEditor = {
 		that.status_container = that.status_container || $('<div/>').appendTo('body');
 		that.table.appendTo(that.container);
 	},
-	hide: function() {
-		if (!(this.click) || !(this.list_contr.get_selected())) {
+	hide: function(force) {
+		if (!(this.click) || !(this.list_contr.get_selected()) || force) {
 			this.table.empty();
 		}
 	},
@@ -471,17 +482,18 @@ var ListEditor = {
 		that.show(fields);
 		that.table.find('input').val('').empty();
 		pseudo_selected.remove();
-		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
+		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></tr>');
 		that.table.append(row);
-		var save_button = $('<input id="LE_save" type="button" value="save"/>')
+		var save_button = $('<a id="LE_save" value="save">save</a>')
 									.click(function() {
 										that.commit('save');
 									});
-		var cancel_button = $('<input id="LE_cancel" type="button" value="cancel"/>')
+		var cancel_button = $('<a id="LE_cancel" value="cancel">cancel</a>')
 									.click(function() {
 										that.commit('cancel');
 									});
 		row.children('td').last().append(save_button);
+		row.children('td').last().append('<br/>');
 		row.children('td').last().append(cancel_button);
 	},
 	edit_child: function(fields, that) {
@@ -496,15 +508,16 @@ var ListEditor = {
 		that.show(fields);
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
 		that.table.append(row);
-		var save_button = $('<input id="LE_save" type="button" value="save"/>')
+		var save_button = $('<a id="LE_save" value="save">save</a>')
 									.click(function() {
 										that.commit('save');
 									});
-		var cancel_button = $('<input id="LE_cancel" type="button" value="cancel"/>')
+		var cancel_button = $('<a id="LE_cancel" value="cancel">cancel</a>')
 									.click(function() {
 										that.commit('cancel');
 									});
 		row.children('td').last().append(save_button);
+		row.children('td').last().append('<br/>');
 		row.children('td').last().append(cancel_button);
 	},
 	delete_child: function() {
@@ -519,15 +532,16 @@ var ListEditor = {
 		this.show(fields);
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
 		this.table.append(row);
-		var del_button = $('<input id="LE_del" type="button" value="delete"/>')
+		var del_button = $('<a id="LE_del" type="button" value="delete">delete</a>')
 									.click(function() {
 										that.commit('del');
 									});
-		var cancel_button = $('<input id="LE_cancel" type="button" value="cancel"/>')
+		var cancel_button = $('<a id="LE_cancel" type="button" value="cancel">cancel</a>')
 									.click(function() {
 										that.commit('cancel');
 									});
 		row.children('td').last().append(del_button);
+		row.children('td').last().append('<br/>');
 		row.children('td').last().append(cancel_button);
 	},
 	commit: function(button) {
