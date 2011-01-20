@@ -362,24 +362,30 @@ chs=${c.num_vos*55 + 120}x300
 </tr>
 </table>
 
-<table width='550' border="1">
-<tr class="table_head"><th> Overall 'current' Usage/Cluster </th>
+<table width='800' border="1">
+<tr class="table_head"><th colspan=2> Overall 'current' Usage/Cluster </th>
 </tr>
-<tr><td>
-<! -- notice there is a limitation in the size a picture can take ... -->
 <%
 if c.walltime_max ==0:
     c.walltime_max = 1
 if c.job_max == 0:
     c.job_max = 1
 %>
+<% n_col=0 %>
+%for p in range(0, c.n_plots - 1):
+    %if (n_col % 2) == 0:
+        <% n_col = 0 %>
+        <tr>
+    %endif
+<td>
+<% n_col += 1 %>
 <img src="http://chart.apis.google.com/chart?
-chs=350x${c.num_clusters*55 +90}
+chs=350x${c.plot_size * 55 +80}
 &amp;cht=bhg
 &amp;chco=FF9000,5D7CBA
 &amp;chxt=x,t,r
-&amp;chxl=2:${c.cl_labels}
-&amp;chd=t:${c.cl_jobs_data}|${c.cl_walltime_data}
+&amp;chxl=2:${c.cl_labels[p]}
+&amp;chd=t:${c.cl_jobs_data[p]}|${c.cl_walltime_data[p]}
 &amp;chds=0,${'%0.2f' % (c.cl_job_max * 1.3)},0,${'%0.2f' %(c.cl_walltime_max * 1.3)}
 &amp;chxr=0,0,${'%0.2f' %(c.cl_walltime_max * 1.3)}|1,0,${'%02.f' % (c.cl_job_max * 1.3)}
 &amp;chdl=jobs|walltime[hours]
@@ -387,7 +393,10 @@ chs=350x${c.num_clusters*55 +90}
 &amp;chm=N&nbsp;*c0*,FF9000,0,-1,11|N&nbsp;&nbsp;*c0*,5D7CBA,1,-1,11
 &amp;alt="Number of jobs and duration per Cluster."/>
 </td>
-</tr>
+%if (n_col % 2) == 0:
+    </tr>
+%endif
+%endfor
 </table>
 
 % endif  <!-- c.tables -->

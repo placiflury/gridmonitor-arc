@@ -18,6 +18,25 @@ class ErrorController(BaseController):
     """
     def document(self):
         """Render the error document"""
+        my_template="""
+        <html>
+        <head><title>GridMonitor Error %(code)s</title></head>
+        <body>
+        <h1>Error %(code)s</h1>
+        <p>%(message)s</p>
+        </body>
+        </html>
+        """ 
+        c.title = "GridMonitor Error Page"
+        c.heading = "An Error Occured"
+        c.prefix =request.environ.get('SCRIPT_NAME', '')
+        c.code=cgi.escape(request.params.get('code', ''))
+        c.message=cgi.escape(request.params.get('message', ''))
+        
+        return render('/base/error.html')
+
+    def org_document(self):
+        """Render the error document"""
         page = error_document_template % \
             dict(prefix=request.environ.get('SCRIPT_NAME', ''),
                  code=cgi.escape(request.params.get('code', '')),

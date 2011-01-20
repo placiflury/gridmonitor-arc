@@ -163,12 +163,20 @@ class GridadminStatisticsController(GridadminController):
             # plot...
             # XXX if number of clusters >= 14, we going to get problems with the size of the plot
             # google charts, won't plot anymore -> break up in smaller plots
+
+            n_clusters = len(cluster_series.keys())
+            c.plot_size = 3  # we want 3 clusters per plot
+            n_plots = n_clusters / c.plot_size + 1
+
             cl_walltime_max = 0
             cl_job_max = 0
-            cl_walltime_data = list()
-            cl_jobs_data = list()
+            cl_walltime_data = [list() for x in range(0,n_plots)]
+            cl_jobs_data = [list() for x in range(0, n_plots)]
+            c.cl_labels = [list() for x in range(0, n_plots)]
+           
+            n = 0
+            old_plot_num = 0
             cl_labels = ''
-            
             for cluster in cluster_series.keys():
                 njob = cluster_series[cluster]['n_jobs'].get_sum()    
                 cluster_series[cluster]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
@@ -178,20 +186,34 @@ class GridadminStatisticsController(GridadminController):
                     cl_walltime_max = wall
                 if cl_job_max < njob:
                     cl_job_max = njob
-                cl_walltime_data.append(wall)
-                cl_jobs_data.append(njob)
-                
-                cl_labels+="|"
-                cl_labels += cluster
+               
+                plot_num =  n / c.plot_size
+                if old_plot_num != plot_num:
+                    old_plot_num = plot_num            
+                    cl_labels = ''
 
-            c.cl_labels = cl_labels
-            cl_walltime_data.reverse()
-            c.cl_walltime_data = h.list2string(cl_walltime_data)
-            c.cl_walltime_max = float(cl_walltime_max)
-            cl_jobs_data.reverse()
-            c.cl_jobs_data = h.list2string(cl_jobs_data)
+                cl_walltime_data[plot_num].append(wall)
+                cl_jobs_data[plot_num].append(njob)
+                
+                cl_labels +="|"
+                cl_labels += cluster
+                c.cl_labels[plot_num] = cl_labels
+                n += 1
+                    
+
+            c.cl_walltime_data = list()
+            c.cl_jobs_data = list()
+
+            for i in range(0,n_plots - 1):
+                cl_walltime_data[i].reverse()
+                c.cl_walltime_data.append(h.list2string(cl_walltime_data[i]))
+                cl_jobs_data[i].reverse()
+                c.cl_jobs_data.append(h.list2string(cl_jobs_data[i]))
+           
+            c.n_plots = n_plots 
             c.cl_job_max = float(cl_job_max)
             c.num_clusters = len(c.cluster_menu)
+            c.cl_walltime_max = float(cl_walltime_max)
  
             return render('/derived/gridadmin/statistics/form.html')
 
