@@ -150,7 +150,7 @@ class MonadminAclController(MonadminController):
         # AAI enabled:
         return self.__build_json__(adm_list, ADMIN_KEYMAP, ADMIN_KEYMAP_ORDER, { \
                             'id_key': 'shib_unique_id', \
-                            'show_keys': ['shib_given_name', 'shib_surname'], \
+                            'show_keys': [ 'shib_surname', 'shib_given_name'], \
                             })
 
     def changeadm(self):
@@ -334,13 +334,19 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
+            changes = 0;
             for k in data['add']:
                 log.info('Added admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.add_admin(data['source']['name'], k['shib_unique_id'])
+                changes += 1
             for k in data['del']:
                 log.info('Deleted admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.remove_admin(data['source']['name'], k['shib_unique_id'])
-            return "OK;;;Successfully saved admins for site " + data['source']['name']
+                changes += 1
+            if changes > 0:
+                return "OK;;;Successfully saved admins for site " + data['source']['name']
+            else:
+                return
         except:
             return "ERROR;;;Failed to save admins for site " + data['source']['name']
 
@@ -352,13 +358,19 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
+            changes = 0;
             for k in data['add']:
                 log.info('Added admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.add_admin(data['source']['name'], data['source']['hostname'], k['shib_unique_id'])
+                changes += 1
             for k in data['del']:
                 log.info('Deleted admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.remove_admin(data['source']['name'], data['source']['hostname'], k['shib_unique_id'])
-            return "OK;;;Successfully saved admins for service " + data['source']['name'] + data['source']['hostname']
+                changes += 1
+            if changes > 0:
+                return "OK;;;Successfully saved admins for service " + data['source']['name'] + data['source']['hostname']
+            else:
+                return
         except:
             return "ERROR;;;Failed to save admins for service " + data['source']['name'] + data['source']['hostname']
             
@@ -370,13 +382,19 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
+            changes = 0;
             for k in data['add']:
                 log.info('Added site ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.add_admin(k['name'], data['source']['shib_unique_id'])
+                changes += 1
             for k in data['del']:
                 log.info('Deleted site ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.remove_admin(k['name'], data['source']['shib_unique_id'])
-            return "OK;;;Successfully saved sites for admin " + data['source']['shib_unique_id']
+                changes += 1
+            if changes > 0:
+                return "OK;;;Successfully saved sites for admin " + data['source']['shib_unique_id']
+            else:
+                return
         except:
             return "ERROR;;;Failed to save sites for admin " + data['source']['shib_unique_id']
             
@@ -388,12 +406,18 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
+            changes = 0;
             for k in data['add']:
                 log.info('Added service ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.add_admin(k['name'], k['hostname'], data['source']['shib_unique_id'])
+                changes += 1
             for k in data['del']:
                 log.info('Deleted service ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.remove_admin(k['name'], k['hostname'], data['source']['shib_unique_id'])
-            return "OK;;;Successfully saved services for admin " + data['source']['shib_unique_id']
+                changes += 1
+            if changes > 0:
+                return "OK;;;Successfully saved services for admin " + data['source']['shib_unique_id']
+            else:
+                return
         except:
             return "ERROR;;;Failed to save services for admin " + data['source']['shib_unique_id']

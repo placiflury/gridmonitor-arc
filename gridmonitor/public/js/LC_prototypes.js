@@ -7,7 +7,39 @@ debug = function (log_txt) {
     }
 }
 
-
+var StatusMessageController = {
+	event_types: undefined,		// array
+	container: null,
+	delay: 3000,
+	init: function(event_type, that) {
+		var that = that || this;
+		that.event_type = event_type;
+		if (!that.container) {
+			that.container = $('<div/>').appendTo('body').hide();
+		}
+		for (i in that.event_types) {
+			$(that.container).bind(that.event_types[i], function(event, data) {
+				that.set(data);
+			});
+		}
+	},
+	set: function(data) {
+		var answer = data.split(';;;');
+		if (answer[0] == 'OK') {
+			$(this.container).attr('class', 'ok')
+		} else if (answer[0] == 'ERROR') {
+			$(this.container).attr('class', 'critical')
+		} else {
+			
+		}
+		if (answer.length > 1) {
+			$(this.container).empty().text(answer[1]);
+		} else {
+			$(this.container).empty().text(data);
+		}
+		$(this.container).fadeIn().delay(this.delay).fadeOut();
+	}
+}
 
 
 
@@ -712,6 +744,9 @@ Usage: 		(* means optional)
 var ListExchanger = {
 	left: null,			// has to be derived from ListController
 	right: null,		// has to be derived from ListController
+	xtra_data: null,	// {key: value}
+	url: undefined,
+	event_type_save: 'ListExchanger_save_done',
 	doubleclick: true,
 	enabled: true,
 	init: function(first, second, that) {
@@ -772,6 +807,25 @@ var ListExchanger = {
 			diff['del'] = del;
 		}
 		return diff;
+	},
+	save: function(orig_contr) {
+		var that = this;
+		var orig_contr = orig_contr || this.left;
+		var other_contr = that.other_contr(orig_contr);
+		var site_diff = that.get_diff(orig_contr);
+		if (that.xtra_data) {
+			for (var key in that.xtra_data) {
+				site_diff[key] = that.xtra_data[key];
+			}
+		}
+		$.post(
+				that.url || orig_contr.url,
+				site_diff,
+				function(data) {
+					jQuery.event.trigger(that.event_type_save, data);
+				},
+				"text"
+		);
 	},
 	exchange: function(item, contr) {
 		var new_parent = this.other_contr(contr);

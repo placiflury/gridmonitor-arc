@@ -121,6 +121,8 @@
 	MA_adm_mapper_inverse2.init(MA_service_list, MA_admin_list_inactive2);
 	
 	var MA_admin_list_exchanger = Object.create(ListExchanger);
+	MA_admin_list_exchanger.url = 'save';
+	MA_admin_list_exchanger.event_type_save = 'MA_admin_list_exchanger_saved';
 	MA_admin_list_exchanger.init(MA_admin_list, MA_admin_list_inactive);
 	MA_admin_list_exchanger.toggle(false);
 	$('#MA_exchange_ltr').click(function() {MA_admin_list_exchanger.ltr(); });
@@ -128,11 +130,18 @@
 	$('#MA_exchange_links').hide();
 	
 	var MA_admin_list_exchanger2 = Object.create(ListExchanger);
+	MA_admin_list_exchanger2.url = 'save';
+	MA_admin_list_exchanger2.event_type_save = 'MA_admin_list_exchanger2_saved';
 	MA_admin_list_exchanger2.init(MA_admin_list2, MA_admin_list_inactive2);
 	MA_admin_list_exchanger2.toggle(false);
 	$('#MA_exchange_ltr2').click(function() {MA_admin_list_exchanger2.ltr(); });
 	$('#MA_exchange_rtl2').click(function() {MA_admin_list_exchanger2.rtl(); });
 	$('#MA_exchange_links2').hide();
+	
+	var MA_status1 = Object.create(StatusMessageController);
+	MA_status1.event_types = ['MA_admin_list_exchanger_saved', 'MA_admin_list_exchanger2_saved'];
+	MA_status1.container = $('#MA_status');
+	MA_status1.init();
 	
 	var MA_userinterface = Object.create(MA_UI_Controller);
 	MA_userinterface.init();
@@ -216,31 +225,46 @@
 		MA_userinterface.restore();
 	});
 	MA_admin_list.links.delegate('a#save', 'click', function() {
-		var diff = MA_admin_list_exchanger.get_diff();
-		diff['source_id'] = 'MA_site_list';
-		diff['target_id'] = 'MA_adm_list';
-		diff['source'] = MA_site_list.get_selected().data('info');
-		$.post(
-				'save',
-				diff,
-				function(data) {
-					MA_adm_mapper.map();
-					MA_adm_mapper_inverse.map();
-					var answer = data.split(';;;');
-					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
-					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
-					$('#MA_status').empty().text(answer[1]);
-					$('#MA_status').fadeIn().delay(3000).fadeOut();
-				},
-				"text"
-		);
-		debug(diff)
+		MA_admin_list_exchanger.xtra_data = {
+			'source': MA_site_list.get_selected().data('info'),
+			'source_id': 'MA_site_list',
+			'target_id': 'MA_adm_list'
+		};
+		MA_admin_list_exchanger.save();
 		MA_admin_list_exchanger.toggle(false);
 		MA_admin_list.click = false;
 		toggle_lock($('#MA_site_list_container'), false);
 		toggle_lock($('#MA_service_list_container'), false);
 		toggle_lock($('#MA_admin_list_container2'), false);
 		MA_userinterface.restore();
+##		
+##		
+##		
+##		var diff = MA_admin_list_exchanger.get_diff();
+##		diff['source_id'] = 'MA_site_list';
+##		diff['target_id'] = 'MA_adm_list';
+##		diff['source'] = MA_site_list.get_selected().data('info');
+##		$.post(
+##				'save',
+##				diff,
+##				function(data) {
+##					MA_adm_mapper.map();
+##					MA_adm_mapper_inverse.map();
+##					var answer = data.split(';;;');
+##					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
+##					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
+##					$('#MA_status').empty().text(answer[1]);
+##					$('#MA_status').fadeIn().delay(3000).fadeOut();
+##				},
+##				"text"
+##		);
+##		debug(diff)
+##		MA_admin_list_exchanger.toggle(false);
+##		MA_admin_list.click = false;
+##		toggle_lock($('#MA_site_list_container'), false);
+##		toggle_lock($('#MA_service_list_container'), false);
+##		toggle_lock($('#MA_admin_list_container2'), false);
+##		MA_userinterface.restore();
 	});
 
 	MA_admin_list2.links.delegate('a#exchange', 'click', function() {
@@ -269,31 +293,45 @@
 		MA_userinterface.restore();
 	});
 	MA_admin_list2.links.delegate('a#save', 'click', function() {
-		var diff = MA_admin_list_exchanger2.get_diff();
-		diff['source_id'] = 'MA_service_list';
-		diff['target_id'] = 'MA_adm_list';
-		diff['source'] = MA_service_list.get_selected().data('info');
-		$.post(
-				'save',
-				diff,
-				function(data) {
-					MA_adm_mapper2.map();
-					MA_adm_mapper_inverse2.map();
-					var answer = data.split(';;;');
-					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
-					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
-					$('#MA_status').empty().text(answer[1]);
-					$('#MA_status').fadeIn().delay(3000).fadeOut();
-				},
-				"text"
-		);
-		debug(diff)
+		MA_admin_list_exchanger2.xtra_data = {
+			'source': MA_service_list.get_selected().data('info'),
+			'source_id': 'MA_service_list',
+			'target_id': 'MA_adm_list'
+		};
+		MA_admin_list_exchanger2.save();
 		MA_admin_list_exchanger2.toggle(false);
 		MA_admin_list2.click = false;
 		toggle_lock($('#MA_site_list_container'), false);
 		toggle_lock($('#MA_service_list_container'), false);
 		toggle_lock($('#MA_admin_list_container'), false);
 		MA_userinterface.restore();
+		
+		
+##		var diff = MA_admin_list_exchanger2.get_diff();
+##		diff['source_id'] = 'MA_service_list';
+##		diff['target_id'] = 'MA_adm_list';
+##		diff['source'] = MA_service_list.get_selected().data('info');
+##		$.post(
+##				'save',
+##				diff,
+##				function(data) {
+##					MA_adm_mapper2.map();
+##					MA_adm_mapper_inverse2.map();
+##					var answer = data.split(';;;');
+##					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
+##					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
+##					$('#MA_status').empty().text(answer[1]);
+##					$('#MA_status').fadeIn().delay(3000).fadeOut();
+##				},
+##				"text"
+##		);
+##		debug(diff)
+##		MA_admin_list_exchanger2.toggle(false);
+##		MA_admin_list2.click = false;
+##		toggle_lock($('#MA_site_list_container'), false);
+##		toggle_lock($('#MA_service_list_container'), false);
+##		toggle_lock($('#MA_admin_list_container'), false);
+##		MA_userinterface.restore();
 	});
 
 	

@@ -96,9 +96,13 @@
 	MA_service_mapper_inverse.init(MA_admin_list, MA_service_list_inactive);
 	
 	var MA_site_list_exchanger = Object.create(ListExchanger);
+	MA_site_list_exchanger.url = 'save';
+	MA_site_list_exchanger.event_type_save = 'MA_site_list_exchanger_saved';
 	MA_site_list_exchanger.init(MA_site_list, MA_site_list_inactive);
 	MA_site_list_exchanger.toggle(false);
 	var MA_service_list_exchanger = Object.create(ListExchangerSub);
+	MA_service_list_exchanger.url = 'save';
+	MA_service_list_exchanger.event_type_save = 'MA_service_list_exchanger_saved';
 	MA_service_list_exchanger.init(MA_service_list, MA_service_list_inactive);
 	MA_service_list_exchanger.toggle(false);
 	$('#MA_exchange_ltr').click(function() {
@@ -110,6 +114,16 @@
 		MA_service_list_exchanger.rtl();
 	});
 	$('#MA_exchange_links').hide();
+	
+	var MA_status1 = Object.create(StatusMessageController);
+	MA_status1.event_types = ['MA_site_list_exchanger_saved'];
+	MA_status1.container = $('#MA_status');
+	MA_status1.init();
+	
+	var MA_status2 = Object.create(StatusMessageController);
+	MA_status2.event_types = ['MA_service_list_exchanger_saved'];
+	MA_status2.container = $('#MA_status2');
+	MA_status2.init();
 	
 	var MA_userinterface = Object.create(MA_UI_Controller);
 	MA_userinterface.init();
@@ -125,6 +139,12 @@
 			return value * (-1); 
 		});
 	}
+	
+	###################################################################
+	## MA_lock: Sets the z-index of a DOM element to                 ##
+	##          (-1) * abs(current z-index)                          ##
+	##          Only works with elements that already have a z-index.##
+	###################################################################
 	var MA_lock = $('#MA_lock') .css('z-index', '-1')
 								.css('width', $('#yui-main').width())
 								.text(' ')
@@ -172,52 +192,82 @@
 		MA_userinterface.restore();
 	});
 	MA_service_list.links.delegate('a#save', 'click', function() {
-		var site_diff = MA_site_list_exchanger.get_diff();
-		site_diff['source_id'] = 'MA_adm_list';
-		site_diff['target_id'] = 'MA_site_list';
-		site_diff['source'] = MA_admin_list.get_selected().data('info');
-		$.post(
-				'save',
-				site_diff,
-				function(data) {
-					MA_site_mapper.map();
-					MA_site_mapper_inverse.map();
-					var answer = data.split(';;;');
-					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
-					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
-					$('#MA_status').empty().text(answer[1]);
-					$('#MA_status').fadeIn().delay(3000).fadeOut();
-				},
-				"text"
-		);
-		debug(site_diff)
-		
-		var service_diff = MA_service_list_exchanger.get_diff();
-		service_diff['source_id'] = 'MA_adm_list';
-		service_diff['target_id'] = 'MA_service_list';
-		service_diff['source'] = MA_admin_list.get_selected().data('info');
-		$.post(
-				'save',
-				service_diff,
-				function(data) {
-					MA_service_mapper.map();
-					MA_service_mapper_inverse.map();
-					var answer = data.split(';;;');
-					if (answer[0] == 'OK') { $('#MA_status2').attr('class', 'ok') }
-					else if (answer[0] == 'ERROR') { $('#MA_status2').attr('class', 'critical') }
-					$('#MA_status2').empty().text(answer[1]);
-					$('#MA_status2').fadeIn().delay(3000).fadeOut();
-				},
-				"text"
-		);
-		debug(service_diff)
+		MA_service_list_exchanger.xtra_data = {
+			'source': MA_admin_list.get_selected().data('info'),
+			'source_id': 'MA_adm_list',
+			'target_id': 'MA_service_list'
+		};
+		MA_site_list_exchanger.xtra_data = 	{
+			'source': MA_admin_list.get_selected().data('info'),
+			'source_id': 'MA_adm_list',
+			'target_id': 'MA_site_list'
+		};
+		MA_service_list_exchanger.save();
+		MA_site_list_exchanger.save();
+	});
+	$('#ui').bind('MA_site_list_exchanger_saved', function(event, data) {
+		MA_site_mapper.map();
+		MA_site_mapper_inverse.map();
 		MA_site_list_exchanger.toggle(false);
-		MA_service_list_exchanger.toggle(false);
 		MA_site_list.click = false;
+		toggle_lock($('#MA_admin_list_container'), false);
+		MA_userinterface.restore();
+	});
+	$('#ui').bind('MA_service_list_exchanger_saved', function(event, data) {
+		MA_service_mapper.map();
+		MA_service_mapper_inverse.map();
+		MA_service_list_exchanger.toggle(false);
 		MA_service_list.click = false;
 		toggle_lock($('#MA_admin_list_container'), false);
 		MA_userinterface.restore();
 	});
+	
+//##		var site_diff = MA_site_list_exchanger.get_diff();
+//##		site_diff['source_id'] = 'MA_adm_list';
+//##		site_diff['target_id'] = 'MA_site_list';
+//##		site_diff['source'] = MA_admin_list.get_selected().data('info');
+//##		$.post(
+//##				'save',
+//##				site_diff,
+//##				function(data) {
+//##					MA_site_mapper.map();
+//##					MA_site_mapper_inverse.map();
+//##					var answer = data.split(';;;');
+//##					if (answer[0] == 'OK') { $('#MA_status').attr('class', 'ok') }
+//##					else if (answer[0] == 'ERROR') { $('#MA_status').attr('class', 'critical') }
+//##					$('#MA_status').empty().text(answer[1]);
+//##					$('#MA_status').fadeIn().delay(3000).fadeOut();
+//##				},
+//##				"text"
+//##		);
+//##		debug(site_diff)
+//##		
+//##		var service_diff = MA_service_list_exchanger.get_diff();
+//##		service_diff['source_id'] = 'MA_adm_list';
+//##		service_diff['target_id'] = 'MA_service_list';
+//##		service_diff['source'] = MA_admin_list.get_selected().data('info');
+//##		$.post(
+//##				'save',
+//##				service_diff,
+//##				function(data) {
+//##					MA_service_mapper.map();
+//##					MA_service_mapper_inverse.map();
+//##					var answer = data.split(';;;');
+//##					if (answer[0] == 'OK') { $('#MA_status2').attr('class', 'ok') }
+//##					else if (answer[0] == 'ERROR') { $('#MA_status2').attr('class', 'critical') }
+//##					$('#MA_status2').empty().text(answer[1]);
+//##					$('#MA_status2').fadeIn().delay(3000).fadeOut();
+//##				},
+//##				"text"
+//##		);
+//## 	debug(service_diff)
+//##		MA_site_list_exchanger.toggle(false);
+//##		MA_service_list_exchanger.toggle(false);
+//##		MA_site_list.click = false;
+//##		MA_service_list.click = false;
+//##		toggle_lock($('#MA_admin_list_container'), false);
+//##		MA_userinterface.restore();         
+//##	});
 
 
 	
@@ -246,7 +296,7 @@
 	</div>
 </div>
 
-<div id="MA_status" style="display:none;"></div>
-<div id="MA_status2" style="display:none;"></div>
+<div id="MA_status" style="display:none; clear:both;"></div>
+<div id="MA_status2" style="display:none; clear:both;"></div>
 
 
