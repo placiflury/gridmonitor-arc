@@ -2,6 +2,12 @@ import logging
 from gridmonitor.lib.base import *
 from gridmonitor.model.acl import *
 from gridmonitor.model.acl.name_mapping import *
+from sft.db.cluster_handler import *
+from sft.db.sft_handler import *
+from sft.db.test_handler import *
+from sft.db.user_handler import *
+from sft.db.vo_handler import *
+
 import simplejson as json
 
 log = logging.getLogger(__name__)
@@ -60,8 +66,26 @@ class MonadminController(BaseController):
         if 'ACL' in authorized_sections:
                 c.menu.append(('ACL Manager','/monadmin/acl', acl_editor))
 
+        self.sft_clusters = None
+        self.sft_cluster_groups = None
+        self.sfts = None
+        self.sft_tests = None
+        self.sft_test_suits = None
+        self.sft_users = None
+        self.sft_vos = None
+        self.sft_vo_groups = None 
+        self.sft_vo_users = None
         if 'SFT' in authorized_sections: 
-                c.menu.append(('SFTs','/monadmin/sft', sft_editor))
+            self.sft_clusters = ClusterPool()
+            self.sft_cluster_groups = ClusterGroupPool() 
+            self.sfts = SFTPool()
+            self.sft_tests = TestPool()
+            self.sft_test_suits = TestSuitPool() 
+            self.sft_users = UserPool()
+            self.sft_vo_users = VOUserPool()
+            self.sft_vos = VOPool()
+            self.sft_vo_groups = VOGroupPool()
+            c.menu.append(('SFTs','/monadmin/sft', sft_editor))
 
 
         c.top_nav_active="Monitor Admin"

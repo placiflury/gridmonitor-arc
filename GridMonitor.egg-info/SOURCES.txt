@@ -245,7 +245,6 @@ gridmonitor/public/js/yui/build/paginator/paginator.js
 gridmonitor/public/js/yui/build/reset/reset-min.css
 gridmonitor/public/js/yui/build/reset/reset.css
 gridmonitor/public/js/yui/build/yahoo-dom-event/yahoo-dom-event.js
-gridmonitor/templates/base/.index.html.swp
 gridmonitor/templates/base/error.html
 gridmonitor/templates/base/gridadmin.html
 gridmonitor/templates/base/help.html
