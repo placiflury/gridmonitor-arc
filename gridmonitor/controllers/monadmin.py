@@ -48,8 +48,11 @@ class MonadminController(BaseController):
         # static menu information
         acl_editor = [('Sites & Services', '/monadmin/acl/admin2site'),
                       ('Administrators', '/monadmin/acl/site2admin')]
-        sft_editor = [('View SFTs (dummy)', '/monadmin/sft/list'),
-                      ('Edit SFTs (dummy)', '/monadmin/sft/edit')]
+        sft_editor = [('Clusters', '/monadmin/sft/clusters'),
+                      ('Tests', '/monadmin/sft/tests'),
+                      ('VOs', '/monadmin/sft/vos'),
+                      ('Users', '/monadmin/sft/users'),
+                      ('Edit SFTs', '/monadmin/sft/edit')]
         
         c.top_nav= session['top_nav_bar']
         

@@ -11,7 +11,7 @@
 	MA_admin_list.init('MA_adm_list', 'getadms');
 	var MA_admin_list_editor = Object.create(ListEditor);
 	MA_admin_list_editor.container = $('#MA_admin_editor_container');
-	MA_admin_list_editor.status_container = $('#MA_status');
+	MA_admin_list_editor.event_type_status = 'MA_admin_editor_status';
 	MA_admin_list_editor.url = 'changeadm';
 	MA_admin_list_editor.click = true;
 	MA_admin_list_editor.edit_child = function(fields, that) {
@@ -97,12 +97,12 @@
 	
 	var MA_site_list_exchanger = Object.create(ListExchanger);
 	MA_site_list_exchanger.url = 'save';
-	MA_site_list_exchanger.event_type_save = 'MA_site_list_exchanger_saved';
+	MA_site_list_exchanger.event_type_status = 'MA_site_list_exchanger_saved';
 	MA_site_list_exchanger.init(MA_site_list, MA_site_list_inactive);
 	MA_site_list_exchanger.toggle(false);
 	var MA_service_list_exchanger = Object.create(ListExchangerSub);
 	MA_service_list_exchanger.url = 'save';
-	MA_service_list_exchanger.event_type_save = 'MA_service_list_exchanger_saved';
+	MA_service_list_exchanger.event_type_status = 'MA_service_list_exchanger_saved';
 	MA_service_list_exchanger.init(MA_service_list, MA_service_list_inactive);
 	MA_service_list_exchanger.toggle(false);
 	$('#MA_exchange_ltr').click(function() {
@@ -121,7 +121,7 @@
 	MA_status1.init();
 	
 	var MA_status2 = Object.create(StatusMessageController);
-	MA_status2.event_types = ['MA_service_list_exchanger_saved'];
+	MA_status2.event_types = ['MA_service_list_exchanger_saved', 'MA_admin_editor_status'];
 	MA_status2.container = $('#MA_status2');
 	MA_status2.init();
 	

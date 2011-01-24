@@ -14,6 +14,9 @@ var StatusMessageController = {
 	init: function(event_type, that) {
 		var that = that || this;
 		that.event_type = event_type;
+		if (a.indexOf('OpDoneStatus') < 0) {
+			that.event_type[that.event_type.length] = 'OpDoneStatus';
+		}
 		if (!that.container) {
 			that.container = $('<div/>').appendTo('body').hide();
 		}
@@ -370,7 +373,6 @@ var ListControllerSub = Object.create(ListController);
 // Prototype of ListEditor
 /************************************************************************************
 	url: 					[String],
-	status_container: 		[jQuery Object],
 	list_contr: 			[ListController Object],
 	selected_item: 			[jQuery Object],
 	container: 				[jQuery Object],
@@ -388,9 +390,6 @@ Usage:  		(* means optional)
 	*editor.url = "http://my.domain.com/somewhere/";
 									// IMPORTANT: Save, change and delete are sent to
 									// this url --> set it if you want to change data
-	*editor.status_container = $('#my_status_container');
-									// set this to steer where the status messages are
-									// shown, otherwise they are displayed in the body
 	*editor.container = $('my_editor_container');
 									// set this to steer where the editor table should
 									// appear, otherwise it's appended to the body
@@ -416,7 +415,7 @@ Usage:  		(* means optional)
 ************************************************************************************/
 var ListEditor = {
 	url: undefined,
-	status_container: null,
+	event_type_status = "OpDoneStatus",
 	list_contr: null,
 	selected_item: null,
 	container: undefined,
@@ -442,20 +441,19 @@ var ListEditor = {
 		that.table = that.table_proto.clone();
 
 		if (that.new_link && !(that.list_contr.has_link('new'))) {
-			that.list_contr.set_link('new', 'Add new Element');
+			that.list_contr.set_link('new', 'New');
 		}
 		if (that.edit_link && !(that.list_contr.has_link('edit'))) {
-			that.list_contr.set_link('edit', 'Edit Element');
+			that.list_contr.set_link('edit', 'Edit');
 		}
 		if (that.del_link && !(that.list_contr.has_link('del'))) {
-			that.list_contr.set_link('del', 'Delete Element');
+			that.list_contr.set_link('del', 'Delete');
 		}
 
 		that.delegate_click();
 		that.delegate_hover();
 		that.delegate_links();
 		that.container = that.container || $('body');
-		that.status_container = that.status_container || $('<div/>').appendTo('body');
 		that.table.appendTo(that.container);
 	},
 	hide: function(force) {
@@ -476,6 +474,8 @@ var ListEditor = {
 			var child_selected = this.list_contr.get_selected();
 		} else if (this.hover) {
 			var child_selected = this.selected_item;
+		} else {
+			var child_selected = this.list_contr.get_selected();
 		}
 		debug(child_selected.data('info'));
 		var info = child_selected.data().info;
@@ -604,13 +604,7 @@ var ListEditor = {
 			this.url,
 			member,
 			function(data) {
-				var answer = data.split(';;;');
-				if (answer[0] == 'OK') { that.status_container.attr('class', 'ok') }
-				else if (answer[0] == 'ERROR') { that.status_container.attr('class', 'critical') }
-				that.status_container.text(answer[1]);
-				that.status_container.fadeIn().delay(3000).fadeOut();
-				that.list_contr.update_list(http_get_params);
-				that.table.empty();
+					jQuery.event.trigger(that.event_type_status, data);
 				}, "text");
 		that.status_container.ajaxError(function() {
 		  $(this).attr('class', 'critical').text('AJAX request could not be completed.');
@@ -746,7 +740,7 @@ var ListExchanger = {
 	right: null,		// has to be derived from ListController
 	xtra_data: null,	// {key: value}
 	url: undefined,
-	event_type_save: 'ListExchanger_save_done',
+	event_type_status: 'OpDoneStatus',
 	doubleclick: true,
 	enabled: true,
 	init: function(first, second, that) {
@@ -822,7 +816,7 @@ var ListExchanger = {
 				that.url || orig_contr.url,
 				site_diff,
 				function(data) {
-					jQuery.event.trigger(that.event_type_save, data);
+					jQuery.event.trigger(that.event_type_status, data);
 				},
 				"text"
 		);

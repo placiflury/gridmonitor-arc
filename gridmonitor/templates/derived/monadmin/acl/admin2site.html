@@ -10,7 +10,7 @@
 	MA_site_list.init('MA_site_list', 'getsites');
 	var MA_site_list_editor = Object.create(ListEditor);
 	MA_site_list_editor.container = $('#MA_site_editor_container');
-	MA_site_list_editor.status_container = $('#MA_status');
+	MA_site_list_editor.event_type_status = 'MA_status_site_editor';
 	MA_site_list_editor.url = 'changesite';
 	MA_site_list_editor.click = true;
 	MA_site_list_editor.flush_container = true;
@@ -25,7 +25,7 @@
 	MA_service_list.hide();
 	var MA_service_list_editor = Object.create(ListEditor);
 	MA_service_list_editor.container = $('#MA_service_editor_container');
-	MA_service_list_editor.status_container = $('#MA_status');
+	MA_service_list_editor.event_type_status = 'MA_status_service_editor';
 	MA_service_list_editor.url = 'changeservice';
 	MA_service_list_editor.click = true;
 	MA_service_list_editor.flush_container = true;
@@ -122,7 +122,7 @@
 	
 	var MA_admin_list_exchanger = Object.create(ListExchanger);
 	MA_admin_list_exchanger.url = 'save';
-	MA_admin_list_exchanger.event_type_save = 'MA_admin_list_exchanger_saved';
+	MA_admin_list_exchanger.event_type_status = 'MA_admin_list_exchanger_saved';
 	MA_admin_list_exchanger.init(MA_admin_list, MA_admin_list_inactive);
 	MA_admin_list_exchanger.toggle(false);
 	$('#MA_exchange_ltr').click(function() {MA_admin_list_exchanger.ltr(); });
@@ -131,7 +131,7 @@
 	
 	var MA_admin_list_exchanger2 = Object.create(ListExchanger);
 	MA_admin_list_exchanger2.url = 'save';
-	MA_admin_list_exchanger2.event_type_save = 'MA_admin_list_exchanger2_saved';
+	MA_admin_list_exchanger2.event_type_status = 'MA_admin_list_exchanger2_saved';
 	MA_admin_list_exchanger2.init(MA_admin_list2, MA_admin_list_inactive2);
 	MA_admin_list_exchanger2.toggle(false);
 	$('#MA_exchange_ltr2').click(function() {MA_admin_list_exchanger2.ltr(); });
@@ -139,7 +139,7 @@
 	$('#MA_exchange_links2').hide();
 	
 	var MA_status1 = Object.create(StatusMessageController);
-	MA_status1.event_types = ['MA_admin_list_exchanger_saved', 'MA_admin_list_exchanger2_saved'];
+	MA_status1.event_types = ['MA_admin_list_exchanger_saved', 'MA_admin_list_exchanger2_saved', 'MA_status_site_editor', 'MA_status_service_editor'];
 	MA_status1.container = $('#MA_status');
 	MA_status1.init();
 	
