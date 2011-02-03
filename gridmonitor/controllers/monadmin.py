@@ -2,6 +2,7 @@ import logging
 from gridmonitor.lib.base import *
 from gridmonitor.model.acl import *
 from gridmonitor.model.acl.name_mapping import *
+from gridmonitor.model.sft.name_mapping import *
 from sft.db.cluster_handler import *
 from sft.db.sft_handler import *
 from sft.db.test_handler import *
@@ -52,12 +53,12 @@ class MonadminController(BaseController):
 
                 
         # static menu information
-        acl_editor = [('Sites & Services', '/monadmin/acl/admin2site'),
-                      ('Administrators', '/monadmin/acl/site2admin')]
-        sft_editor = [('Clusters', '/monadmin/sft/clusters'),
-                      ('Tests', '/monadmin/sft/tests'),
+        acl_editor = [('Sites & Services', '/monadmin/acl/siteservices'),
+                      ('Administrators', '/monadmin/acl/admins')]
+        sft_editor = [('Users', '/monadmin/sft/users'),
                       ('VOs', '/monadmin/sft/vos'),
-                      ('Users', '/monadmin/sft/users'),
+                      ('Clusters', '/monadmin/sft/clusters'),
+                      ('Tests', '/monadmin/sft/tests'),
                       ('Edit SFTs', '/monadmin/sft/edit')]
         
         c.top_nav= session['top_nav_bar']
@@ -95,7 +96,9 @@ class MonadminController(BaseController):
         
         c.title = "Monitoring System: Monitor Admin View"
         c.menu_active = "Manage Resources"
+        c.heading = "Monitor Admin"
+        
         if self.authorized == False:
             return render('/derived/monadmin/error/access_denied.html')        
-        return render('/base/monadmin.html')
+        return render('/derived/monadmin/index.html')
   

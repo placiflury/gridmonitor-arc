@@ -63,9 +63,7 @@ def make_map():
 
 
     # administrator interface for GridMonitor
-    map.connect('monadmin',controller='monadmin_resources')
-    map.connect('monadmin/resources/:action', controller='monadmin_resources')
-    map.connect('monadmin/resources/:action/:id', controller='monadmin_resources')
+    map.connect('monadmin',controller='monadmin')
     map.connect('monadmin/acl/:action', controller='monadmin_acl')
     map.connect('monadmin/acl/:action/:id', controller='monadmin_acl')
     map.connect('monadmin/sft/:action', controller='monadmin_sft')

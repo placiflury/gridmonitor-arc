@@ -17,7 +17,7 @@ class MonadminAclController(MonadminController):
         return render('/derived/monadmin/acl/index.html')
     
 
-    def admin2site(self):
+    def siteservices(self):
         c.title = "Monitoring System: Monitor Admin View"
         c.menu_active = "Manage ACL"
         c.heading = "Manage ACLs for Sites and Services"
@@ -28,16 +28,16 @@ class MonadminAclController(MonadminController):
         c.sites = self.sites_pool.list_sites()
         c.services = list()
 
-        return render('/derived/monadmin/acl/admin2site.html')
+        return render('/derived/monadmin/acl/sites_services.html')
     
-    def site2admin(self):
+    def admins(self):
         c.title = "Monitoring System: Monitor Admin View"
         c.menu_active = "Manage ACL"
         c.heading = "Manage ACLs for Administrators"
         if self.authorized == False:
             return render('/derived/monadmin/error/access_denied.html')
         
-        return render('/derived/monadmin/acl/site2admin.html')
+        return render('/derived/monadmin/acl/admins.html')
     
     def __build_json__(self, data_list, keymap, keymap_order, opt_params):
         """
@@ -62,7 +62,6 @@ class MonadminAclController(MonadminController):
                     item_dict[k] = item.__dict__[k]
                 except:
                     pass
-            log.info('Key: %s' % k)
             if opt_params['id_key'] == 'hash':
                 item_dict['hash'] = hash(item_dict.__str__())
             json_data['members'].append(item_dict)
@@ -180,7 +179,7 @@ class MonadminAclController(MonadminController):
                                                 request.POST['shib_given_name'], \
                                                 request.POST['shib_email'] )
                 return "OK;;;Changed admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
-        except ACLError, e:
+        except errors.ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
@@ -232,7 +231,7 @@ class MonadminAclController(MonadminController):
                 return "OK;;;Changed site " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except ACLError, e:
+        except errors.ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
@@ -302,7 +301,7 @@ class MonadminAclController(MonadminController):
                                                 request.POST['hostname'], \
                                                 request.POST['alias'])
                 return "OK;;;Changed service " + request.POST['name'] + " successfully."
-        except ACLError, e:
+        except errors.ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1

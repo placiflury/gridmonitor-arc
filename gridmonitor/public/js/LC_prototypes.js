@@ -2,20 +2,22 @@
 // Set LC_debug to true if you want to see notifications on the console.
 var LC_debug = true;
 debug = function (log_txt) {
-    if (window.console != undefined && LC_debug) {
-        console.log(log_txt);
-    }
+	if (window.console != undefined && LC_debug) {
+		console.log(log_txt);
+	}
 }
 
 var StatusMessageController = {
 	event_types: undefined,		// array
 	container: null,
 	delay: 3000,
-	init: function(event_type, that) {
+	init: function(that) {
 		var that = that || this;
-		that.event_type = event_type;
-		if (a.indexOf('OpDoneStatus') < 0) {
-			that.event_type[that.event_type.length] = 'OpDoneStatus';
+		// Default value if no value is set:
+		that.event_types = that.event_types || ['OpDoneStatus'];
+		// Default value if some values are set:
+		if (that.event_types.indexOf('OpDoneStatus') < 0) {
+			that.event_types[that.event_types.length] = 'OpDoneStatus';
 		}
 		if (!that.container) {
 			that.container = $('<div/>').appendTo('body').hide();
@@ -25,21 +27,28 @@ var StatusMessageController = {
 				that.set(data);
 			});
 		}
+		$(that.container).ajaxError(function() {
+			that.set("ERROR;;;AJAX Request Error.");
+		});
+		$(that.container).hide();
 	},
 	set: function(data) {
 		var answer = data.split(';;;');
+		if (answer.length < 2) {
+			var answer = ['UNKNOWN', data];
+		}
 		if (answer[0] == 'OK') {
-			$(this.container).attr('class', 'ok')
+			$(this.container).attr('class', 'ok');
 		} else if (answer[0] == 'ERROR') {
-			$(this.container).attr('class', 'critical')
+			$(this.container).attr('class', 'error');
+		} else if (answer[0] == 'CRITICAL') {
+			$(this.container).attr('class', 'critical');
+		} else if (answer[0] == 'WARN') {
+			$(this.container).attr('class', 'warn');
 		} else {
-			
+			$(this.container).attr('class', 'unknown');
 		}
-		if (answer.length > 1) {
-			$(this.container).empty().text(answer[1]);
-		} else {
-			$(this.container).empty().text(data);
-		}
+		$(this.container).empty().text(answer[1]);
 		$(this.container).fadeIn().delay(this.delay).fadeOut();
 	}
 }
@@ -65,35 +74,35 @@ var StatusMessageController = {
 
 // List Controller for simple listing of admins, sites, services, clusters, vos, tests
 /************************************************************************************
-url: 				[String],
-click: 				[Boolean]
-container: 			[jQuery Object],
-title_proto 		[jQuery Object]
-title: 				[jQuery Object],
-list_proto: 		[jQuery Object],
-list: 				[jQuery Object],
+url:				[String],
+click:				[Boolean]
+container:			[jQuery Object],
+title_proto			[jQuery Object]
+title:				[jQuery Object],
+list_proto:			[jQuery Object],
+list:				[jQuery Object],
 child_proto:		[jQuery Object],
-link_proto: 		[jQuery Object],
-links: 				[jQuery Object],
-multiple: 			[Boolean],
-name_tag: 			[String],
-identifier: 		[String]
-toggle: 			[Boolean]
+link_proto:			[jQuery Object],
+links:				[jQuery Object],
+multiple:			[Boolean],
+name_tag:			[String],
+identifier:			[String]
+toggle:				[Boolean]
 **************************************************************************************
-Usage: 		(* means optional)
+Usage:		(* means optional)
 	var test = Object.create(ListController);
 	*test.container = “DOM Element”;
 	*test.title_proto = “another title prototype“;
-	*test.list_proto = “another list prototype“;  		// should be some <ul> element
+	*test.list_proto = “another list prototype“;		// should be some <ul> element
 	*test.child_proto = “another child prototype“;		// should be some <li> element
 	*test.link_proto = “another link prototype“;
 	*test.multiple = true/false;						// select multiple list elements
-	*test.click = true/false; 							// List elements selectable
-	*test.set_link(string id, string link_text, bool remove) 	// 	id= "new", "edit",
+	*test.click = true/false;							// List elements selectable
+	*test.set_link(string id, string link_text, bool remove)	//	id= "new", "edit",
 	*test.set_link(string id, bool remove)						//	"del" have special
 	*test.set_link(string id, string link_text)					//	meanings
 	*test.set_title('Titelzeile:');
-	test.init(name_tag, url); 			// name_tag: identifier for the generated list.
+	test.init(name_tag, url);			// name_tag: identifier for the generated list.
 										// url: valid url where data is stored (JSON)
 JSON data format url should return:
 	{
@@ -115,6 +124,7 @@ JSON data format url should return:
 var ListController = {
 	url: undefined,
 	click: true,
+	cursor: undefined,
 	container: undefined,
 	title_proto: $('<b/>'),
 	title: null,
@@ -128,13 +138,17 @@ var ListController = {
 	identifier: undefined,
 	toggle: false,
 	init: function(name_tag, url, that) {
-		var that = that || this; 
-		that.identifier = Math.random();
+		var that = that || this;
+		var my_identifier = Math.random();
+		that.identifier = my_identifier.toString().replace(/\W/g, '');
 		if (!name_tag || typeof name_tag != 'string') {
 			throw 'A ListController object has to be initiated with a valid name_tag.';
 		}
 		if (!url || typeof url != 'string') {
 			throw 'A URL is needed to fetch JSON data.';
+		}
+		if (!that.cursor) {
+			that.cursor = 'pointer'
 		}
 		that.name_tag = name_tag;
 		that.url = url;
@@ -175,7 +189,7 @@ var ListController = {
 		} else {
 			this.links = this.links || $('<div/>');
 			if (id && link_text) {
-				var new_link = this.link_proto 	.clone()
+				var new_link = this.link_proto	.clone()
 												.text(link_text)
 												.attr('id', id);
 				new_link.append($('<br/>'));
@@ -241,13 +255,15 @@ var ListController = {
 				str += ' ';
 			}
 		}
-		return str;
+		// Strip white spaces at beginning and end of String.
+		return str.replace(/^\s+|\s+$/g, '');
 	},
 	create_child: function(id, child_text) {
-		return this.child_proto 	.clone(true)
+		return this.child_proto		.clone(true)
 									.appendTo(this.list)
 									.attr('name', this.identifier)
-									.attr('id', id)
+									.attr('id', id.toString().replace(/\W/g, ''))
+									.css('cursor', this.cursor)
 									.text(child_text);
 	},
 	show: function() {
@@ -299,10 +315,10 @@ var ListController = {
 // appended with the functionality of sub categories
 // Only difference to ListController is documented here:
 /************************************************************************************
-	subchild_proto: 		[jQuery Object]
-	child_proto: 			[jQuery Object]
+	subchild_proto:			[jQuery Object]
+	child_proto:			[jQuery Object]
 **************************************************************************************
-Usage: 		(* means optional)
+Usage:		(* means optional)
 	same as ListController
 The url in the init function should return the following JSON structure:
 	{
@@ -362,30 +378,31 @@ var ListControllerSub = Object.create(ListController);
 		});
 	},
 	ListControllerSub.create_subchild = function(id, child_text, parent) {
-		return this.subchild_proto 	.clone()
+		return this.subchild_proto	.clone()
 								.appendTo(parent)
-								.attr('id', id)
+								.attr('id', id.toString().replace(/\W/g, ''))
 								.attr('name', this.identifier)
+								.css('cursor', this.cursor)
 								.text(child_text);
 	}
 
 
 // Prototype of ListEditor
 /************************************************************************************
-	url: 					[String],
-	list_contr: 			[ListController Object],
-	selected_item: 			[jQuery Object],
-	container: 				[jQuery Object],
-	flush_container: 		[Boolean],
-	table_proto: 			[jQuery Object],
-	table: 					[jQuery Object],
-	new_link: 				[Boolean],
-	edit_link: 				[Boolean],
-	del_link: 				[Boolean],
-	click: 					[Boolean],
-	hover: 					[Boolean],
+	url:					[String],
+	list_contr:				[ListController Object],
+	selected_item:			[jQuery Object],
+	container:				[jQuery Object],
+	flush_container:		[Boolean],
+	table_proto:			[jQuery Object],
+	table:					[jQuery Object],
+	new_link:				[Boolean],
+	edit_link:				[Boolean],
+	del_link:				[Boolean],
+	click:					[Boolean],
+	hover:					[Boolean],
 **************************************************************************************
-Usage:  		(* means optional)
+Usage:			(* means optional)
 	var editor = Object.create(ListEditor);
 	*editor.url = "http://my.domain.com/somewhere/";
 									// IMPORTANT: Save, change and delete are sent to
@@ -415,7 +432,7 @@ Usage:  		(* means optional)
 ************************************************************************************/
 var ListEditor = {
 	url: undefined,
-	event_type_status = "OpDoneStatus",
+	event_type_status: "OpDoneStatus",
 	list_contr: null,
 	selected_item: null,
 	container: undefined,
@@ -461,31 +478,32 @@ var ListEditor = {
 			this.table.empty();
 		}
 	},
-	show: function(fields) {
-		this.table.show();
-		this.table.empty();
-		if (this.flush_container) {
-			this.container.empty();
+	show: function(fields, that) {
+		var that = that || this
+		that.table.show();
+		that.table.empty();
+		if (that.flush_container) {
+			that.container.empty();
 		}
 		var fields = fields || {};
-		if (this.click && this.hover) {
-			var child_selected = this.list_contr.get_selected() || this.selected_item;
-		} else if (this.click) {
-			var child_selected = this.list_contr.get_selected();
-		} else if (this.hover) {
-			var child_selected = this.selected_item;
+		if (that.click && that.hover) {
+			var child_selected = that.list_contr.get_selected() || that.selected_item;
+		} else if (that.click) {
+			var child_selected = that.list_contr.get_selected();
+		} else if (that.hover) {
+			var child_selected = that.selected_item;
 		} else {
-			var child_selected = this.list_contr.get_selected();
+			var child_selected = that.list_contr.get_selected();
 		}
 		debug(child_selected.data('info'));
 		var info = child_selected.data().info;
-		var keys = this.list_contr.list.data().order_keys;
+		var keys = that.list_contr.list.data().order_keys;
 		for (var k in keys) {
 			if (info.hasOwnProperty(keys[k])) {
-				var row = $('<tr><td/><td id="LE_change"/></tr>');
-				this.table.append(row);
+				var row = $('<tr><td id="LE_name"/><td id="LE_change"/></tr>');
+				that.table.append(row);
 				fields[keys[k]] = fields[keys[k]] || $('<div/>');
-				row.children('td').first().text(this.list_contr.list.data().fields[keys[k]]);
+				row.children('td').first().text(that.list_contr.list.data().fields[keys[k]]);
 				var field = fields[keys[k]];
 				field.text(info[keys[k]]);
 				try {
@@ -496,7 +514,11 @@ var ListEditor = {
 				row.children('td').last().append(field);
 			}
 		}
-		this.container.append(this.table);
+		that.container.append(that.table);
+	},
+	show_child: function(fields, that) {
+		var that = that || this;
+		that.show(fields, that);
 	},
 	new_child: function(fields, that) {
 		var that = that || this;
@@ -511,8 +533,8 @@ var ListEditor = {
 		var pseudo_selected = $('<li/>').toggleClass('selected', true).hide();
 		pseudo_selected.data('info', that.list_contr.list.data('fields'));
 		that.list_contr.list.append(pseudo_selected);
-		that.show(fields);
-		that.table.find('input').val('').empty();
+		that.show(fields, that);
+		that.table.find('input, textarea').val('').empty();
 		pseudo_selected.remove();
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></tr>');
 		that.table.append(row);
@@ -537,7 +559,7 @@ var ListEditor = {
 				fields[k] = $('<input type="text" id="' + k + '" />');
 			}
 		}
-		that.show(fields);
+		that.show(fields, that);
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
 		that.table.append(row);
 		var save_button = $('<a id="LE_save" value="save">save</a>')
@@ -552,18 +574,18 @@ var ListEditor = {
 		row.children('td').last().append('<br/>');
 		row.children('td').last().append(cancel_button);
 	},
-	delete_child: function() {
-		var that = this;
-		var field_names = this.list_contr.list.data().fields;
-		var fields = {};
+	delete_child: function(fields, that) {
+		var that = that || this;
+		var field_names = that.list_contr.list.data().fields;
+		var fields = fields || {};
 		for (var k in field_names) {
-			if (field_names.hasOwnProperty(k)) {
+			if (field_names.hasOwnProperty(k) && !fields[k]) {
 				fields[k] = $('<div id="' + k + '" />');
 			}
 		}
-		this.show(fields);
+		that.show(fields, that);
 		var row = $('<tr style="border:0;"><td style="border:0;"/><td style="border:0;"/></<tr>');
-		this.table.append(row);
+		that.table.append(row);
 		var del_button = $('<a id="LE_del" type="button" value="delete">delete</a>')
 									.click(function() {
 										that.commit('del');
@@ -604,18 +626,19 @@ var ListEditor = {
 			this.url,
 			member,
 			function(data) {
+					that.hide(true);
+					that.list_contr.update_list();
 					jQuery.event.trigger(that.event_type_status, data);
-				}, "text");
-		that.status_container.ajaxError(function() {
-		  $(this).attr('class', 'critical').text('AJAX request could not be completed.');
-		});
+			},
+			"text"
+		);
 	},
 	delegate_show: function(evnt) {
 		var evnt = evnt || 'click';
 		this.list_contr.list.delegate('li', evnt, {user:this}, function(event) {
 			var that = event.data.user;
 			that.selected_item = $(this);
-			that.show();
+			that.show_child();
 		});
 	},
 	delegate_hide: function(evnt) {
@@ -654,14 +677,14 @@ var ListEditor = {
 
 // Prototype of ListMapper
 /************************************************************************************
-	source: 			[ListController object]
-	target: 			[ListController object]
+	source:				[ListController object]
+	target:				[ListController object]
 *************************************************************************************
 Usage:
 	var my_mapper = Object.create(ListMapper)
 	my_mapper.init(my_listcontroller_1, my_listcontroller_2)
 	
-INFO: 	The whole selected source object is sent to the server side via HTTP GET request
+INFO:	The whole selected source object is sent to the server side via HTTP GET request
 		to the url of the target object. The whole logic is on the server side.
 ************************************************************************************/
 var ListMapper = {
@@ -677,9 +700,9 @@ var ListMapper = {
 		}
 		that.delegate_click();
 	},
-	delegate_click: function() {
-		this.source.list.delegate('li', 'click', {user:this}, function(event) {
-			var that = event.data.user;
+	delegate_click: function(that) {
+		var that = that || this;
+		that.source.list.delegate('li', 'click', function(event) {
 			that.map();
 		});
 	},
@@ -717,12 +740,12 @@ ListMapperInverse.map = function() {
 
 // Prototype of List Exchanger
 /************************************************************************************
-	left: 			[ListController object],			// has to be derived from ListController
-	right: 			[ListController object],		// has to be derived from ListController
-	doubleclick: 	[Boolean],
-	enabled: 		[Boolean],
+	left:			[ListController object],			// has to be derived from ListController
+	right:			[ListController object],		// has to be derived from ListController
+	doubleclick:	[Boolean],
+	enabled:		[Boolean],
 *************************************************************************************
-Usage: 		(* means optional)
+Usage:		(* means optional)
 	var my_listexchanger = Object.create(ListExchanger)
 	*my_listexchanger.doubleclick = false;
 	my_listexchanger.init(my_listcontroller_1, my_listcontroller_2)
