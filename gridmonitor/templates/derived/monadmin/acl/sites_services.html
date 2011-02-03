@@ -1,0 +1,342 @@
+<%inherit file="/base/monadmin.html"/>
+
+<%def name="dom_ready()" >\
+	## Initialization of the Controllers:
+	var MA_site_list = Object.create(ListController);
+	MA_site_list.container = $('#MA_site_list_container');
+	MA_site_list.set_title('Sites:');
+	MA_site_list.set_link('new', 'Add site');
+	MA_site_list.set_link('del', 'Remove site');
+	MA_site_list.init('MA_site_list', 'getsites');
+	var MA_site_list_editor = Object.create(ListEditor);
+	MA_site_list_editor.container = $('#MA_site_editor_container');
+	MA_site_list_editor.event_type_status = 'MA_status_site_editor';
+	MA_site_list_editor.url = 'changesite';
+	MA_site_list_editor.click = true;
+	MA_site_list_editor.flush_container = true;
+	MA_site_list_editor.init(MA_site_list);
+	
+	var MA_service_list = Object.create(ListController);
+	MA_service_list.container = $('#MA_service_list_container');
+	MA_service_list.set_title('Services:');
+	MA_service_list.set_link('new', 'Add service');
+	MA_service_list.set_link('del', 'Remove service');
+	MA_service_list.init('MA_service_list', 'getservices');
+	MA_service_list.hide();
+	var MA_service_list_editor = Object.create(ListEditor);
+	MA_service_list_editor.container = $('#MA_service_editor_container');
+	MA_service_list_editor.event_type_status = 'MA_status_service_editor';
+	MA_service_list_editor.url = 'changeservice';
+	MA_service_list_editor.click = true;
+	MA_service_list_editor.flush_container = true;
+	MA_service_list_editor.new_child = function(fields, that) {
+		var that = that || this;
+		var site_name = MA_site_list.get_selected().data('info').name;
+		this.http_get_params = '?source_id=MA_site_list&target_id=MA_service_list&name=' + site_name;
+		var fields = {};
+		fields['site_name'] = $('<div id="site_name"/>');
+		fields['type'] = $('<select id="type" type="select" size="1"/>');
+		that.__proto__.new_child(fields, that);
+		fields['site_name'].val(undefined).text(site_name);
+		fields['type'].text('')
+		%for type in c.service_names:
+			fields['type'].append('<option>${type.strip()}</option>');
+		%endfor
+	};
+	MA_service_list_editor.init(MA_service_list);
+
+	var MA_admin_list = Object.create(ListController);
+	MA_admin_list.container = $('#MA_admin_list_container');
+	MA_admin_list.multiple = true;
+	MA_admin_list.set_title('Site admins:');
+	MA_admin_list.set_link('exchange', 'Edit site admins');
+	MA_admin_list.set_link('save');
+	MA_admin_list.links.find('#save').hide();
+	MA_admin_list.set_link('cancel');
+	MA_admin_list.links.find('#cancel').hide();
+	MA_admin_list.click = false;
+	MA_admin_list.init('MA_adm_list', 'getadms');
+	MA_admin_list.hide();
+	var MA_admin_list_editor = Object.create(ListEditor);
+	MA_admin_list_editor.container = $('#MA_admin_editor_container');
+	MA_admin_list_editor.hover = true;
+	MA_admin_list_editor.flush_container = true;
+	MA_admin_list_editor.init(MA_admin_list);
+	
+	var MA_admin_list2 = Object.create(ListController);
+	MA_admin_list2.container = $('#MA_admin_list_container2');
+	MA_admin_list2.multiple = true;
+	MA_admin_list2.set_title('Service admins:');
+	MA_admin_list2.set_link('exchange', 'Edit service admins');
+	MA_admin_list2.set_link('save');
+	MA_admin_list2.links.find('#save').hide();
+	MA_admin_list2.set_link('cancel');
+	MA_admin_list2.links.find('#cancel').hide();
+	MA_admin_list2.click = false;
+	MA_admin_list2.init('MA_adm_list', 'getadms');
+	MA_admin_list2.hide();
+	var MA_admin_list_editor2 = Object.create(ListEditor);
+	MA_admin_list_editor2.container = $('#MA_admin_editor_container2');
+	MA_admin_list_editor2.hover = true;
+	MA_admin_list_editor2.flush_container = true;
+	MA_admin_list_editor2.init(MA_admin_list2);
+	
+	var MA_adm_mapper = Object.create(ListMapper);
+	MA_adm_mapper.init(MA_site_list, MA_admin_list);
+	
+	var MA_service_mapper = Object.create(ListMapper);
+	MA_service_mapper.init(MA_site_list, MA_service_list);
+	
+	var MA_adm_mapper2 = Object.create(ListMapper);
+	MA_adm_mapper2.init(MA_service_list, MA_admin_list2);
+	
+	var MA_admin_list_inactive = Object.create(ListController);
+	MA_admin_list_inactive.container = $('#MA_admin_list_inactive_container');
+	MA_admin_list_inactive.multiple = true;
+	MA_admin_list_inactive.set_title('Inactive site admins:');
+	MA_admin_list_inactive.init('MA_adm_list', 'getadms');
+	MA_admin_list_inactive.hide();
+	var MA_admin_list_inactive_editor = Object.create(ListEditor);
+	MA_admin_list_inactive_editor.container = $('#MA_admin_editor_container');
+	MA_admin_list_inactive_editor.hover = true;
+	MA_admin_list_inactive_editor.flush_container = true;
+	MA_admin_list_inactive_editor.init(MA_admin_list_inactive);
+	
+	var MA_admin_list_inactive2 = Object.create(ListController);
+	MA_admin_list_inactive2.container = $('#MA_admin_list_inactive_container2');
+	MA_admin_list_inactive2.multiple = true;
+	MA_admin_list_inactive2.set_title('Inactive service admins:');
+	MA_admin_list_inactive2.init('MA_adm_list', 'getadms');
+	MA_admin_list_inactive2.hide();
+	var MA_admin_list_inactive_editor2 = Object.create(ListEditor);
+	MA_admin_list_inactive_editor2.container = $('#MA_admin_editor_container2');
+	MA_admin_list_inactive_editor2.hover = true;
+	MA_admin_list_inactive_editor2.flush_container = true;
+	MA_admin_list_inactive_editor2.init(MA_admin_list_inactive2);
+	
+	var MA_adm_mapper_inverse = Object.create(ListMapperInverse);
+	MA_adm_mapper_inverse.init(MA_site_list, MA_admin_list_inactive);
+	
+	var MA_adm_mapper_inverse2 = Object.create(ListMapperInverse);
+	MA_adm_mapper_inverse2.init(MA_service_list, MA_admin_list_inactive2);
+	
+	var MA_admin_list_exchanger = Object.create(ListExchanger);
+	MA_admin_list_exchanger.url = 'save';
+	MA_admin_list_exchanger.event_type_status = 'MA_admin_list_exchanger_saved';
+	MA_admin_list_exchanger.init(MA_admin_list, MA_admin_list_inactive);
+	MA_admin_list_exchanger.toggle(false);
+	$('#MA_exchange_ltr').click(function() {MA_admin_list_exchanger.ltr(); });
+	$('#MA_exchange_rtl').click(function() {MA_admin_list_exchanger.rtl(); });
+	$('#MA_exchange_links').hide();
+	
+	var MA_admin_list_exchanger2 = Object.create(ListExchanger);
+	MA_admin_list_exchanger2.url = 'save';
+	MA_admin_list_exchanger2.event_type_status = 'MA_admin_list_exchanger2_saved';
+	MA_admin_list_exchanger2.init(MA_admin_list2, MA_admin_list_inactive2);
+	MA_admin_list_exchanger2.toggle(false);
+	$('#MA_exchange_ltr2').click(function() {MA_admin_list_exchanger2.ltr(); });
+	$('#MA_exchange_rtl2').click(function() {MA_admin_list_exchanger2.rtl(); });
+	$('#MA_exchange_links2').hide();
+	
+	var MA_status1 = Object.create(StatusMessageController);
+	MA_status1.event_types = ['MA_admin_list_exchanger_saved', 'MA_admin_list_exchanger2_saved', 'MA_status_site_editor', 'MA_status_service_editor'];
+	MA_status1.container = $('#MA_status');
+	MA_status1.init();
+	
+	var MA_userinterface = Object.create(MA_UI_Controller);
+	MA_userinterface.init();
+	
+	###################################################################
+	## MA_lock: Sets the z-index of a DOM element to                 ##
+	##          (-1) * abs(current z-index)                          ##
+	##          Only works with elements that already have a z-index.##
+	###################################################################
+	var MA_lock = $('#MA_lock') .css('z-index', '-1')
+								.css('width', $('#yui-main').width())
+								.text(' ')
+								.css('height', $('#yui-main').height())
+								.css('left', 0)
+								.css('top', $('#yui-main').css('top'));
+	## Functionality
+	var toggle_lock = function(container, force) {
+		MA_lock.css('height', $('#yui-main').height());
+		$(container).css('z-index',function(index,value) {
+			if (force == false) {
+				return Math.abs(value);
+			} else if (force == true) {
+				return (-1) * Math.abs(value);
+			}
+			return value * (-1); 
+		});
+	}
+	$('#MA_site_list_container').css('z-index', '2');
+	$('#MA_service_list_container').css('z-index', '2');
+	$('#MA_admin_list_container').css('z-index', '2');
+	$('#MA_admin_list_inactive_container').css('z-index', '2');
+	$('#MA_admin_list_container2').css('z-index', '2');
+	$('#MA_admin_list_inactive_container2').css('z-index', '2');
+	$('#ui').css('height', $('#yui-main').height());
+	
+	
+	MA_site_list.links.delegate('a', 'click', function() {
+		MA_admin_list.hide();
+		MA_admin_list2.hide();
+		MA_service_list.hide();
+		MA_service_list_editor.hide(true);
+	});
+	
+	MA_service_list.links.delegate('a', 'click', function() {
+		MA_admin_list2.hide();
+		MA_userinterface.set();
+		MA_admin_list.hide();
+		MA_site_list_editor.hide(true);
+		toggle_lock($('#MA_site_list_container'), true);
+	});
+	
+	MA_site_list.list.delegate('li', 'click', function() {
+		var site = MA_site_list.get_selected().text();
+		MA_service_list.set_title('Services (' + site + '):');
+		MA_admin_list.set_title('Site admins (' + site + '):');
+		MA_admin_list2.hide();
+		MA_admin_list_inactive2.hide();
+		MA_service_list_editor.hide(true);
+	});
+	MA_service_list.list.delegate('li', 'click', function() {
+		var service = MA_service_list.get_selected().text();
+		MA_admin_list2.set_title('Service admins (' + service + '):');
+	});
+	
+	$('#MA_service_editor_container').delegate('a', 'click', function() {
+		MA_userinterface.restore();
+		toggle_lock($('#MA_site_list_container'), false);
+	});
+	
+	MA_admin_list.links.delegate('a#exchange', 'click', function() {
+		MA_admin_list_exchanger.toggle(true);
+		MA_admin_list.click = true;
+		toggle_lock($('#MA_site_list_container'), true);
+		toggle_lock($('#MA_service_list_container'), true);
+		toggle_lock($('#MA_admin_list_container2'), true);
+		MA_userinterface.set();
+		MA_service_list_editor.table.hide();
+		MA_admin_list_inactive.show();
+		$('#MA_exchange_links').show();
+		MA_admin_list.links.find('#exchange').hide();
+		MA_admin_list.links.find('#save').show();
+		MA_admin_list.links.find('#cancel').show();
+		$('#MA_lock').css('height', $('#yui-main').height());
+	});
+	MA_admin_list.links.delegate('a#cancel', 'click', function() {
+		MA_adm_mapper.map();
+		MA_adm_mapper_inverse.map();
+		MA_admin_list_exchanger.toggle(false);
+		MA_admin_list.click = false;
+		toggle_lock($('#MA_site_list_container'), false);
+		toggle_lock($('#MA_service_list_container'), false);
+		toggle_lock($('#MA_admin_list_container2'), false);
+		MA_userinterface.restore();
+	});
+	MA_admin_list.links.delegate('a#save', 'click', function() {
+		MA_admin_list_exchanger.xtra_data = {
+			'source': MA_site_list.get_selected().data('info'),
+			'source_id': 'MA_site_list',
+			'target_id': 'MA_adm_list'
+		};
+		MA_admin_list_exchanger.save();
+		MA_admin_list_exchanger.toggle(false);
+		MA_admin_list.click = false;
+	});
+	$('#ui').bind('MA_admin_list_exchanger_saved', function(event, data) {
+		MA_adm_mapper.map();
+		MA_adm_mapper_inverse.map();
+		MA_admin_list_exchanger.toggle(false);
+		toggle_lock($('#MA_site_list_container'), false);
+		toggle_lock($('#MA_service_list_container'), false);
+		toggle_lock($('#MA_admin_list_container2'), false);
+		MA_userinterface.restore();
+	});
+
+	MA_admin_list2.links.delegate('a#exchange', 'click', function() {
+		MA_admin_list_exchanger2.toggle(true);
+		MA_admin_list2.click = true;
+		toggle_lock($('#MA_site_list_container'), true);
+		toggle_lock($('#MA_service_list_container'), true);
+		toggle_lock($('#MA_admin_list_container'), true);
+		MA_userinterface.set();
+		MA_site_list_editor.table.hide();
+		MA_admin_list_inactive2.show();
+		$('#MA_exchange_links2').show();
+		MA_admin_list2.links.find('#exchange').hide();
+		MA_admin_list2.links.find('#save').show();
+		MA_admin_list2.links.find('#cancel').show();
+		$('#MA_lock').css('height', $('#yui-main').height());
+	});
+	MA_admin_list2.links.delegate('a#cancel', 'click', function() {
+		MA_adm_mapper2.map();
+		MA_adm_mapper_inverse2.map();
+		MA_admin_list_exchanger2.toggle(false);
+		MA_admin_list2.click = false;
+		toggle_lock($('#MA_site_list_container'), false);
+		toggle_lock($('#MA_service_list_container'), false);
+		toggle_lock($('#MA_admin_list_container'), false);
+		MA_userinterface.restore();
+	});
+	MA_admin_list2.links.delegate('a#save', 'click', function() {
+		MA_admin_list_exchanger2.xtra_data = {
+			'source': MA_service_list.get_selected().data('info'),
+			'source_id': 'MA_service_list',
+			'target_id': 'MA_adm_list'
+		};
+		MA_admin_list_exchanger2.save();
+		MA_admin_list_exchanger2.toggle(false);
+		MA_admin_list2.click = false;
+	});
+	$('#ui').bind('MA_admin_list_exchanger2_saved', function(event, data) {
+		MA_adm_mapper2.map();
+		MA_adm_mapper_inverse2.map();
+		toggle_lock($('#MA_site_list_container'), false);
+		toggle_lock($('#MA_service_list_container'), false);
+		toggle_lock($('#MA_admin_list_container'), false);
+		MA_userinterface.restore();
+	});
+
+	
+</%def>
+
+<div id="MA_lock" style="position:absolute; background-color: #FFFFFF; opacity: 0.5; filter: alpha(opacity = 50);"></div>
+
+<div id="ui">
+	<div id="ui_top">
+		<div id="MA_site_list_container" style="position:relative;"></div>
+		<div id="MA_admin_list_container" style="position:relative;"></div>
+		<div id="MA_exchange_links" style="position:relative;">
+			<div id="MA_exchange_rtl" style="position:relative; top:115px;">&larr;</div>
+			<div id="MA_exchange_ltr" style="position:relative; top:115px;">&rarr;</div>
+		</div>
+		<div id="MA_admin_list_inactive_container" style="position:relative;"></div>
+		<div id="MA_editor_container" style="position:relative;">
+			<div id="MA_site_editor_container" style="position:relative;"></div>
+			<p>&nbsp;</p>
+			<div id="MA_admin_editor_container" style="position:relative;"></div>
+		</div>
+	</div>
+	<div id="ui_bottom" style="clear:both;">
+		<div id="MA_service_list_container" style="position:relative;"></div>
+		<div id="MA_admin_list_container2" style="position:relative;"></div>
+		<div id="MA_exchange_links2" style="position:relative;">
+			<div id="MA_exchange_rtl2" style="position:relative; top:115px;">&larr;</div>
+			<div id="MA_exchange_ltr2" style="position:relative; top:115px;">&rarr;</div>
+		</div>
+		<div id="MA_admin_list_inactive_container2" style="position:relative;"></div>
+		<div id="MA_editor_container2" style="position:relative;">
+			<div id="MA_service_editor_container" style="position:relative;"></div>
+			<p>&nbsp;</p>
+			<div id="MA_admin_editor_container2" style="position:relative;"></div>
+		</div>
+	</div>
+</div>
+
+<div id="MA_status" style="display:none;"></div>
+
+
+

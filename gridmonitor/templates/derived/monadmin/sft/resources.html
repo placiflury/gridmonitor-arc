@@ -1,0 +1,212 @@
+<%inherit file="/base/monadmin.html"/>
+## c.list_title
+## c.list_gr_title
+## c.short_identifier
+## c.list_url
+## c.list_gr_url
+## c.exchanger_url
+## c.editor_url
+##
+##
+
+<%def name="dom_ready()" >\
+	var MA_sft_${c.short_identifier}_list = Object.create(ListController);
+	MA_sft_${c.short_identifier}_list.set_title("${c.list_title}:");
+	MA_sft_${c.short_identifier}_list.container = $('#MA_sft_${c.short_identifier}_list_container');
+	MA_sft_${c.short_identifier}_list.init('MA_sft_${c.short_identifier}_list', '${c.list_url}');
+	var MA_sft_${c.short_identifier}_editor = Object.create(ListEditor);
+	MA_sft_${c.short_identifier}_editor.url = "${c.list_editor_url}";
+	MA_sft_${c.short_identifier}_editor.click = true;
+	MA_sft_${c.short_identifier}_editor.new_link = true;
+	MA_sft_${c.short_identifier}_editor.edit_link = true;
+	MA_sft_${c.short_identifier}_editor.del_link = true;
+	MA_sft_${c.short_identifier}_editor.container = $('#MA_sft_${c.short_identifier}_editor_container');
+	<%include file="editor_fields.mako"/>
+	MA_sft_${c.short_identifier}_editor.init(MA_sft_${c.short_identifier}_list);
+	
+	var MA_sft_${c.short_identifier}_gr_list = Object.create(ListController);
+	MA_sft_${c.short_identifier}_gr_list.set_title("${c.list_gr_title}:");
+	MA_sft_${c.short_identifier}_gr_list.container = $('#MA_sft_${c.short_identifier}_gr_list_container');
+	MA_sft_${c.short_identifier}_gr_list.init('MA_sft_${c.short_identifier}_gr_list', '${c.list_gr_url}');
+	var MA_sft_${c.short_identifier}_gr_editor = Object.create(ListEditor);
+	MA_sft_${c.short_identifier}_gr_editor.url = "${c.list_gr_editor_url}";
+	MA_sft_${c.short_identifier}_gr_editor.new_link = true;
+	MA_sft_${c.short_identifier}_gr_editor.del_link = true;
+	MA_sft_${c.short_identifier}_gr_editor.container = $('#MA_sft_${c.short_identifier}_gr_editor_container');
+	MA_sft_${c.short_identifier}_gr_editor.init(MA_sft_${c.short_identifier}_gr_list);
+	
+	var MA_sft_${c.short_identifier}_list2 = Object.create(ListController);
+	MA_sft_${c.short_identifier}_list2.set_title("${c.list_title}:");
+	MA_sft_${c.short_identifier}_list2.container = $('#MA_sft_${c.short_identifier}_list2_container');
+	MA_sft_${c.short_identifier}_list2.click = false;
+	MA_sft_${c.short_identifier}_list2.toggle = true;
+	MA_sft_${c.short_identifier}_list2.cursor = 'default';
+	MA_sft_${c.short_identifier}_list2.set_link('exchange', 'Add/Remove ${c.list_title}');
+	MA_sft_${c.short_identifier}_list2.set_link('save');
+	MA_sft_${c.short_identifier}_list2.links.find('#save').hide();
+	MA_sft_${c.short_identifier}_list2.set_link('cancel');
+	MA_sft_${c.short_identifier}_list2.links.find('#cancel').hide();
+	MA_sft_${c.short_identifier}_list2.init('MA_sft_${c.short_identifier}_list', '${c.list_url}');
+	
+	var MA_sft_${c.short_identifier}_list2_inactive = Object.create(ListController);
+	MA_sft_${c.short_identifier}_list2_inactive.set_title("Unavailable ${c.list_title}:");
+	MA_sft_${c.short_identifier}_list2_inactive.toggle = true;
+	MA_sft_${c.short_identifier}_list2_inactive.cursor = 'default';
+	MA_sft_${c.short_identifier}_list2_inactive.container = $('#MA_sft_${c.short_identifier}_list2_inactive_container');
+	MA_sft_${c.short_identifier}_list2_inactive.init('MA_sft_${c.short_identifier}_list', '${c.list_url}');
+	
+	var MA_sft_${c.short_identifier}_mapper = Object.create(ListMapper);
+	MA_sft_${c.short_identifier}_mapper.init(MA_sft_${c.short_identifier}_gr_list, MA_sft_${c.short_identifier}_list2);
+	
+	var MA_sft_${c.short_identifier}_mapper_inactive = Object.create(ListMapperInverse);
+	MA_sft_${c.short_identifier}_mapper_inactive.init(MA_sft_${c.short_identifier}_gr_list, MA_sft_${c.short_identifier}_list2_inactive);
+	
+	var MA_sft_${c.short_identifier}_exchanger = Object.create(ListExchanger);
+	MA_sft_${c.short_identifier}_exchanger.url = '${c.exchanger_url}';
+	MA_sft_${c.short_identifier}_exchanger.event_type_status = 'MA_${c.short_identifier}_exchanger_saved';
+	MA_sft_${c.short_identifier}_exchanger.init(MA_sft_${c.short_identifier}_list2, MA_sft_${c.short_identifier}_list2_inactive);
+	MA_sft_${c.short_identifier}_exchanger.toggle(false);
+	$('#MA_exchange_ltr').click(function() {MA_sft_${c.short_identifier}_exchanger.ltr(); });
+	$('#MA_exchange_rtl').click(function() {MA_sft_${c.short_identifier}_exchanger.rtl(); });
+	$('#MA_exchange_links').hide();
+	MA_sft_${c.short_identifier}_list2.hide();
+	MA_sft_${c.short_identifier}_list2_inactive.hide();
+	
+	var MA_status = Object.create(StatusMessageController);
+	MA_status.container = $('#MA_status');
+	MA_status.event_types = ['MA_${c.short_identifier}_exchanger_saved'];
+	MA_status.init();
+	
+	var MA_userinterface = Object.create(MA_UI_Controller);
+	MA_userinterface.init();
+	
+	###################################################################
+	## MA_lock: Sets the z-index of a DOM element to                 ##
+	##          (-1) * abs(current z-index)                          ##
+	##          Only works with elements that already have a z-index.##
+	###################################################################
+	var MA_lock = $('#MA_lock') .css('z-index', '-1')
+								.css('width', $('#yui-main').width())
+								.text(' ')
+								.css('height', $('#yui-main').height())
+								.css('left', 0)
+								.css('top', $('#yui-main').css('top'));
+	## Functionality
+	var toggle_lock = function(container, force) {
+		MA_lock.css('height', $('#yui-main').height());
+		$(container).css('z-index',function(index,value) {
+			if (force == false) {
+				return Math.abs(value);
+			} else if (force == true) {
+				return (-1) * Math.abs(value);
+			}
+			return value * (-1); 
+		});
+	}
+	MA_sft_${c.short_identifier}_list.container.css('z-index', '3');
+	MA_sft_${c.short_identifier}_gr_list.container.css('z-index', '2');
+	MA_sft_${c.short_identifier}_list2.container.css('z-index', '2');
+	MA_sft_${c.short_identifier}_editor.container.css('z-index', '2');
+	$('#ui').css('height', $('#yui-main').height());
+	
+	MA_sft_${c.short_identifier}_list2.links.delegate('#exchange', 'click', function() {
+		MA_sft_${c.short_identifier}_exchanger.toggle(true);
+		MA_sft_${c.short_identifier}_list2.click = true;
+		MA_sft_${c.short_identifier}_editor.hide(true);
+		MA_sft_${c.short_identifier}_list.list.find('li').toggleClass('selected', false);
+		MA_userinterface.set();
+		MA_sft_${c.short_identifier}_list2_inactive.show();
+		$('#MA_exchange_links').show();
+		MA_sft_${c.short_identifier}_list2.links.find('#save').show();
+		MA_sft_${c.short_identifier}_list2.links.find('#cancel').show();
+		MA_sft_${c.short_identifier}_list2.links.find('#exchange').hide();
+		toggle_lock(MA_sft_${c.short_identifier}_list.container, true);
+		toggle_lock(MA_sft_${c.short_identifier}_gr_list.container, true);
+		toggle_lock(MA_sft_${c.short_identifier}_editor.container, true);
+	});
+	MA_sft_${c.short_identifier}_gr_list.links.delegate('a', 'click', function() {
+		MA_sft_${c.short_identifier}_list2.hide();
+		toggle_lock(MA_sft_${c.short_identifier}_list.container, true);
+		toggle_lock(MA_sft_${c.short_identifier}_gr_list.container, true);
+		toggle_lock(MA_sft_${c.short_identifier}_editor.container, true);
+	});
+	MA_sft_${c.short_identifier}_gr_editor.container.delegate('a', 'click', function() {
+		toggle_lock(MA_sft_${c.short_identifier}_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_gr_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_editor.container, false);
+	});
+	MA_sft_${c.short_identifier}_list2.links.delegate('#cancel', 'click', function() {
+		MA_sft_${c.short_identifier}_exchanger.toggle(false);
+		MA_sft_${c.short_identifier}_list2.click = false;
+		MA_sft_${c.short_identifier}_mapper.map();
+		MA_sft_${c.short_identifier}_mapper_inactive.map();
+		MA_userinterface.restore();
+		toggle_lock(MA_sft_${c.short_identifier}_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_gr_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_editor.container, false);
+	});
+	MA_sft_${c.short_identifier}_list2.links.delegate('#save', 'click', function() {
+		MA_sft_${c.short_identifier}_exchanger.xtra_data = 	{
+			'source': MA_sft_${c.short_identifier}_gr_list.get_selected().data('info'),
+			'source_id': 'MA_sft_${c.short_identifier}_gr_list',
+			'target_id': 'MA_sft_${c.short_identifier}_list'
+		};
+		MA_sft_${c.short_identifier}_exchanger.save();
+		MA_sft_${c.short_identifier}_exchanger.toggle(false);
+		MA_sft_${c.short_identifier}_list2.click = false;
+	});
+	$('#ui').bind('MA_${c.short_identifier}_exchanger_saved', function(event, data) {
+		MA_sft_${c.short_identifier}_mapper.map();
+		MA_sft_${c.short_identifier}_mapper_inactive.map();
+		MA_userinterface.restore();
+		toggle_lock(MA_sft_${c.short_identifier}_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_gr_list.container, false);
+		toggle_lock(MA_sft_${c.short_identifier}_editor.container, false);
+	});
+	MA_sft_${c.short_identifier}_list.links.delegate('a', 'click', function() {
+		MA_sft_${c.short_identifier}_list2.hide();
+		MA_sft_${c.short_identifier}_gr_list.get_selected().toggleClass('selected', false);
+	});
+	MA_sft_${c.short_identifier}_gr_list.list.delegate('li', 'click', function() {
+		MA_sft_${c.short_identifier}_list2.set_title("${c.list_title} (" + MA_sft_${c.short_identifier}_gr_list.get_selected().text() + "):");
+		MA_sft_${c.short_identifier}_list2_inactive.set_title("Unavailable ${c.list_title}:");
+	});
+	MA_sft_${c.short_identifier}_list2.list.delegate('li', 'click', function() {
+		if (MA_sft_${c.short_identifier}_exchanger.enabled == false) {
+			MA_sft_${c.short_identifier}_list.list.find('li#' + $(this).attr('id')).click();
+		}
+	});
+</%def>
+
+<div id="MA_lock" style="position:absolute; background-color: #FFFFFF; opacity: 0.5; filter: alpha(opacity = 50);"></div>
+
+<div id="ui">
+	<div id="ui_top" style="clear:both;">
+		<div id="MA_sft_${c.short_identifier}_list_container">
+		
+		</div>
+		<div id="MA_sft_${c.short_identifier}_editor_container">
+		
+		</div>
+	</div>
+	<div id="ui_bottom" style="clear:both;">
+		<div id="MA_sft_${c.short_identifier}_gr_list_container">
+		
+		</div>
+		<div id="MA_sft_${c.short_identifier}_list2_container">
+		
+		</div>
+		<div id="MA_exchange_links" style="position:relative;">
+			<div id="MA_exchange_rtl" style="position:relative; top:115px;">&larr;</div>
+			<div id="MA_exchange_ltr" style="position:relative; top:115px;">&rarr;</div>
+		</div>
+		<div id="MA_sft_${c.short_identifier}_list2_inactive_container">
+		
+		</div>
+		<div id="MA_sft_${c.short_identifier}_gr_editor_container">
+		
+		</div>
+	</div>
+</div>
+
+<div id="MA_status" style="display:none;"></div>

@@ -1,0 +1,288 @@
+<%inherit file="/base/monadmin.html"/>
+
+<%def name="dom_ready()" >\
+	var ajax_edit_mode_success = function(data, field, group_name) {
+		var members = data['members'];
+		var submembers = data['submembers'];
+		var show_keys = data['show_keys'];
+		var id_key = data['id_key'];
+		for (var i in members) {
+			var option = $('<option/>');
+			var text = '';
+			for (k in show_keys) {
+				text += members[i][show_keys[k]] + ' ';
+			}
+			option.text(text);
+			option.data().info = members[i];
+			option.data().info.submembers = submembers[members[i]['name']];
+			option.appendTo(field)
+			if (option.data().info.name == group_name) {
+				$(field.children()[i]).attr('selected','selected');
+			}
+		}
+	}
+	var ajax_show_mode_success = function(data, field, group_name) {
+		var members = data['members'];
+		var submembers = data['submembers'];
+		var show_keys = data['show_keys'];
+		var id_key = data['id_key'];
+		for (var i in members) {
+			if (members[i].name == group_name) {
+				field.data().info = members[i];
+				field.data().info.submembers = submembers[members[i]['name']];
+				field.attr('selected','selected');
+			}
+		}
+	}
+	var bind_mouseover_details = function(field, data_holder_id) {
+		field.bind('change mouseenter', function() {
+			$.event.trigger('MA_update_detail_list', $(data_holder_id).data().info.submembers);
+			MA_sft_detail_list.set_title('Details (' + $(data_holder_id).data().info.name + '):');
+			$('#MA_sft_detail_list_container').show()
+		});
+		field.bind('mouseleave', function() {
+			$('#MA_sft_detail_list_container').hide();
+		});
+	}
+
+	var MA_sft_list = Object.create(ListController);
+	MA_sft_list.set_title("${c.list_title}:");
+	MA_sft_list.container = $('#MA_sft_list_container');
+	MA_sft_list.init('MA_sft_list', '${c.list_url}');
+	var MA_sft_editor = Object.create(ListEditor);
+	MA_sft_editor.url = "${c.list_editor_url}";
+	MA_sft_editor.click = true;
+	MA_sft_editor.new_link = true;
+	MA_sft_editor.edit_link = true;
+	MA_sft_editor.del_link = true;
+	MA_sft_editor.container = $('#MA_sft_editor_container');
+	MA_sft_editor.show_child = function(fields,that) {
+		var that = that || this;
+		var fields = fields || {};
+		fields['cluster_group'] = $('<a id="cluster_group"/>');
+		fields['vo_group'] = $('<a id="vo_group"/>');
+		fields['test_suit'] = $('<a id="test_suit"/>');
+		that.__proto__.show(fields, that);
+		
+		var cluster_group_name = that.list_contr.get_selected().data('info').cluster_group;
+		var vo_group_name = that.list_contr.get_selected().data('info').vo_group;
+		var test_suit_name = that.list_contr.get_selected().data('info').test_suit;
+		jQuery.get( 
+			'listclustergroups/' + cluster_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['cluster_group'], cluster_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listvogroups/' + vo_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['vo_group'], vo_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listtestsuits/' + cluster_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['test_suit'], test_suit_name)},
+			'json'
+		);
+		bind_mouseover_details(fields['cluster_group'], 'a#cluster_group');
+		bind_mouseover_details(fields['vo_group'], 'a#vo_group');
+		bind_mouseover_details(fields['test_suit'], 'a#test_suit');
+	}
+	MA_sft_editor.delete_child = function(fields, that) {
+		var that = that || this;
+		var fields = fields || {};
+		fields['cluster_group'] = $('<a id="cluster_group"/>');
+		fields['vo_group'] = $('<a id="vo_group"/>');
+		fields['test_suit'] = $('<a id="test_suit"/>');
+		that.__proto__.delete_child(fields, that);
+		var cluster_group_name = that.list_contr.get_selected().data('info').cluster_group;
+		var vo_group_name = that.list_contr.get_selected().data('info').vo_group;
+		var test_suit_name = that.list_contr.get_selected().data('info').test_suit;
+		jQuery.get( 
+			'listclustergroups/' + cluster_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['cluster_group'], cluster_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listvogroups/' + vo_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['vo_group'], vo_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listtestsuits/' + cluster_group_name,
+			'',
+			function(data) {ajax_show_mode_success(data, fields['test_suit'], test_suit_name)},
+			'json'
+		);
+		bind_mouseover_details(fields['cluster_group'], 'a#cluster_group');
+		bind_mouseover_details(fields['vo_group'], 'a#vo_group');
+		bind_mouseover_details(fields['test_suit'], 'a#test_suit');
+	}
+	MA_sft_editor.new_child = function(fields,that) {
+		var that = that || this;
+		that.list_contr.list.find('li').toggleClass('selected', false);
+		var pseudo_selected = $('<li/>').toggleClass('selected', true).hide();
+		pseudo_selected.data('info', that.list_contr.list.data('fields'));
+		that.list_contr.list.append(pseudo_selected);
+		that.edit_child(fields, that);
+		that.table.find('input, textarea').val('').empty();
+		that.table.find('select').prepend('<option selected/>');
+		pseudo_selected.remove();
+	}
+	MA_sft_editor.edit_child = function(fields, that) {
+		var that = that || this;
+		var fields = fields || {};
+		fields['cluster_group'] = $('<select size="1" id="cluster_group"/>');
+		fields['vo_group'] = $('<select size="1" id="vo_group"/>');
+		fields['test_suit'] = $('<select size="1" id="test_suit"/>');
+		
+		that.__proto__.edit_child(fields, that);
+		
+		fields['cluster_group'].text('').val('');
+		fields['vo_group'].text('').val('');
+		fields['test_suit'].text('').val('');
+		var cluster_group_name = that.list_contr.get_selected().data('info').cluster_group;
+		var vo_group_name = that.list_contr.get_selected().data('info').vo_group;
+		var test_suit_name = that.list_contr.get_selected().data('info').test_suit;
+		jQuery.get( 
+			'listclustergroups/' + cluster_group_name,
+			'',
+			function(data) {ajax_edit_mode_success(data, fields['cluster_group'], cluster_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listvogroups/' + vo_group_name,
+			'',
+			function(data) {ajax_edit_mode_success(data, fields['vo_group'], vo_group_name)},
+			'json'
+		);
+		jQuery.get( 
+			'listtestsuits/' + cluster_group_name,
+			'',
+			function(data) {ajax_edit_mode_success(data, fields['test_suit'], test_suit_name)},
+			'json'
+		);
+		bind_mouseover_details(fields['cluster_group'], 'select#cluster_group option:selected');
+		bind_mouseover_details(fields['vo_group'], 'select#vo_group option:selected');
+		bind_mouseover_details(fields['test_suit'], 'select#test_suit option:selected');
+	}
+	MA_sft_editor.init(MA_sft_list);
+	
+	var MA_sft_detail_list = Object.create(ListController);
+	MA_sft_detail_list.set_title('Details:');
+	MA_sft_detail_list.click = false;
+	MA_sft_detail_list.container = $('#MA_sft_detail_list_container');
+	MA_sft_detail_list.init('MA_sft_detail_list', 'listclusters');
+	MA_sft_detail_list.hide();
+	
+	MA_sft_detail_list.data = null;
+	MA_sft_detail_list.create_list = function(http_get_params) {
+		var that = this;
+		if (!that.data) {
+			return;
+		}
+		var data = that.data;
+		that.list.empty();
+		that.list.data('fields', data['names']);
+		that.list.data('order_keys', data['order_keys']);
+		var mem = data['members']
+		for (var i in mem) {
+			if (mem.hasOwnProperty(i)){
+				var new_child = that.create_child(
+						mem[i][data['id_key']],
+						that.child_text(mem[i], data['show_keys'])
+				);
+				if (data['id_key'] == 'hash') {
+					new_child.data('hash', mem[i]['hash']);
+					delete mem[i]['hash'];
+				}
+				new_child.data('info', mem[i]);
+			}
+		}
+	};
+	$('#ui').bind('MA_update_detail_list', function(event, data) {
+		MA_sft_detail_list.data = data;
+		MA_sft_detail_list.update_list();
+	});
+	
+	
+	var MA_status = Object.create(StatusMessageController);
+	MA_status.container = $('#MA_status');
+	MA_status.init();
+	
+	###################################################################
+	## MA_lock: Sets the z-index of a DOM element to                 ##
+	##          (-1) * abs(current z-index)                          ##
+	##          Only works with elements that already have a z-index.##
+	###################################################################
+	var MA_lock = $('#MA_lock') .css('z-index', '-1')
+								.css('width', $('#yui-main').width())
+								.text(' ')
+								.css('height', $('#yui-main').height())
+								.css('left', 0)
+								.css('top', $('#yui-main').css('top'));
+	## Functionality
+	var toggle_lock = function(container, force) {
+		MA_lock.css('height', $('#yui-main').height());
+		$(container).css('z-index',function(index,value) {
+			if (force == false) {
+				return Math.abs(value);
+			} else if (force == true) {
+				return (-1) * Math.abs(value);
+			}
+			return value * (-1); 
+		});
+	}
+	MA_sft_list.container.css('z-index', '3');
+	$('#ui').css('height', $('#yui-main').height());
+	
+	// Parse Cron strings as typing: (Test new character)
+	MA_sft_editor.table.delegate('#month, #day_of_week, #day, #hour, #minute', 'keypress', function(evt) {		
+		// Test new character
+		var charCode = (evt.which) ? evt.which : window.event.keyCode;  
+		if (charCode <= 13)
+		{
+			return true;
+		}
+		else
+		{
+			var keyChar = String.fromCharCode(charCode); 
+			var re = /[\*\/,\-0-9]/
+			return re.test(keyChar);
+		}
+	});
+	// Parse Cron strings as typing: (Test expression)
+	MA_sft_editor.table.delegate('#month, #day_of_week, #day, #hour, #minute', 'keyup', function(evt) {
+		var error = false;
+		var input = $(this).val();
+		var re = /^((\*)|(\d+((,\d+)*|(\-\d+)*)*))(\/((\*)|(\d+((,\d+)*|(\-\d+)*)*)))?$/g
+		re_result = input.match(re);
+		if (!re_result || re_result[0] != input) {
+			error = true;
+		}
+		if (error) {
+			$(this).css('background-color','red');
+		} else {
+			$(this).css('background-color','white');
+		}
+	});
+</%def>
+
+<div id="MA_lock" style="position:absolute; background-color: #FFFFFF; opacity: 0.5; filter: alpha(opacity = 50);"></div>
+
+<div id="ui">
+	<div id="MA_sft_list_container" style="float:left;">
+	
+	</div>
+	<div id="MA_sft_editor_container" style="float:left;">
+	
+	</div>
+	<div id="MA_sft_detail_list_container" style="left:20px; float:left;">
+	
+	</div>
+</div>
+
+<div id="MA_status" style="display:none;"></div>
