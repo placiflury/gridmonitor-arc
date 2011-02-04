@@ -600,7 +600,7 @@ var ListEditor = {
 	},
 	commit: function(button) {
 		var that = this;
-		var http_get_params = that.http_get_params || '';
+		var http_get_params = that.list_contr.http_get_params || '';
 		if (!button || button == 'cancel') {
 			this.table.empty();
 			this.list_contr.list.find('li').toggleClass('selected', false);
@@ -627,7 +627,8 @@ var ListEditor = {
 			member,
 			function(data) {
 					that.hide(true);
-					that.list_contr.update_list();
+					http_get_params = that.http_get_params || "";
+					that.list_contr.update_list(http_get_params);
 					jQuery.event.trigger(that.event_type_status, data);
 			},
 			"text"

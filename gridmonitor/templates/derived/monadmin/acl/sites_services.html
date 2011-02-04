@@ -195,6 +195,7 @@
 	
 	MA_site_list.list.delegate('li', 'click', function() {
 		var site = MA_site_list.get_selected().text();
+		MA_service_list.http_get_params = MA_service_mapper.build_params();
 		MA_service_list.set_title('Services (' + site + '):');
 		MA_admin_list.set_title('Site admins (' + site + '):');
 		MA_admin_list2.hide();

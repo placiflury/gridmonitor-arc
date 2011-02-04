@@ -176,7 +176,7 @@ class MonadminSftController(MonadminController):
     def changesft(self):
         try:
             if request.POST['button'] == 'del':
-                self.sft_tests.remove_sft(request.POST['name'])
+                self.sfts.remove_sft(request.POST['name'])
                 return "OK;;;Deleted SFT " + request.POST['name'] + " successfully."
             elif request.POST['button'] == 'save':
                 self.sfts.add_sft( request.POST['name'],\
