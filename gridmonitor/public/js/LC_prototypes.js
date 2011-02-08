@@ -1,12 +1,34 @@
 // Debug Flag:
 // Set LC_debug to true if you want to see notifications on the console.
-var LC_debug = true;
+var LC_debug = false;
 debug = function (log_txt) {
 	if (window.console != undefined && LC_debug) {
 		console.log(log_txt);
 	}
 }
 
+
+// StatusMessageController: Show a Status String in a Box when some events get triggered
+/************************************************************************************
+event_types: 		[Array] containing all the events that should be bound
+							default: ['OpDoneStatus']
+container: 			[jQuery Object] refering to a DOM Element that should contain the
+									status message
+									default: $('body > div')
+delay: 				[Int] in ms to keep the status message visible before it disappears
+
+init(that): 		Initialization function (bind event_types)
+set(data): 			[String] data contains a string to display (function gets called
+					if an event in event_types gets triggered)
+*************************************************************************************
+Usage: 		(* means optional)
+		var my_smc = Object.create(StatusMessageController);
+		*my_smc.event_types = ['SpecialEvent', 'AnotherEvent', 'YetAnotherEvent'];
+		*my_smc.container = $('div#StatusMessageContainer');  // an existing div with ID StatusMessageContainer
+		*my_smc.delay = 4000;
+		my_smc.init();
+		
+*************************************************************************************/
 var StatusMessageController = {
 	event_types: undefined,		// array
 	container: null,
@@ -55,43 +77,52 @@ var StatusMessageController = {
 
 
 
-/*function get_json_data(url, callback_handle) {
-	if (!url) {
-		throw 'A URL is needed to fetch JSON data.';
-	}
-	var json_data = null;
-	$.getJSON(url, function(data) {
-		json_data = data;
-		return json_data;
-	});
-	if (!json_data['members'] || !json_data['names']) {
-		throw 'Fetched JSON data has wrong format.'
-	}
-	return json_data;
-}
-*/
-
-
 // List Controller for simple listing of admins, sites, services, clusters, vos, tests
 /************************************************************************************
-url:				[String],
-click:				[Boolean]
-container:			[jQuery Object],
-title_proto			[jQuery Object]
-title:				[jQuery Object],
-list_proto:			[jQuery Object],
-list:				[jQuery Object],
-child_proto:		[jQuery Object],
-link_proto:			[jQuery Object],
-links:				[jQuery Object],
-multiple:			[Boolean],
-name_tag:			[String],
-identifier:			[String]
-toggle:				[Boolean]
+(--: meant to be private)
+--url:				[String],           A URL to find a JSON object with list data
+click:				[Boolean]           Set list elements to clickable or not
+container:			[jQuery Object],    The corresponding parent of the list, default appended to body
+--title_proto	   	[jQuery Object]
+--title:		   	[jQuery Object],    To change the title, use set_title('Text')
+--list_proto:	   	[jQuery Object],
+--list:				[jQuery Object],    Pointer to the <ul></ul> part
+--child_proto:		[jQuery Object],
+--link_proto:	   	[jQuery Object],
+--links:		   	[jQuery Object],    To set link use set_link('link_id', 'link_text'), to remove link
+                                        use set_link('link_id', false) or set_link(false) to remove all links
+multiple:			[Boolean],          Enables the possibility to select multiple items
+--name_tag:			[String],
+--identifier:  		[String]
+toggle:				[Boolean]           Enables toggling of selected items if true (unselect selected item)
+
+init(name_tag, url, that):              Call init after having set the optional parameters above.
+                                        name_tag: identifier for the kind of the list. Important if used together 
+                                                  with ListMapper
+                                        url: A URL to find a JSON object with list data
+                                        that: internal use only (don't set)
+set_title(new_title):                   Sets the text of the title to new_title
+
+set_link(id, link_text):                Set link with ID "id" and text "link_text"
+set_link(id):                           Set link with ID "id" and text "id"
+set_link(id, false):                    Unset link with id "id"
+set_link(false):                        Unset all links
+--has_link(id):
+--build():
+--create_list(http_get_params):
+update_list(http_get_params):           Send a HTTP_GET_REQUEST to renew the data of the list with or without http_get_params
+--child_text(member, keys):
+--create_child(id, child_text):
+show():                                 Show list
+hide():                                 Hide list
+get_selected():                         Returns list of [jQuery Objects] with selected items
+get_all():                              Returns all items of the list
+--bind_click;():
+--handle_click_event(clicked):
 **************************************************************************************
 Usage:		(* means optional)
 	var test = Object.create(ListController);
-	*test.container = “DOM Element”;
+	*test.container = “DOM Element”;                    // NOTICE: normally this should be set by hand to something like this: $('div#mydiv_id')
 	*test.title_proto = “another title prototype“;
 	*test.list_proto = “another list prototype“;		// should be some <ul> element
 	*test.child_proto = “another child prototype“;		// should be some <li> element
@@ -244,7 +275,6 @@ var ListController = {
 		});
 	},
 	update_list: function(http_get_params) {
-		this.list.empty();
 		this.create_list(http_get_params);
 	},
 	child_text: function(member, keys) {
@@ -387,20 +417,45 @@ var ListControllerSub = Object.create(ListController);
 	}
 
 
-// Prototype of ListEditor
+// Prototype of ListEditor: Edit the data of one element of ListController and
+// send the changed data to the given url using a HTTP_POST_REQUEST
+// If HTTP_POST_REQUEST is successful, event_type_status is triggered.
 /************************************************************************************
-	url:					[String],
-	list_contr:				[ListController Object],
-	selected_item:			[jQuery Object],
-	container:				[jQuery Object],
-	flush_container:		[Boolean],
-	table_proto:			[jQuery Object],
-	table:					[jQuery Object],
-	new_link:				[Boolean],
-	edit_link:				[Boolean],
-	del_link:				[Boolean],
-	click:					[Boolean],
-	hover:					[Boolean],
+		(--: Meant to be private)
+Variables:
+	url:					[String],                // URL where POST request should send post data to
+	--list_contr:			[ListController Object], // set with init()
+	event_type_status: 		[String]                 // The event type that gets triggered after successful
+                                                     //   HTTP-POST-REQUEST, just needed if you want to catch it.
+	--selected_item:		[jQuery Object],         
+	container:				[jQuery Object],         // jQuery element to be parent of Editor UI. Usually some $('div#mydiv_id')
+	flush_container:		[Boolean],               // Set to true if you want to use the same container for more
+                                                     //   than one ListEditor
+	--table_proto:			[jQuery Object],         
+	--table:				[jQuery Object],         // Reference to the <table> object
+	new_link:				[Boolean],               // If true, ListEditor will create a link in ListController
+	edit_link:				[Boolean],               //   and delegate it with the corresponding function
+	del_link:				[Boolean],               //   .
+	click:					[Boolean],               // Will set a click delegation handler to every list element to show editor
+	hover:					[Boolean],               // Will set a hover delegation handler to every list element to show editor
+	                                                 
+Methods:
+	init(list_contr, that):                          // Call this after having set the options above
+                                                     //   list_contr is a reference to the desired ListController or ListControllerSub
+	hide(force):                                     // hide(true) will hide the table
+	--show(fields, that):
+	show_child(fields, that):                        // show data of ListController
+	new_child(fields, that):                         // show data of ListController + Buttons save and cancel will be displayed
+	edit_child(fields, that):                        // show data of ListController + Buttons save and cancel will be displayed
+	delete_child(fields, that):                      // show data of ListController + Buttons delete and cancel will be displayed     
+	                                                 //   --> fields is an object to control the field type (eg. fields={key:$('<div/>')})
+	--commit(button):                                // commit() is called by buttons save and delete, on successful completion
+	                                                 //   event_type_status is triggered.
+	--delegate_show(evnt):
+	--delegate_hide(evnt):
+	--delegate_click():
+	--delegate_hover():
+	--delegate_links():
 **************************************************************************************
 Usage:			(* means optional)
 	var editor = Object.create(ListEditor);
@@ -422,10 +477,12 @@ Usage:			(* means optional)
 	*editor.click = true;
 									// Allows to show the editor by just clicking on
 									// a list element.
-									// IMPORTANT: Sets the ListController.multiple to false
+									// IMPORTANT: This option sets the ListController.multiple to false
+									// NOTICE: Either use click or hover (both do not make sense)
 	*editor.hover = true;
 									// Allows to show the editor by just mouseover on
 									// a list element.
+									// NOTICE: Either use click or hover (both do not make sense)
 	editor.init(my_list_controller);
 
 
@@ -676,10 +733,19 @@ var ListEditor = {
 }
 
 
-// Prototype of ListMapper
+// Prototype of ListMapper:
+// Implements a n:m mapping of two tables
+// Clicked element on the source ListController triggers target ListController to update
+// itself with data of clicked element as additional HTTP_GET_PARAMS.
 /************************************************************************************
-	source:				[ListController object]
-	target:				[ListController object]
+Variables:
+	--source:				[ListController object]
+	--target:				[ListController object]
+Methods:
+	init(source, target, that)      // source and target: ListController or ListControllerSub
+	--delegate_click(that)
+	map()                           // Can be used to force update (eg. in combination with ListEditor)
+	--build_params()
 *************************************************************************************
 Usage:
 	var my_mapper = Object.create(ListMapper)
@@ -729,6 +795,19 @@ var ListMapper = {
 		return str;
 	}
 }
+// Prototype of ListMapperInverse
+/************************************************************************************
+	source:				[ListController object]
+	target:				[ListController object]
+*************************************************************************************
+Usage:
+	var my_mapper = Object.create(ListMapper)
+	my_mapper.init(my_listcontroller_1, my_listcontroller_2)
+	
+INFO:	The whole selected source object is sent to the server side via HTTP GET request
+		to the url of the target object. The whole logic is on the server side. Only
+		difference to ListMapper: parameter inverse=true is also appended to the GET request.
+************************************************************************************/
 var ListMapperInverse = Object.create(ListMapper);
 ListMapperInverse.map = function() {
 	var http_get_params = this.build_params();
@@ -739,12 +818,30 @@ ListMapperInverse.map = function() {
 
 
 
-// Prototype of List Exchanger
+// Prototype of List Exchanger:
+// Gives the functionality to swap elements of two different ListControllers.
 /************************************************************************************
-	left:			[ListController object],			// has to be derived from ListController
-	right:			[ListController object],		// has to be derived from ListController
-	doubleclick:	[Boolean],
-	enabled:		[Boolean],
+		(--: Meant to be private)
+Variables:
+	--left:				[ListController object],   // has to be derived from ListController
+	--right:		   	[ListController object],   // has to be derived from ListController
+	xtra_data: 			[Object] // {key: value}   // additional data to be sent on saving
+	url: 				[String]                   // URL to send HTTP_GET_REQUEST to
+	event_type_status: 	[String]                   // Event that is triggered on successful complete of HTTP_GET_REQUEST
+	doubleclick:		[Boolean],                 // If true: Functionality to swap elements by doubleclicking on them
+	--enabled:			[Boolean],
+Methods:
+	init(left, right, that)                        // Call init() after having set optional params above
+	toggle(state)                                  // toggle(), toggle(true), toggle(false) to enable/disable functionality
+	ltr()                                          // left to right: Set this on a callback function of a button
+	rtl()                                          // right to left: Set this on a callback function of a button
+	--get_selected(contr)
+	--get_diff()
+	--save()                                       // Is triggered by save button
+	--exchange(item, contr)
+	--handle_dblclick(contr)
+	--handle_mouseover_cursor(contr, type)
+	--other_contr(orig_contr)
 *************************************************************************************
 Usage:		(* means optional)
 	var my_listexchanger = Object.create(ListExchanger)
@@ -767,11 +864,11 @@ var ListExchanger = {
 	event_type_status: 'OpDoneStatus',
 	doubleclick: true,
 	enabled: true,
-	init: function(first, second, that) {
+	init: function(left, right, that) {
 		var that = that || this;
 		if (ListController.isPrototypeOf(first) && ListController.isPrototypeOf(second)) {
-			that.left = first;
-			that.right = second;
+			that.left = left;
+			that.right = right;
 		} else {
 			throw 'init(first, second): Prototype of arguments has to be ListController';
 		}
@@ -886,7 +983,7 @@ var ListExchanger = {
 // Prototype of ListExchangerSub
 /************************************************************************************
 Usage:
-	Exactly the same as ListExchanger:
+	Exactly the same as ListExchanger, but can be used with ListControllerSub:
 	var my_listexchanger = Object.create(ListExchangerSub)
 	my_listexchanger.init(my_listcontrollersub_1, my_listcontrollersub_2)
 ************************************************************************************/
