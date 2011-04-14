@@ -34,7 +34,6 @@ gridmonitor/controllers/gridadmin_testjobs.py
 gridmonitor/controllers/help.py
 gridmonitor/controllers/monadmin.py
 gridmonitor/controllers/monadmin_acl.py
-gridmonitor/controllers/monadmin_resources.py
 gridmonitor/controllers/monadmin_sft.py
 gridmonitor/controllers/siteadmin.py
 gridmonitor/controllers/siteadmin_clusters.py
@@ -59,7 +58,6 @@ gridmonitor/lib/app_globals.py
 gridmonitor/lib/base.py
 gridmonitor/lib/helpers.py
 gridmonitor/lib/slcs.py
-gridmonitor/management/acl_populate.py
 gridmonitor/model/__init__.py
 gridmonitor/model/cache_reader.py
 gridmonitor/model/factories.py
@@ -96,6 +94,8 @@ gridmonitor/model/nagios/meta.py
 gridmonitor/model/nagios/objects.py
 gridmonitor/model/nagios/scheduleddowntimes.py
 gridmonitor/model/nagios/servicetables.py
+gridmonitor/model/sft/__init__.py
+gridmonitor/model/sft/name_mapping.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
 gridmonitor/public/css/LC_prototypes.css
@@ -218,8 +218,9 @@ gridmonitor/public/img/korn_bg.jpg
 gridmonitor/public/img/logo.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
+gridmonitor/public/js/LC_prototypes-min.js
 gridmonitor/public/js/LC_prototypes.js
-gridmonitor/public/js/jquery-1.4.4.min.js
+gridmonitor/public/js/jquery-1.5.min.js
 gridmonitor/public/js/pop.js
 gridmonitor/public/js/select.js
 gridmonitor/public/js/wz_jsgraphics.js
@@ -276,14 +277,17 @@ gridmonitor/templates/derived/gridadmin/testjobs/form.html
 gridmonitor/templates/derived/gridadmin/testjobs/index.html
 gridmonitor/templates/derived/gridadmin/testjobs/test.html
 gridmonitor/templates/derived/help/index.html
+gridmonitor/templates/derived/monadmin/index.html
 gridmonitor/templates/derived/monadmin/acl/admin2site.html
+gridmonitor/templates/derived/monadmin/acl/admins.html
 gridmonitor/templates/derived/monadmin/acl/index.html
 gridmonitor/templates/derived/monadmin/acl/site2admin.html
+gridmonitor/templates/derived/monadmin/acl/sites_services.html
 gridmonitor/templates/derived/monadmin/error/access_denied.html
-gridmonitor/templates/derived/monadmin/resources/admin.html
-gridmonitor/templates/derived/monadmin/resources/index.html
-gridmonitor/templates/derived/monadmin/resources/site_services.html
+gridmonitor/templates/derived/monadmin/sft/editor_fields.mako
 gridmonitor/templates/derived/monadmin/sft/index.html
+gridmonitor/templates/derived/monadmin/sft/resources.html
+gridmonitor/templates/derived/monadmin/sft/sfts.html
 gridmonitor/templates/derived/siteadmin/clusters/index.html
 gridmonitor/templates/derived/siteadmin/error/access_denied.html
 gridmonitor/templates/derived/siteadmin/jobs/index.html
