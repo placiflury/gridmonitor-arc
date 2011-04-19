@@ -1,8 +1,11 @@
 """The application's Globals object"""
 import logging
-import sys, time
+import sys
+import time
 
-from pylons import config
+from beaker.cache import CacheManager
+from beaker.util import parse_cache_config_options
+
 from gridmonitor.model.factories import DataHandlerFactory
 from gridmonitor.model.errors.handler import * 
 from gridmonitor.model.errors.voms import * 
@@ -15,7 +18,7 @@ class Globals(object):
     NUM_TRIES = 5
     SLEEP_TIME = 5  # in secs
 
-    def __init__(self):
+    def __init__(self, config):
         """One instance of Globals is created during application
         initialization and is available during requests via the 'g'
         variable:
@@ -24,11 +27,13 @@ class Globals(object):
         --> BEWARE: the time it takes for the __init__ is  critical for user perception on performance. 
         """
         self.log = logging.getLogger(__name__)
+        self.cache = CacheManager(**parse_cache_config_options(config))
+
         self.data_handler = None
-        for i in xrange(0,Globals.NUM_TRIES): 
+        for i in xrange(0, Globals.NUM_TRIES): 
             try:
                 self.log.info("Starting GridMonitor by getting handler...")  
-                self.data_handler = DataHandlerFactory().get_handler()
+                self.data_handler = DataHandlerFactory().get_handler(config)
                 self.log.debug("...got data handler")
                 break
             except HandlerException, e:

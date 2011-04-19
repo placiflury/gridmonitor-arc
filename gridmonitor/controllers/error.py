@@ -6,6 +6,8 @@ from pylons.middleware import error_document_template, media_path
 
 from gridmonitor.lib.base import *
 
+log = logging.getLogger(__name__)
+
 class ErrorController(BaseController):
     """Generates error documents as and when they are required.
 
@@ -28,11 +30,12 @@ class ErrorController(BaseController):
         </html>
         """ 
         c.title = "GridMonitor Error Page"
-        c.heading = "An Error Occured"
-        c.prefix =request.environ.get('SCRIPT_NAME', '')
-        c.code=cgi.escape(request.params.get('code', ''))
-        c.message=cgi.escape(request.params.get('message', ''))
+        c.heading = "An Error Occurred"
+        c.prefix = request.environ.get('SCRIPT_NAME', '')
+        c.code = cgi.escape(request.params.get('code', ''))
+        c.message = cgi.escape(request.params.get('message', ''))
         
+        log.info("XXX %s" % request.params)
         return render('/base/error.html')
 
     def org_document(self):
