@@ -2,15 +2,15 @@
 Handler for reading Grid Information System data that is stored 
 in a (local) db.
 """
-__author__="Placi Flury grid@switch.ch"
-__date__ = "21.11.2009"
-__version__="0.2"
+__author__ = "Placi Flury grid@switch.ch"
+__date__ = "19.04.2011"
+__version__ = "0.3"
 
-import logging, pickle
+import logging
+import cPickle
 from gridmonitor.model.api.handler_api import HandlerApi
-from infocache.db import meta
-from infocache.db import ng_schema
-from sqlalchemy import and_ 
+from infocache.db import meta, schema
+from sqlalchemy import and_  as AND
 
 
 class GiisDbHandler(HandlerApi):
@@ -18,20 +18,19 @@ class GiisDbHandler(HandlerApi):
     def __init__(self):
         self.log = logging.getLogger(__name__)
 
-    def get_clusters(self,start_t=None, end_t = None):
+    def get_clusters(self, start_t = None, end_t = None):
         """ Returns dictionary of clusters, where the key is 
             the cluster hostname (which is/must be unique) and the value
             is a cluster object that implements the cluster api.
             The returned dictionary may be empty.
         """
         cls = dict()
-        query = meta.Session.query(ng_schema.Cluster)
+        query = meta.Session.query(schema.NGCluster)
         dbclusters = query.filter_by(status='active').all()
         self.log.debug("Found %d active clusters." % (len(dbclusters)))
         for cluster in dbclusters:
-            cls[cluster.hostname] = pickle.loads(cluster.pickle_object) 
+            cls[cluster.hostname] = cluster
         return cls 
-
 
     def get_cluster_queues(self, cluster_hostname, start_t=None, end_t = None):
         """ Returns dictionary of queue objects for given clusters, where
@@ -43,9 +42,9 @@ class GiisDbHandler(HandlerApi):
             end_t       -  valid until time end_t
         """
         qs = dict()
-        query = meta.Session.query(ng_schema.Queue)
-        for queue in query.filter_by(hostname=cluster_hostname,status='active').all():
-            qs[queue.name] = pickle.loads(queue.pickle_object)
+        query = meta.Session.query(schema.NGQueue)
+        for queue in query.filter_by(hostname = cluster_hostname, status = 'active').all():
+            qs[queue.get_name()] = queue
         return qs
         
     def get_cluster_jobs(self, cluster_hostname, start_t=None, end_t = None):
@@ -57,8 +56,8 @@ class GiisDbHandler(HandlerApi):
             end_t       -  valid until time end_t
         """
         # XXX implement start_t and end_t
-        query = meta.Session.query(ng_schema.Job)
-        jobs = query.filter_by(cluster_name=cluster_hostname).all()
+        query = meta.Session.query(schema.NGJob)
+        jobs = query.filter_by(cluster_name = cluster_hostname).all()
         return jobs
         
 
@@ -69,32 +68,32 @@ class GiisDbHandler(HandlerApi):
             start_t     -  valid from time starting at start_t
             end_t       -  valid until time end_t
         """
-        query = meta.Session.query(ng_schema.UserAccess)
-        users = query.filter_by(hostname=cluster_hostname).all()
+        query = meta.Session.query(schema.UserAccess)
+        users = query.filter_by(hostname = cluster_hostname).all()
         ulist = list() 
         for u in users:
             ulist.append(u.user)
 
         return ulist
 
-    def get_user_clusters(self,user_dn,start_t=None, end_t = None):
+    def get_user_clusters(self, user_dn, start_t=None, end_t = None):
         """ Returns list of cluster hostnames users is allowed on.
             
             user_dn     -  DN of user (like in certificate)
             start_t     -  valid from time starting at start_t
             end_t       -  valid until time end_t
         """
-        query = meta.Session.query(ng_schema.UserAccess)
-        clusters = query.filter_by(user=user_dn).all()
-        cls=list()
+        query = meta.Session.query(schema.UserAccess)
+        clusters = query.filter_by(user = user_dn).all()
+        cls = set()
     
         for cluster in clusters:
-            cls.append(cluster.hostname)
+            set.add(cluster.hostname)
+        return list(cls)
 
-        return cls
 
-    def get_user_queues(self,user_dn, cluster_hostname,start_t,end_t):
-        """ Returns list of queue objects to which user is grated access.
+    def get_user_queues(self, user_dn, cluster_hostname, start_t, end_t):
+        """ Returns list of queue objects to which user is allowed on.
             The queue objects implement the queue api.
             
             user_dn     -  DN of user (like in certificate)
@@ -102,38 +101,43 @@ class GiisDbHandler(HandlerApi):
             start_t     -  valid from time starting at start_t
             end_t       -  valid until time end_t
         """
-        query = meta.Session.query(ng_schema.UserAccess)
-        queues = query.filter_by(user=user_dn,hostname=cluster_hostname).all()
+        query = meta.Session.query(schema.UserAccess)
+        return query.filter_by(user = user_dn, hostname = cluster_hostname).all()
+        """
         qs=list()
         for q in queues:
-            qs.append(q.name)
+            qs.append(q.queuename)
         return qs
+        """
 
-    def get_user_jobs(self,user_dn, status=None, start_t = None, end_t=None):
+    def get_user_jobs(self, user_dn, status=None, start_t = None, end_t=None):
         """ 
         special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
-        query = meta.Session.query(ng_schema.Job)
+        query = meta.Session.query(schema.NGJob)
         query = query.outerjoin('access')
        
         if status == 'orphaned':
-            query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
-            ng_schema.UserAccess.user==None))
+            query = query.filter(AND(schema.NGJob.global_owner==user_dn, 
+            schema.UserAccess.user == None))
             orphaned = query.all()
             self.log.debug("Found %d orphaned" % len(orphaned))
             return orphaned
         elif status == 'INLRMS':
-            jobs=query.filter(and_(ng_schema.UserAccess.user!=None,
-                ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).all()
+            jobs=query.filter(AND(schema.UserAccess.user != None,
+                schema.NGJob.global_owner == user_dn,
+                schema.NGJob.status.like('%INLRMS%'))).all()
         elif status == 'FETCHED':
-            jobs=query.filter(and_(ng_schema.UserAccess.user!=None,
-                ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%FETCHED%'))).all()
+            jobs=query.filter(AND(schema.UserAccess.user != None,
+                schema.NGJob.global_owner == user_dn, 
+                schema.NGJob.status.like('%FETCHED%'))).all()
         elif status:
-            jobs = query.filter(and_(ng_schema.UserAccess.user!=None, 
-                ng_schema.Job.globalowner==user_dn, ng_schema.Job.status==status)).all()
+            jobs = query.filter(AND(schema.UserAccess.user != None, 
+                schema.NGJob.global_owner==user_dn, 
+                schema.NGJob.status==status)).all()
         else:
-            jobs = query.filter(and_(ng_schema.Job.globalowner==user_dn)).all()
+            jobs = query.filter(AND(schema.NGJob.global_owner == user_dn)).all()
 
         self.log.debug("Found %d non-orphaned jobs" % len(jobs))
         return jobs
@@ -144,45 +148,56 @@ class GiisDbHandler(HandlerApi):
         special job status 'orphaned' must be supported. Orphans are jobs
         jobs that got executed on a queue the user can't access anymore.
         """
-        query = meta.Session.query(ng_schema.Job)
+        query = meta.Session.query(schema.NGJob)
         query = query.outerjoin('access')
       
         if not cluster_hostname: 
             if status == 'orphaned':
-                query = query.filter(and_(ng_schema.Job.globalowner==user_dn, 
-                ng_schema.UserAccess.user==None))
+                query = query.filter(AND(schema.NGJob.global_owner == user_dn, 
+                schema.UserAccess.user == None))
                 norphaned = query.count()
                 return norphaned
             elif status == 'INLRMS':
-                njobs=query.filter(and_(ng_schema.UserAccess.user!=None,
-                    ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).count()
+                njobs=query.filter(AND(schema.UserAccess.user != None,
+                    schema.NGJob.global_owner == user_dn,
+                    schema.NGJob.status.like('%INLRMS%'))).count()
             elif status == 'FETCHED':
-                njobs=query.filter(and_(ng_schema.UserAccess.user!=None,
-                    ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%FETCHED%'))).count()
+                njobs=query.filter(AND(schema.UserAccess.user != None,
+                    schema.NGJob.global_owner == user_dn,
+                    schema.NGJob.status.like('%FETCHED%'))).count()
             elif status:
-                njobs = query.filter(and_(ng_schema.UserAccess.user!=None, 
-                    ng_schema.Job.globalowner==user_dn, ng_schema.Job.status==status)).count()
+                njobs = query.filter(AND(schema.UserAccess.user != None, 
+                    schema.NGJob.global_owner == user_dn,
+                    schema.NGJob.status == status)).count()
             else:
-                njobs = query.filter(and_(ng_schema.Job.globalowner==user_dn)).count()
+                njobs = query.filter(AND(schema.NGJob.global_owner == user_dn)).count()
 
             return njobs
         else:
             if status == 'orphaned':
-                query = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.globalowner==user_dn, 
-                ng_schema.UserAccess.user==None))
+                query = query.filter(AND(schema.NGJob.cluster_name == cluster_hostname, 
+                    schema.NGJob.global_owner == user_dn, 
+                    schema.UserAccess.user == None))
                 norphaned = query.count()
                 return norphaned
             elif status == 'INLRMS':
-                njobs=query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.UserAccess.user!=None,
-                    ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%INLRMS%'))).count()
+                njobs=query.filter(AND(schema.NGJob.cluster_name == cluster_hostname, 
+                        schema.UserAccess.user != None,
+                        schema.NGJob.global_owner == user_dn,
+                        schema.NGJob.status.like('%INLRMS%'))).count()
             elif status == 'FETCHED':
-                njobs=query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.UserAccess.user!=None,
-                    ng_schema.Job.globalowner==user_dn,ng_schema.Job.status.like('%FETCHED%'))).count()
+                njobs=query.filter(AND(schema.NGJob.cluster_name == cluster_hostname, 
+                    schema.UserAccess.user != None,
+                    schema.NGJob.global_owner == user_dn,
+                    schema.NGJob.status.like('%FETCHED%'))).count()
             elif status:
-                njobs = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.UserAccess.user!=None, 
-                    ng_schema.Job.globalowner==user_dn, ng_schema.Job.status==status)).count()
+                njobs = query.filter(AND(schema.NGJob.cluster_name == cluster_hostname,
+                    schema.UserAccess.user != None, 
+                    schema.NGJob.global_owner == user_dn, 
+                    schema.NGJob.status==status)).count()
             else:
-                njobs = query.filter(and_(ng_schema.Job.cluster_name==cluster_hostname, ng_schema.Job.globalowner==user_dn)).count()
+                njobs = query.filter(AND(schema.NGJob.cluster_name == cluster_hostname, 
+                    schema.NGJob.global_owner == user_dn)).count()
             return njobs
             
 
@@ -209,13 +224,13 @@ class GiisDbHandler(HandlerApi):
         """ returns either statistics object that implements the StatsApi, or None.
             Calling the get_type() method return 'grid'.
         """
-        query = meta.Session.query(ng_schema.GridStats)
+        query = meta.Session.query(schema.GridStats)
         stats = query.first()
         if stats:
-            return pickle.loads(stats.pickle_object)
+            return cPickle.loads(stats.pickle_object)
         return None
 
-    def get_cluster_stats(self,cluster_hostname):
+    def get_cluster_stats(self, cluster_hostname):
         """ returns either statistics object that implements the StatsApi, or None.
             Calling the get_type() method return 'cluster'.
         """
