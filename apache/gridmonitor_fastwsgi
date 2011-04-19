@@ -1,0 +1,58 @@
+<VirtualHost *:80>
+ Redirect / https://<HOSTNAME>/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+
+    ServerAdmin <YOUR_EMAIL_ADDRESS>
+    ServerSignature Off
+    DocumentRoot /var/www
+    ErrorLog /var/log/apache2/error.log
+    RewriteLog /var/log/apache2/rewrite.log
+    # log level 0 (default), no logging, 9 almost every action is logged
+    RewriteLogLevel 0
+    CustomLog /var/log/apache2/access.log common
+    LogLevel info
+
+    SSLEngine on
+    SSLOptions StdEnvVars
+    SSLCertificateFile    /etc/grid-security/hostcert.pem
+    SSLCertificateKeyFile /etc/grid-security/hostkey.pem 
+    SSLCACertificatePath /etc/grid-security/certificates
+    SSLVerifyDepth 4
+    SSLOptions +ExportCertData
+    SSLVerifyClient optional_no_ca
+    
+    Alias /rrd /opt/smscg/monitor/plots/
+    Alias /jobs /opt/smscg/monitor/sft/jobs/
+    Alias / /opt/smscg/monitor/apache/monitor.fcgi/
+    
+    <Location /rrd>
+        AuthType None
+        SetHandler None
+        RewriteEngine Off
+    </Location>
+
+    <Location /jobs>
+        AuthType None
+        SetHandler None
+        RewriteEngine Off
+    </Location>
+
+    <Location / >
+        AuthType shibboleth
+        ShibUseHeaders On
+        ShibRequireSession On
+        require valid-user
+        Options FollowSymLinks
+        Options +ExecCGI
+        AddHandler fastcgi-script .fcgi
+        AddHandler cgi-script .cgi
+        RewriteEngine On
+        RewriteRule   ^/$  /monitor.fcgi/
+        RewriteRule   ^(\[-_a-zA-Z0-9/\.]+)$  /monitor.fcgi/$1
+        Order allow,deny
+        Allow from all
+    </Location>
+
+</VirtualHost>
