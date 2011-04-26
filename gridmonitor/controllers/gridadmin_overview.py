@@ -4,8 +4,7 @@ from gridadmin import GridadminController
 from user_overview import UserOverviewController
 from datetime import datetime
 
-from infocache.db import meta
-from infocache.db import ng_schema
+from infocache.db import meta, schema
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ class GridadminOverviewController(GridadminController):
 
 
         # inactive COMPUTING ELEMENTS 
-        query = meta.Session.query(ng_schema.Cluster)
+        query = meta.Session.query(schema.NGCluster)
         c.db_inactive_clusters = query.filter_by(status='inactive').all()
 
 
@@ -181,7 +180,7 @@ class GridadminOverviewController(GridadminController):
             
 
         # GETTING GIIS-LIST
-        c.giises = meta.Session.query(ng_schema.Giis).all()
+        c.giises = meta.Session.query(schema.GiisMeta).all()
         
         return render('/derived/gridadmin/overview/index.html')
     
