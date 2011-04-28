@@ -8,6 +8,7 @@ from pylons.middleware import ErrorHandler, StatusCodeRedirect
 from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 
+
 from gridmonitor.config.environment import load_environment
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
@@ -58,10 +59,10 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
 
     # Establish the Registry for this application
     app = RegistryManager(app)
+
     if asbool(static_files):
         # Serve static files
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
     app.config = config
-    
     return app
