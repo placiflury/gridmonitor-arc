@@ -10,9 +10,12 @@ from gridmonitor.model.factories import DataHandlerFactory
 from gridmonitor.model.errors.handler import * 
 from gridmonitor.model.errors.voms import * 
 
+
 class Globals(object):
+
     """Globals acts as a container for objects available throughout the
     life of the application
+
     """
     
     NUM_TRIES = 5
@@ -26,11 +29,12 @@ class Globals(object):
         will create it's own Globals object. ;-(
         --> BEWARE: the time it takes for the __init__ is  critical for user perception on performance. 
         """
-        self.log = logging.getLogger(__name__)
         self.cache = CacheManager(**parse_cache_config_options(config))
-
+        self.config = config
+        
+        self.log = logging.getLogger(__name__)
         self.data_handler = None
-        for i in xrange(0, Globals.NUM_TRIES): 
+        for i in xrange(0,Globals.NUM_TRIES): 
             try:
                 self.log.info("Starting GridMonitor by getting handler...")  
                 self.data_handler = DataHandlerFactory().get_handler(config)
@@ -63,61 +67,61 @@ class Globals(object):
             return clusters[hostname]
         return None
     
-    def get_cluster_queues(self,cluster_hostname):
+    def get_cluster_queues(self, cluster_hostname):
         return self.data_handler.get_cluster_queues(cluster_hostname)
     
-    def get_cluster_queues_names(self,cluster_hostname):
+    def get_cluster_queues_names(self, cluster_hostname):
         queue_dict = self.data_handler.get_cluster_queues(cluster_hostname)
         return queue_dict.keys()
 
-    def get_queue(self,cluster_hostname,queue_name):
+    def get_queue(self, cluster_hostname, queue_name):
         queues = self.get_cluster_queues(cluster_hostname)
         if queues.has_key(queue_name):
             return queues[queue_name]
         return None   
 
-    def get_user_jobs(self,userDN, status=None):
-        return self.data_handler.get_user_jobs(userDN,status)
+    def get_user_jobs(self, userDN, status=None):
+        return self.data_handler.get_user_jobs(userDN, status)
 
     # STATISTICS
-    def get_grid_stats(self,stats_variable):
+    def get_grid_stats(self, stats_variable):
         """ return value of statistical variable for the entire grid. If
             statistical variable does not exists or hasn't been set, it 
             will return 0.
         """
-        grid_stats= self.data_handler.get_grid_stats()
-        name = config[stats_variable].strip()
+        grid_stats = self.data_handler.get_grid_stats()
+        name = self.config[stats_variable].strip()
         val = grid_stats.get_attribute(name)
-        self.log.debug("Grid statistics: '%s=%r'" % (name,val))
+        self.log.debug("Grid statistics: '%s=%r'" % (name, val))
         if val == None:
             return 0
         return val
     
-    def get_cluster_stats(self,cluster_hostname,stats_variable):
+    def get_cluster_stats(self, cluster_hostname, stats_variable):
         """ return value of statistical variable for given cluster. If
             statistical variable does not exists or hasn't been set, it 
             will return 0.
         """
-        cluster_stats= self.data_handler.get_cluster_stats(cluster_hostname)
+        cluster_stats = self.data_handler.get_cluster_stats(cluster_hostname)
         if not cluster_stats:  return 0
-        name = config[stats_variable].strip()
+        name = self.config[stats_variable].strip()
         val = cluster_stats.get_attribute(name)
-        self.log.debug("Cluster statistics: '%s=%r'" % (name,val))
+        self.log.debug("Cluster statistics: '%s=%r'" % (name, val))
         if val == None:
             return 0
         return val
 
 
-    def get_queue_stats(self,cluster_hostname,queue_name,stats_variable):
+    def get_queue_stats(self, cluster_hostname, queue_name, stats_variable):
         """ return value of statistical variable for given cluster-queue. If
             statistical variable does not exists or hasn't been set, it 
             will return 0.
         """
-        queue_stats = self.data_handler.get_queue_stats(cluster_hostname,queue_name)
+        queue_stats = self.data_handler.get_queue_stats(cluster_hostname, queue_name)
         if not queue_stats: return 0
-        name = config[stats_variable].strip()
+        name = self.config[stats_variable].strip()
         val = queue_stats.get_attribute(name)
-        self.log.debug("Queue statistics: '%s=%r'" % (name,val))
+        self.log.debug("Queue statistics: '%s=%r'" % (name, val))
         if val == None:
             return 0
         return val 
