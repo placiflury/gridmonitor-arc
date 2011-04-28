@@ -3,27 +3,18 @@
 Provides the BaseController class for subclassing, and other objects
 utilized by Controllers.
 """
-"""
-from pylons.controllers.util import abort, etag_cache, redirect_to
-from pylons.templating import render
-
-
-import gridmonitor.lib.helpers as h
-import gridmonitor.model as model
-
-"""
 import logging
-from hashlib import md5
 
+from pylons import config,  request, session
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
-from pylons import cache, g, request, response, session, config
-from pylons import tmpl_context as c
-from pylons.decorators import jsonify, validate
-from pylons.i18n import _, ungettext, N_
 
-import gridmonitor.lib.helpers as h
+from  pylons import app_globals as g
+
+from hashlib import md5
+
 from gridmonitor.lib.slcs import SLCS
+import gridmonitor.lib.helpers as h
 from gridmonitor.model.nagios import meta as nagios_meta
 from gridmonitor.model.acl import meta as acl_meta
 from gridmonitor.model.acl import handler
@@ -31,7 +22,6 @@ from sft.db import sft_meta
 
 
 log = logging.getLogger(__name__)
-
 
 class BaseController(WSGIController):
 
@@ -45,20 +35,16 @@ class BaseController(WSGIController):
             generated given the Shibboleth attributes the user presented.
             (notice, the shibboleth way is currently customized for the 
             Swiss AAI Federation only)"""
-            
-        log.info("XXX >%s<" % request.environ.keys())
-        for k in request.environ.keys():
-            log.info("XXX %s = >%s<" % (k,request.environ[k]))
 
         if self.requires_authN and ('authenticated' not in session):
 
             user_name = 'Guest'
-            user_surname ='' 
+            user_surname = '' 
             home_org = None
             unique_id = None
 
-
             # 1. check whether Shibboleth enabled
+            log.info("XXX '%r'" % request.environ.keys())
             if request.environ.has_key(config['shib_given_name']):
                 user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
                 user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
@@ -69,8 +55,8 @@ class BaseController(WSGIController):
                 session['user_unique_id'] = unique_id
                 
                 # online CA enabled (XXX currently only SWISS SLCS CA supported)
-                if config['slcs_enabled'] in ['True','true']: # 
-                    user_slcs_obj = SLCS(home_org, user_name,user_surname,unique_id)
+                if config['slcs_enabled'] in ['True', 'true']: # 
+                    user_slcs_obj = SLCS(home_org, user_name, user_surname, unique_id)
                     session['user_slcs_obj'] = user_slcs_obj
 
             else: # go for browser certificate
@@ -95,7 +81,7 @@ class BaseController(WSGIController):
                     dn = unicode(request.environ['SSL_CLIENT_S_DN'],'iso-8859-1')
                     ca = unicode(request.environ['SSL_CLIENT_I_DN'],'iso-8859-1')
                     if dn and ca:
-                        unique_id= md5(dn + ca).hexdigest()
+                        unique_id = md5(dn + ca).hexdigest()
                         session['user_unique_id'] = unique_id 
 
             session['user_name'] = user_name
@@ -105,7 +91,6 @@ class BaseController(WSGIController):
             # 2. get browser certificate details
             if request.environ.has_key('SSL_CLIENT_S_DN'):
                 user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'iso-8859-1')
-                log.info("XXX user_client_dn >%s<" % user_client_dn)
                 # if emailaddress= within DN -> fix it
                 cand = user_client_dn.split("emailAddress=")
                 if len(cand) > 1:
