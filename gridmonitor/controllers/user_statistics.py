@@ -1,12 +1,16 @@
 import logging
-from datetime import datetime
-import time, calendar
+import time
+import calendar
 from decimal import Decimal
+from datetime import datetime
 
-from gridmonitor.lib.base import *
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
+from pylons import session
+from pylons import request
+
 from gridmonitor.model.statistics.series import Series
-from user import UserController 
-
+from user import UserController
 from sgasaggregator.utils import helpers 
 
 log = logging.getLogger(__name__)
@@ -23,6 +27,11 @@ class UserStatisticsController(UserController):
         c.heading = "Statistics about my Jobs"
 
         c.form_error =''
+        c.table_only = False
+        c.n_jobs_page_faults = False
+        c.cpu_wall_duration = False
+        c.user_kernel_time = False
+
         resolution = 86400 # 1 day
         series = dict()
         

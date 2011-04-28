@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 import logging
-
+from datetime import datetime
 from sqlalchemy import desc
 from sqlalchemy import and_
-from datetime import datetime
+
+from pylons import tmpl_context as c
+from pylons import session
+from pylons import request
+from pylons.templating import render_mako as render
+
+from gridadmin import GridadminController
+
 
 from sft.db import sft_meta
 from sft.db import sft_schema
 from sft.db.user_handler import UserPool
-from gridmonitor.lib.base import *
 
-from gridadmin import GridadminController
 
 
 log = logging.getLogger(__name__)
@@ -20,6 +25,9 @@ class GridadminSftsController(GridadminController):
     def __init__(self):
 
         GridadminController.__init__(self)
+        c.form_error = None
+        c.user_client_dn = None
+        c.user_slcs_dn = None
 
         if session.has_key('user_client_dn'):
             c.user_client_dn = session['user_client_dn']
@@ -142,7 +150,7 @@ class GridadminSftsController(GridadminController):
         c.title = "Storing the password of your  MyProxy certificate."
         c.menu_active = "-- none --"
         c.heading = "Storing the password of your MyProxy certificate."
-        
+        c 
 
         up = UserPool()
         

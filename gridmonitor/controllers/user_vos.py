@@ -1,8 +1,13 @@
 import logging
-from gridmonitor.lib.base import *
+
+from pylons import tmpl_context as c
+from pylons import session
+from pylons.templating import render_mako as render
+
 from gridmonitor.model.voms import VOMSConnector
-from gridmonitor.model.errors.voms import *
-from user import UserController 
+from gridmonitor.model.errors.voms import VOMSException
+
+from user import UserController
 
 log = logging.getLogger(__name__)
 

@@ -1,6 +1,5 @@
-import logging
-from gridmonitor.lib.base import *
-from monadmin import MonadminController
+from pylons import request
+
 from monadmin import *
 from hashlib import md5
 import sft

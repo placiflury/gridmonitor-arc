@@ -1,7 +1,12 @@
 import logging
+from pylons import session
+from pylons import tmpl_context as c
+from pylons import app_globals as g
+from pylons.templating import render_mako as render
 
-from gridmonitor.lib.base import *
-from user import UserController 
+import gridmonitor.lib.helpers as h
+
+from user import UserController
 
 log = logging.getLogger(__name__)
 

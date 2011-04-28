@@ -9,6 +9,7 @@ __version__="0.1"
 
 import logging
 
+
 log = logging.getLogger(__name__)
 
 class DataHandlerFactory:
@@ -21,13 +22,14 @@ class DataHandlerFactory:
 
     def get_handler(self, config):
 
+        log.info("XXX %s" % config.keys())
         handler_type = config['data_handler_type'].lower().strip() 
         
         if handler_type in ['infocache','cache','cache_handler']:
             log.info("going for Cache Handler")
             from gridmonitor.model.cache.cache_handler import CacheHandler
             return CacheHandler()  
-        elif handler_type in ['giisdb','giis_hanlder']:
+        elif handler_type in ['giisdb','giis_handler']:
             log.info("going for GiisDB Handler")
             from gridmonitor.model.giisdb.giisdb_handler import GiisDbHandler
             return GiisDbHandler()

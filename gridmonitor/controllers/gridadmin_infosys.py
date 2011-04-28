@@ -1,9 +1,10 @@
 import logging
-
-from gridmonitor.lib.base import *
-from gridadmin import GridadminController
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
 
 from infocache.db import meta, schema
+from gridadmin import GridadminController
+
 
 log = logging.getLogger(__name__)
 

@@ -5,8 +5,14 @@ from decimal import Decimal
 from sqlalchemy import and_
 import calendar
 
-from gridmonitor.lib.base import *
+from pylons import tmpl_context as c
+from pylons import request
+from pylons.templating import render_mako as render
+import gridmonitor.lib.helpers as h
+
 from gridadmin import GridadminController
+
+
 from gridmonitor.model.statistics.series import Series
 
 from sgasaggregator.sgascache import session as sgascache_session
@@ -95,7 +101,6 @@ class GridadminStatisticsController(GridadminController):
                 tot_wall += rec.wall_duration
         
         cluster_series = dict()
-        clusters = list()
         for arec in sgascache_session.Session.query(ag_schema.Machine.machine_name).distinct():
             hostname = arec.machine_name
             cluster_series[hostname] = dict()

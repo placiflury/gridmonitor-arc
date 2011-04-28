@@ -17,7 +17,7 @@ To get back to all clusters click <a href="javascript:showUserClusters('all')">a
 % for cluster in c.cluster_menu:
 <% 
 hostname= cluster[1].split('/')[-1]
-cpus=g.get_cluster_stats(hostname,'stats_cpus') 
+cpus=app_globals.get_cluster_stats(hostname,'stats_cpus') 
 %>
         % if hostname in c.allowed_clusters['slcs_browser']: 
             <div class="slcs_browser_access" style="display:''">
@@ -31,7 +31,7 @@ cpus=g.get_cluster_stats(hostname,'stats_cpus')
         <li>
             ${h.link(cluster[1], cluster[0])} 
              % if cpus == 0:
-               <% cpus = g.get_cluster_stats(hostname,'stats_totalcpus') %>
+               <% cpus = app_globals.get_cluster_stats(hostname,'stats_totalcpus') %>
                % if cpus == 0: 
                   <span class="error"> (${cpus} CPUs)</span>
                % else:

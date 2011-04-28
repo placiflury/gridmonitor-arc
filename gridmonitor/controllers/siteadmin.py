@@ -1,9 +1,14 @@
 import logging
+from pylons import session
+from pylons import config
+from pylons import tmpl_context as c
+from pylons import app_globals as g
+from pylons.templating import render_mako as render
 
-from gridmonitor.lib.base import *
+import gridmonitor.lib.helpers as h
+from gridmonitor.lib.base import BaseController
 from gridmonitor.model.acl import meta
-from gridmonitor.model.acl import schema 
-
+from gridmonitor.model.acl import schema
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +17,8 @@ class SiteadminController(BaseController):
     NO_QUEUE_FOUND = 'NO_QUEUE'     # Tag to denote that no queue name was found 
 
     def __init__(self):
+        BaseController.__init__(self)
+
         self.admin = None
         self.authorized = False
         self.clusters= list()  # hostname of clusters
@@ -42,14 +49,14 @@ class SiteadminController(BaseController):
                             log.info("Access to core service %s granted." % service.hostname)
                             self.cores.append(service.hostname)
                 for service in admin.services:
-                        if service.type == 'CE':
-                            if service.hostname not in self.clusters:
-                                log.info("Access to CE service %s granted." % service.hostname)
-                                self.clusters.append(service.hostname)
-                        else:
-                            if service.hostname not in self.cores:
-                                log.info("Access to core service %s granted." % service.hostname)
-                                self.cores.append(service.hostname)
+                    if service.type == 'CE':
+                        if service.hostname not in self.clusters:
+                            log.info("Access to CE service %s granted." % service.hostname)
+                            self.clusters.append(service.hostname)
+                    else:
+                        if service.hostname not in self.cores:
+                            log.info("Access to core service %s granted." % service.hostname)
+                            self.cores.append(service.hostname)
         
 
         # static menu information

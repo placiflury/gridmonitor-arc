@@ -31,7 +31,7 @@ class SLCS:
     
     SHIB_DEL = ';'  # Delimiter for multi-value Shibboleth attributes
 
-    def __init__(self,home_org, given_name, surname, unique_id):
+    def __init__(self, home_org, given_name, surname, unique_id):
         """
         params: 
             home_org - user's home organization (Shibboleth value)
@@ -40,8 +40,8 @@ class SLCS:
             unique_id - Shibboleth unique ID of user
         """
 
-        home= self.__mapped_value(home_org)
-        gname= given_name.split(SLCS.SHIB_DEL)[0]
+        home = self.__mapped_value(home_org)
+        gname = given_name.split(SLCS.SHIB_DEL)[0]
         sname = surname.split(SLCS.SHIB_DEL)[0]
         
 
@@ -82,55 +82,55 @@ class SLCS:
         for c in ucode.encode('Latin-1'):
             code = ord(c)
             if code in [192,193,194,195,197]:
-                str+='A'
+                str += 'A'
             elif code == 196:
-                str+='Ae'
+                str += 'Ae'
             elif code == 198:
-                str+='AE'
+                str += 'AE'
             elif code == 199:
-                str+='C'
+                str += 'C'
             elif code in [200,201,202,203]:
-                str+='E'
+                str += 'E'
             elif code in [204,205,206,207]:
-                str+='I'
+                str += 'I'
             elif code == 209:
-                str+='N'
+                str += 'N'
             elif code in [210,211,212,213,216]:
-                str+='O'
+                str += 'O'
             elif code == 214:
-                str+='Oe'
+                str += 'Oe'
             elif code in [217,218,219]:
-                str+='U'
+                str += 'U'
             elif code == 220:
-                str+='Ue'
+                str += 'Ue'
             elif code == 221:
-                str+='Y'
+                str += 'Y'
             elif code == 223:
-                str+='ss'
+                str += 'ss'
             elif code in [224,225,226,227,229]:
-                str+='a'
+                str += 'a'
             elif code in [228,230]:
-                str+='ae'
+                str += 'ae'
             elif code == 231:
-                str+='c'
+                str += 'c'
             elif code in [232,233,234,235]:
-                str+='e'
+                str += 'e'
             elif code in [236,237,238,239]:
-                str+='i'
+                str += 'i'
             elif code == 241:
-                str+='n'
+                str += 'n'
             elif code in [242,243,244,245,248]:
-                str+='o'
+                str += 'o'
             elif code in [246]:
-                str+='oe'
+                str += 'oe'
             elif code in [249,250,251]:
-                str+='u'
+                str += 'u'
             elif code == 252:
-                str+='ue'
+                str += 'ue'
             elif code in [253,255]:
-                str+='y'
+                str += 'y'
             else:
-                str+=c
+                str += c
         return str
 
 
@@ -189,4 +189,4 @@ if __name__ == "__main__":
         slcs = SLCS(homeorg, given_name, surname, uniqueid)
         print slcs.get_dn()
     except SLCSError, e:
-            print "Error: ", e.message
+        print "Error: ", e.message

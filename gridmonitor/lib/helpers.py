@@ -4,13 +4,18 @@ Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
 import logging
+
 import urllib, datetime
 
-from webhelpers import *
+from pylons.i18n import get_lang, set_lang
+
+from webhelpers.html.tags import link_to
+
 from gridmonitor.model.nagios import meta
 from gridmonitor.model.nagios import hosttables
 from gridmonitor.model.nagios import servicetables
 from gridmonitor.model.nagios import scheduleddowntimes
+
 from routes.util import url_for # used in subsequent modules, don't remove
 
 
@@ -30,12 +35,12 @@ def get_nagios_host_services_from_group_tag(tag):
     nagios__hgroup_members = None
     if nagios_hgroup:
         nagios_hgroup_members = nagios_hgroup.members
-        log.debug("Found Nagios group %s (%d members)" % (tag,len(nagios_hgroup_members)))
+        log.debug("Found Nagios group %s (%d members)" % (tag, len(nagios_hgroup_members)))
     else:
         log.warn("No members of the nagios '%s' group found in mysql's ndoutils db." % tag)
 
     for mem in nagios_hgroup_members:
-        d={}
+        d = {}
         host_object_id = mem.host_object_id
         alias = mem.host.alias
         display_name = mem.host.display_name
@@ -78,22 +83,22 @@ def get_sqldatetime_age(sqldatetime):
 
 
 def str_cannonize(str):
-   """ Input string with spaces and/or mixed upper and lower 
+    """ Input string with spaces and/or mixed upper and lower 
        characters will be converted to a cannonical form, 
        i.e. all to lowercase and spaces replaced by a '_'.
 
        Return  new cannonical string
-   """
-   if not str:
-	return None
+    """
+    if not str:
+        return None
 
-   tmp = str.split()  # intention is to replace multiple whitespaces by a single '_'
-   new_str = ""
-   for i in range(0,len(tmp) -1):
-      	new_str += tmp[i] + "_"
-	
-   new_str += tmp[-1]  
-   return new_str
+    tmp = str.split()  # intention is to replace multiple whitespaces by a single '_'
+    new_str = ""
+    for i in range(0,len(tmp) -1):
+        new_str += tmp[i] + "_"
+   
+    new_str += tmp[-1]  
+    return new_str
 
 
 def link(url, label=None):
@@ -101,11 +106,10 @@ def link(url, label=None):
         the link will be named after the url.
     """
     if label:
-        return "<a href=\"%s\">%s</a>" % (url,label)
+        return link_to(label,url)
     else:
-        return "<a href=\"%s\">%s</a>" % (url,url)
+        return link_to(url,url)
         
-	
    
 def format_environ(environ):
     result = []
@@ -155,53 +159,53 @@ def filter_unicode_accentued_string(ucode):
     for c in ucode.encode('Latin-1'):
         code = ord(c)
         if code in [192,193,194,195,197]:
-            str+='A'
+            str += 'A'
         elif code == 196:
-            str+='Ae'
+            str += 'Ae'
         elif code == 198:
-            str+='AE'
+            str += 'AE'
         elif code == 199:
-            str+='C'
+            str += 'C'
         elif code in [200,201,202,203]:
-            str+='E'
+            str += 'E'
         elif code in [204,205,206,207]:
-            str+='I'
+            str += 'I'
         elif code == 209:
-            str+='N'
+            str += 'N'
         elif code in [210,211,212,213,216]:
-            str+='O'
+            str += 'O'
         elif code == 214:
-            str+='Oe'
+            str += 'Oe'
         elif code in [217,218,219]:
-            str+='U'
+            str += 'U'
         elif code == 220:
-            str+='Ue'
+            str += 'Ue'
         elif code == 221:
-            str+='Y'
+            str += 'Y'
         elif code == 223:
-            str+='ss'
+            str += 'ss'
         elif code in [224,225,226,227,229]:
-            str+='a'
+            str += 'a'
         elif code in [228,230]:
-            str+='ae'
+            str += 'ae'
         elif code == 231:
-            str+='c'
+            str += 'c'
         elif code in [232,233,234,235]:
-            str+='e'
+            str += 'e'
         elif code in [236,237,238,239]:
-            str+='i'
+            str += 'i'
         elif code == 241:
-            str+='n'
+            str += 'n'
         elif code in [242,243,244,245,248]:
-            str+='o'
+            str += 'o'
         elif code == 246:
-            str+='oe'
+            str += 'oe'
         elif code in [249,250,251]:
-            str+='u'
+            str += 'u'
         elif code == 252:
-            str+='ue'
+            str += 'ue'
         elif code in [253,255]:
-            str+='y'
+            str += 'y'
         else:
-            str+=c 
+            str += c 
     return str

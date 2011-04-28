@@ -1,5 +1,10 @@
 import logging
-from gridmonitor.lib.base import *
+from pylons import config
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
+
+import gridmonitor.lib.helpers as h
+
 from siteadmin import SiteadminController
 from user_overview import UserOverviewController
 
@@ -25,32 +30,31 @@ class SiteadminOverviewController(SiteadminController):
         
         # find core services admin has rigths to view
         all_cores = h.get_nagios_host_services_from_group_tag(self.nagios_core_tag)
-        admin_cores = dict()
         missing_cores = [ x for x in self.cores]  # copy
-        c.core_stats_summary={0:0,1:0,2:0,3:0} # 0 -- OK, 1 -- WARN, 2 -- CRITICAL, 3 -- UNKNOWN
+        c.core_stats_summary={0:0, 1:0, 2:0, 3:0} # 0 -- OK, 1 -- WARN, 2 -- CRITICAL, 3 -- UNKNOWN
         c.core_hosts_down=0
         c.cores_admin=False
         for core in all_cores:
             if (core['alias'] in self.cores) or (core['display_name'] in self.cores):
                 c.cores_admin = True
                 if core['hoststatus_object'].current_state != 0: 
-                    c.core_hosts_down +=1
+                    c.core_hosts_down += 1
                     continue
                 core_name = core['display_name']
                 core_name2 =core['alias']
                 for service in core['services_q']:
                     if service.status:
                         if h.is_epoch_time(service.status[0].last_check):  # UNKNOWN STATE
-                            c.core_stats_summary[3] = c.core_stats_summary[3] +1
+                            c.core_stats_summary[3] = c.core_stats_summary[3] + 1
                         else:
                             record_age = h.get_sqldatetime_age(service.status[0].last_check).days
                             if record_age  >= UserOverviewController.NAGIOS_CHECK_AGE_CRIT:
-                                c.core_stats_summary[2] = c.core_stats_summary[2] +1
+                                c.core_stats_summary[2] = c.core_stats_summary[2] + 1
                             elif record_age >= UserOverviewController.NAGIOS_CHECK_AGE_WARN:
-                                c.core_stats_summary[1] = c.core_stats_summary[1] +1
+                                c.core_stats_summary[1] = c.core_stats_summary[1] + 1
                             else:
                                 state = service.status[0].current_state
-                                c.core_stats_summary[state] = c.core_stats_summary[state] +1
+                                c.core_stats_summary[state] = c.core_stats_summary[state] + 1
         
                 for n in range(0, missing_cores.count(core_name)):  # removing from missing list
                     missing_cores.remove(core_name)

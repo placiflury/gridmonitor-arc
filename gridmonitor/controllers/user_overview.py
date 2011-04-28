@@ -1,8 +1,13 @@
 import logging
+from pylons import session
+from pylons import config 
+from pylons import tmpl_context as c
+from pylons import app_globals as g
+from pylons.templating import render_mako as render
 
-from gridmonitor.lib.base import *
-from user import UserController 
-from pylons import config
+import gridmonitor.lib.helpers as h
+
+from user import UserController
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +17,7 @@ class UserOverviewController(UserController):
     NAGIOS_CHECK_AGE_CRIT = 3 # records older than 3 days
 
     def __init__(self):
-        UserController()
+        UserController.__init__(self)
         self.nagios_core_tag = config['nagios_core'] # core services (defined by nagios hostgroup alias)
         self.nagios_ces_tag = config['nagios_ces']   # Grid computing elements  (defined by nagios hostgroup alias)
         
@@ -30,7 +35,7 @@ class UserOverviewController(UserController):
         for host in status_core:
             # XXX if host down -> report
             if host['hoststatus_object'].current_state != 0: 
-                c.core_hosts_down +=1
+                c.core_hosts_down += 1
                 continue
             for service in host['services_q']:
                 if service.status:
@@ -53,7 +58,7 @@ class UserOverviewController(UserController):
         c.ce_hosts_down=0
         for host in status_ces:
             if host['hoststatus_object'].current_state != 0: 
-                c.ce_hosts_down +=1
+                c.ce_hosts_down += 1
                 continue
             for service in host['services_q']:
                 if service.status:

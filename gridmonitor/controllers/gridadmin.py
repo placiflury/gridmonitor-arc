@@ -1,8 +1,17 @@
+import logging
+from pylons import session
+from pylons import config
+from pylons import tmpl_context as c
+from pylons import app_globals as g
+from pylons.templating import render_mako as render
+
+import gridmonitor.lib.helpers as h
+from gridmonitor.lib.base import BaseController
+
+from gridmonitor.model.acl import meta, handler
 from sft.db import sft_meta
 from sft.db import sft_schema
 
-from gridmonitor.lib.base import *
-from gridmonitor.model.acl import *
 from gridmonitor.controllers.user import UserController
 
 log = logging.getLogger(__name__)
@@ -10,6 +19,9 @@ log = logging.getLogger(__name__)
 class GridadminController(BaseController):
     
     def __init__(self):
+
+        BaseController.__init__(self)
+
         self.admin = None
         self.authorized = False
 
@@ -91,7 +103,7 @@ class GridadminController(BaseController):
                 ('GRIS/GIIS', '/gridadmin/infosys', infosys_intervals)]
         
         if self.authorized:
-                c.menu.append(('Grid Statistics', '/gridadmin/statistics', statistics_menu))
+            c.menu.append(('Grid Statistics', '/gridadmin/statistics', statistics_menu))
         c.menu.append(('SFTs', '/gridadmin/sfts', sfts))
         c.menu.append(('SFTs User', '/gridadmin/sfts/user_mgnt'))
         c.menu.append(('Nagios', nagios_server_url))

@@ -1,5 +1,12 @@
 import logging
-from gridmonitor.lib.base import *
+from pylons import session
+from pylons import config
+from pylons import tmpl_context as c
+from pylons import app_globals as g
+from pylons.templating import render_mako as render
+
+import gridmonitor.lib.helpers as h
+from gridmonitor.lib.base import BaseController
 from gridmonitor.model.acl import *
 from gridmonitor.model.acl.name_mapping import *
 from gridmonitor.model.sft.name_mapping import *
@@ -16,6 +23,8 @@ log = logging.getLogger(__name__)
 class MonadminController(BaseController):
 
     def __init__(self):
+        BaseController.__init__(self)
+
         self.admin = None
         self.authorized = False
         authorized_sections = list() # what parts of webpage
@@ -65,7 +74,7 @@ class MonadminController(BaseController):
         
         c.menu = list()
         if 'ACL' in authorized_sections:
-                c.menu.append(('ACL Manager','/monadmin/acl', acl_editor))
+            c.menu.append(('ACL Manager','/monadmin/acl', acl_editor))
 
         self.sft_clusters = None
         self.sft_cluster_groups = None

@@ -1,6 +1,8 @@
 import logging
+from pylons import tmpl_context as c
+from pylons import request
+from pylons.templating import render_mako as render
 
-from gridmonitor.lib.base import *
 from gridadmin import GridadminController
 
 log = logging.getLogger(__name__)

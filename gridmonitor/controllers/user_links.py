@@ -1,14 +1,16 @@
 import logging
-from gridmonitor.lib.base import *
-from gridmonitor.model.errors.voms import *
-from user import UserController 
+
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
+
+from user import UserController
 
 log = logging.getLogger(__name__)
 
 class UserLinksController(UserController):
     
     def __init__(self):
-        UserController()
+        UserController.__init__(self)
 
     def index(self):
 
