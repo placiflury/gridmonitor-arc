@@ -866,7 +866,7 @@ var ListExchanger = {
 	enabled: true,
 	init: function(left, right, that) {
 		var that = that || this;
-		if (ListController.isPrototypeOf(first) && ListController.isPrototypeOf(second)) {
+		if (ListController.isPrototypeOf(left) && ListController.isPrototypeOf(right)) {
 			that.left = left;
 			that.right = right;
 		} else {

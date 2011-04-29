@@ -1,10 +1,18 @@
-from pylons import request
+import logging
+import json 
 
-from monadmin import *
-from hashlib import md5
-import sft
+from pylons import request
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
+
+from gridmonitor.model.sft.name_mapping import * 
+from sft.utils import helpers
+
+from monadmin import MonadminController
 
 log = logging.getLogger(__name__)
+
+
 class MonadminSftController(MonadminController):    
     def __build_json__(self, data_list, keymap, keymap_order, opt_params):
         """
@@ -183,12 +191,12 @@ class MonadminSftController(MonadminController):
                                         request.POST['vo_group'],\
                                         request.POST['test_suit'])
                 try:
-                    sft.utils.helpers.parse_cron_entry(request.POST['minute'], 59)
-                    sft.utils.helpers.parse_cron_entry(request.POST['hour'], 23)
-                    sft.utils.helpers.parse_cron_entry(request.POST['day'], 31)
-                    sft.utils.helpers.parse_cron_entry(request.POST['day_of_week'], 6)
-                    sft.utils.helpers.parse_cron_entry(request.POST['month'], 12)
-                except sft.utils.helpers.CronError, e:
+                    helpers.parse_cron_entry(request.POST['minute'], 59)
+                    helpers.parse_cron_entry(request.POST['hour'], 23)
+                    helpers.parse_cron_entry(request.POST['day'], 31)
+                    helpers.parse_cron_entry(request.POST['day_of_week'], 6)
+                    helpers.parse_cron_entry(request.POST['month'], 12)
+                except helpers.CronError, e:
                     return "ERROR;;;%s" % e.message
                 self.sfts.set_exectime(request.POST['name'],\
                                             request.POST['minute'],\
@@ -199,8 +207,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed SFT " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -250,8 +256,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed User " + request.POST['DN'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -324,8 +328,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed vo " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -362,8 +364,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed vo group " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -437,8 +437,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed cluster " + request.POST['hostname'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -476,8 +474,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed cluster group " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -550,8 +546,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed test " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."
@@ -588,8 +582,6 @@ class MonadminSftController(MonadminController):
                 return "OK;;;Changed testsuit " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
-            return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
         return "ERROR;;;Unrecognized HTTP POST request."

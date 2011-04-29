@@ -29,7 +29,6 @@ gridmonitor/controllers/gridadmin.py
 gridmonitor/controllers/gridadmin_clusters.py
 gridmonitor/controllers/gridadmin_infosys.py
 gridmonitor/controllers/gridadmin_overview.py
-gridmonitor/controllers/gridadmin_plot.py
 gridmonitor/controllers/gridadmin_sfts.py
 gridmonitor/controllers/gridadmin_statistics.py
 gridmonitor/controllers/gridadmin_testjobs.py
@@ -37,15 +36,14 @@ gridmonitor/controllers/help.py
 gridmonitor/controllers/monadmin.py
 gridmonitor/controllers/monadmin_acl.py
 gridmonitor/controllers/monadmin_sft.py
+gridmonitor/controllers/ptest.py
 gridmonitor/controllers/siteadmin.py
 gridmonitor/controllers/siteadmin_clusters.py
 gridmonitor/controllers/siteadmin_jobs.py
-gridmonitor/controllers/siteadmin_newadmin.py
 gridmonitor/controllers/siteadmin_overview.py
 gridmonitor/controllers/siteadmin_statistics.py
 gridmonitor/controllers/siteadmin_testjobs.py
 gridmonitor/controllers/siteadmin_users.py
-gridmonitor/controllers/siteadmin_vos.py
 gridmonitor/controllers/user.py
 gridmonitor/controllers/user_clusters.py
 gridmonitor/controllers/user_job_details.py
@@ -315,3 +313,6 @@ gridmonitor/templates/derived/user/overview/report.html
 gridmonitor/templates/derived/user/statistics/form.html
 gridmonitor/templates/derived/user/tickets/index.html
 gridmonitor/templates/derived/user/vos/index.html
+gridmonitor/tests/__init__.py
+gridmonitor/tests/functional/__init__.py
+gridmonitor/tests/functional/test_ptest.py

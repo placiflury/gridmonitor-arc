@@ -22,7 +22,6 @@ class DataHandlerFactory:
 
     def get_handler(self, config):
 
-        log.info("XXX %s" % config.keys())
         handler_type = config['data_handler_type'].lower().strip() 
         
         if handler_type in ['infocache','cache','cache_handler']:

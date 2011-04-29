@@ -85,11 +85,12 @@ class GiisDbHandler(HandlerApi):
         """
         query = meta.Session.query(schema.UserAccess)
         clusters = query.filter_by(user = user_dn).all()
-        cls = set()
+        cls = list()
     
         for cluster in clusters:
-            set.add(cluster.hostname)
-        return list(cls)
+            if cluster.hostname not in cls:
+                cls.append(cluster.hostname)
+        return cls
 
 
     def get_user_queues(self, user_dn, cluster_hostname, start_t, end_t):

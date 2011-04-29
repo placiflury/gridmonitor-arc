@@ -37,6 +37,8 @@ from the MyProxy server.
         <td> <input type="password" name="slcs_dn_pwd"/> </td>
         <td> <input type="password" name="slcs_dn_pwd2"/> </td>
     </tr>
+    %endif
+    %if c.user_slcs_dn or c.user_client_dn:
     <tr> <td colspan=3 align='right'> <input type="submit" name="submit" value="Submit"> </td>
     </tr>
     %endif

@@ -2,21 +2,21 @@ import logging
 from pylons import session
 from pylons import config
 from pylons import tmpl_context as c
-from pylons import app_globals as g
 from pylons.templating import render_mako as render
 
-import gridmonitor.lib.helpers as h
 from gridmonitor.lib.base import BaseController
-from gridmonitor.model.acl import *
-from gridmonitor.model.acl.name_mapping import *
-from gridmonitor.model.sft.name_mapping import *
-from sft.db.cluster_handler import *
-from sft.db.sft_handler import *
-from sft.db.test_handler import *
-from sft.db.user_handler import *
-from sft.db.vo_handler import *
+import gridmonitor.model.acl.handler as handler
+from gridmonitor.model.acl import meta
+from sft.db.cluster_handler import ClusterPool
+from sft.db.cluster_handler import  ClusterGroupPool
+from sft.db.sft_handler import SFTPool
+from sft.db.test_handler import TestPool
+from sft.db.test_handler import TestSuitPool
+from sft.db.user_handler import UserPool
+from sft.db.vo_handler import VOGroupPool
+from sft.db.vo_handler import VOPool
+from sft.db.vo_handler import VOUserPool
 
-import simplejson as json
 
 log = logging.getLogger(__name__)
 
@@ -70,11 +70,11 @@ class MonadminController(BaseController):
                       ('Tests', '/monadmin/sft/tests'),
                       ('Edit SFTs', '/monadmin/sft/edit')]
         
-        c.top_nav= session['top_nav_bar']
+        c.top_nav = session['top_nav_bar']
         
         c.menu = list()
         if 'ACL' in authorized_sections:
-            c.menu.append(('ACL Manager','/monadmin/acl', acl_editor))
+            c.menu.append(('ACL Manager', '/monadmin/acl', acl_editor))
 
         self.sft_clusters = None
         self.sft_cluster_groups = None
@@ -95,10 +95,10 @@ class MonadminController(BaseController):
             self.sft_vo_users = VOUserPool()
             self.sft_vos = VOPool()
             self.sft_vo_groups = VOGroupPool()
-            c.menu.append(('SFTs','/monadmin/sft', sft_editor))
+            c.menu.append(('SFTs', '/monadmin/sft', sft_editor))
 
 
-        c.top_nav_active="Monitor Admin"
+        c.top_nav_active = "Monitor Admin"
         
  
     def index(self):

@@ -1,9 +1,21 @@
+import logging
+from pylons import config
+from pylons import tmpl_context as c
+from pylons.templating import render_mako as render
+
+#import simplejson as json
+
+import json
+
 from pylons import request
-from monadmin import *
 from hashlib import md5
 
+from gridmonitor.model.acl.name_mapping import *
+from gridmonitor.model.acl.errors import *
+from monadmin import MonadminController
 
 log = logging.getLogger(__name__)
+
 class MonadminAclController(MonadminController):    
     def index(self):
         
@@ -48,7 +60,7 @@ class MonadminAclController(MonadminController):
                     currently: string id_key, list show_keys, string parent_key
         """
         json_data = dict()
-        json_data['order_keys'] = keymap_order;
+        json_data['order_keys'] = keymap_order
         json_data['names'] = dict()
         for k in keymap.keys():
             json_data['names'][k] = keymap[k][0]
@@ -105,8 +117,8 @@ class MonadminAclController(MonadminController):
             source_id = request.GET['source_id']
             target_id = request.GET['target_id']
         except:
-            source_id = None;
-            target_id = 'MA_adm_list';
+            source_id = None
+            target_id = 'MA_adm_list'
         if target_id != 'MA_adm_list':
             raise Exception('Wrong identifier: HTTP_GET[' + target_id + ']')
         if source_id == 'MA_site_list':
@@ -177,7 +189,7 @@ class MonadminAclController(MonadminController):
                                                 request.POST['shib_given_name'], \
                                                 request.POST['shib_email'] )
                 return "OK;;;Changed admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
-        except errors.ACLError, e:
+        except ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
@@ -190,8 +202,8 @@ class MonadminAclController(MonadminController):
             source_id = request.GET['source_id']
             target_id = request.GET['target_id']
         except:
-            source_id = None;
-            target_id = 'MA_site_list';
+            source_id = None
+            target_id = 'MA_site_list'
         if target_id != 'MA_site_list':
             raise 'Wrong identifier: HTTP_GET[' + target_id + ']'
         if source_id == 'MA_adm_list':
@@ -229,7 +241,7 @@ class MonadminAclController(MonadminController):
                 return "OK;;;Changed site " + request.POST['name'] + " successfully."
             else:
                 return "ERROR;;;Unrecognized HTTP POST request."
-        except errors.ACLError, e:
+        except ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
@@ -244,8 +256,8 @@ class MonadminAclController(MonadminController):
             source_id = request.GET['source_id']
             target_id = request.GET['target_id']
         except:
-            source_id = None;
-            target_id = 'MA_service_list';
+            source_id = None
+            target_id = 'MA_service_list'
         if target_id != 'MA_service_list':
             raise 'Wrong identifier: HTTP_GET[' + target_id + ']'
         if source_id == 'MA_site_list':
@@ -299,7 +311,7 @@ class MonadminAclController(MonadminController):
                                                 request.POST['hostname'], \
                                                 request.POST['alias'])
                 return "OK;;;Changed service " + request.POST['name'] + " successfully."
-        except errors.ACLError, e:
+        except ACLError, e:
             return "ERROR;;;%s" % e.message
         except Exception, e1:
             return "ERROR;;;%r" % e1
@@ -331,7 +343,7 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
-            changes = 0;
+            changes = 0
             for k in data['add']:
                 log.info('Added admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.add_admin(data['source']['name'], k['shib_unique_id'])
@@ -355,7 +367,7 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
-            changes = 0;
+            changes = 0
             for k in data['add']:
                 log.info('Added admin ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.add_admin(data['source']['name'], data['source']['hostname'], k['shib_unique_id'])
@@ -379,7 +391,7 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
-            changes = 0;
+            changes = 0
             for k in data['add']:
                 log.info('Added site ' + k.__str__() + " for " + data['source'].__str__())
                 self.sites_pool.add_admin(k['name'], data['source']['shib_unique_id'])
@@ -403,7 +415,7 @@ class MonadminAclController(MonadminController):
         """
         data = self.__parse_http_post__()
         try:
-            changes = 0;
+            changes = 0
             for k in data['add']:
                 log.info('Added service ' + k.__str__() + " for " + data['source'].__str__())
                 self.services_pool.add_admin(k['name'], k['hostname'], data['source']['shib_unique_id'])

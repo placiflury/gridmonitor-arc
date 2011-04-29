@@ -33,11 +33,15 @@ class ErrorController(BaseController):
         </body>
         </html>
         """ 
+
+        resp = request.environ.get('pylons.original_response')
+        content = literal(resp.body) or cgi.escape(request.GET.get('message', ''))
+
         c.title = "GridMonitor Error Page"
         c.heading = "An Error Occurred"
         c.prefix = request.environ.get('SCRIPT_NAME', '')
-        c.code = cgi.escape(request.params.get('code', ''))
-        c.message = cgi.escape(request.params.get('message', ''))
+        c.code = cgi.escape(request.params.get('code', str(resp.status_int)))
+        c.message = content
         
         return render('/base/error.html')
 

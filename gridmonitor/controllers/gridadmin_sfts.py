@@ -147,10 +147,12 @@ class GridadminSftsController(GridadminController):
         return render('/derived/gridadmin/sfts/form.html')
     
     def submit(self):
+        # XXX add an alias/displayname to add_user()
         c.title = "Storing the password of your  MyProxy certificate."
         c.menu_active = "-- none --"
         c.heading = "Storing the password of your MyProxy certificate."
-        c 
+        c.slcs_msg = None 
+        c.browser_msg = None 
 
         up = UserPool()
         
@@ -168,10 +170,10 @@ class GridadminSftsController(GridadminController):
         
             db_browser_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN=browser_dn).first()
             if db_browser_user:
-                up.reset_user_passwd(browser_dn,browser_pwd)
+                up.reset_user_passwd(browser_dn, browser_pwd)
                 c.browser_msg =  "Password for '%s' has been changed successfully" % browser_dn
             else:
-                up.add_user(browser_dn, browser_pwd)
+                up.add_user(browser_dn, None, browser_pwd)
                 c.browser_msg =  "'%s' has been added successfully" % browser_dn
         
         if request.params.has_key('CB_slcs_dn'):
@@ -191,7 +193,7 @@ class GridadminSftsController(GridadminController):
                 up.reset_user_passwd(slcs_dn,slcs_pwd)
                 c.slcs_msg =  "Password for '%s' has been changed successfully" % slcs_dn
             else:
-                up.add_user(slcs_dn, slcs_pwd)
+                up.add_user(slcs_dn, None,  slcs_pwd)
                 c.slcs_msg =  "'%s' has been added successfully" % slcs_dn
  
         if not c.slcs_msg and not c.browser_msg: 

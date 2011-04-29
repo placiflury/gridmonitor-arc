@@ -25,7 +25,8 @@ class UserVosController(UserController):
         c.title = "Monitoring System: User View"
         c.menu_active = "VOs"
         c.heading = "Virtual Organizations Membership"
-        c.user_slsc_dn = None
+        c.user_slcs_dn = None
+
         
         if not self.voms:
             return render('/derived/user/error/voms_error.html')
