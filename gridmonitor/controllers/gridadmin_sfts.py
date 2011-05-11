@@ -157,9 +157,9 @@ class GridadminSftsController(GridadminController):
         up = UserPool()
         
         if request.params.has_key('CB_browser_dn'):
-            browser_dn = request.params['CB_browser_dn'].encode('utf-8')
-            browser_pwd = request.params['browser_dn_pwd'].encode('utf-8')
-            browser_pwd2 = request.params['browser_dn_pwd2'].encode('utf-8')
+            browser_dn = request.params['CB_browser_dn']
+            browser_pwd = request.params['browser_dn_pwd']
+            browser_pwd2 = request.params['browser_dn_pwd2']
             if not browser_pwd:
                 c.form_error= "You must enter a password for your '%s' certificate" % browser_dn
                 return render('/derived/gridadmin/sfts/form.html')
@@ -177,9 +177,9 @@ class GridadminSftsController(GridadminController):
                 c.browser_msg =  "'%s' has been added successfully" % browser_dn
         
         if request.params.has_key('CB_slcs_dn'):
-            slcs_dn = request.params['CB_slcs_dn'].encode('utf-8')
-            slcs_pwd =request.params['slcs_dn_pwd'].encode('utf-8')
-            slcs_pwd2 = request.params['slcs_dn_pwd2'].encode('utf-8')
+            slcs_dn = request.params['CB_slcs_dn']
+            slcs_pwd =request.params['slcs_dn_pwd']
+            slcs_pwd2 = request.params['slcs_dn_pwd2']
 
             if not slcs_pwd:
                 c.form_error = "Your must enter a password for your '%s' certificate" % slcs_dn

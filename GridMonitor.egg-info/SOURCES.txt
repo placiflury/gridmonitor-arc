@@ -261,7 +261,6 @@ gridmonitor/templates/derived/gridadmin/infosys/details.html
 gridmonitor/templates/derived/gridadmin/infosys/index.html
 gridmonitor/templates/derived/gridadmin/overview/index.html
 gridmonitor/templates/derived/gridadmin/overview/report.html
-gridmonitor/templates/derived/gridadmin/sfts/chage.html
 gridmonitor/templates/derived/gridadmin/sfts/change.html
 gridmonitor/templates/derived/gridadmin/sfts/form.html
 gridmonitor/templates/derived/gridadmin/sfts/index.html

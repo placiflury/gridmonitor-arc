@@ -67,6 +67,7 @@ class GridadminInfosysController(GridadminController):
         """ Shows all available plots for specified cluster. Mostly 
             used for displaying history of 'inactive' clusters. 
         """
+        c.menu_active = "GRIS/GIIS"
         c.cluster_name = arg
         c.heading = "Statistics about %s (GRIS/GIIS)" % c.cluster_name
         return render('/derived/gridadmin/infosys/details.html')

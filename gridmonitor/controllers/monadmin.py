@@ -43,7 +43,7 @@ class MonadminController(BaseController):
                 log.debug("Checking whether '%s' is a super admin" % user_unique_id)
                 if site.name == 'GridMonitor' and site.alias == 'not_a_real_site': # super admin
                     self.authorized = True
-                    log.info("Got super admin with ID '%s'" % user_unique_id)
+                    log.debug("Got super admin with ID '%s'" % user_unique_id)
                     for service in site.services:
                         authorized_sections.append(service.name)
                     break

@@ -39,6 +39,7 @@ class GridadminStatisticsController(GridadminController):
         
         c.title = "Monitoring System: VO/Grid Admin Statistics -- Usage Tables --"
         c.menu_active = "VO/Cluster Usage"
+        c.form_error = None
        
         if not self.authorized:
             return render('/derived/gridadmin/error/access_denied.html')

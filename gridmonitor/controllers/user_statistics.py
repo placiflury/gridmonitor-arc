@@ -31,6 +31,7 @@ class UserStatisticsController(UserController):
         c.n_jobs_page_faults = False
         c.cpu_wall_duration = False
         c.user_kernel_time = False
+        c.start_chm = None
 
         resolution = 86400 # 1 day
         series = dict()

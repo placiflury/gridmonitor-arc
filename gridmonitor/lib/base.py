@@ -45,10 +45,16 @@ class BaseController(WSGIController):
 
             # 1. check whether Shibboleth enabled
             if request.environ.has_key(config['shib_given_name']):
+                """
                 user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
                 user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
                 home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
                 unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
+                """
+                user_name = request.environ[config['shib_given_name']]
+                user_surname = request.environ[config['shib_surname']]
+                home_org = request.environ[config['shib_home_org']]
+                unique_id = request.environ[config['shib_unique_id']]
                 
                 session['user_home_org'] = home_org
                 session['user_unique_id'] = unique_id
@@ -61,7 +67,8 @@ class BaseController(WSGIController):
             else: # go for browser certificate
                 
                 if request.environ.has_key('SSL_CLIENT_S_DN_CN'): #generating a unique_id 
-                    name = unicode(request.environ['SSL_CLIENT_S_DN_CN'], 'iso-8859-1')
+                    #name = unicode(request.environ['SSL_CLIENT_S_DN_CN'], 'iso-8859-1')
+                    name = request.environ['SSL_CLIENT_S_DN_CN']
                     if name:
                         name = name.strip().split()
                         if len(name) > 1: 
@@ -72,13 +79,18 @@ class BaseController(WSGIController):
                     
                     
                 if request.environ.has_key('SSL_CLIENT_S_DN_0'):
-                    org  = unicode(request.environ['SSL_CLIENT_S_DN_O'],'iso-8859-1')
+                    #org  = unicode(request.environ['SSL_CLIENT_S_DN_O'],'iso-8859-1')
+                    org  = request.environ['SSL_CLIENT_S_DN_O']
                     if org:
                         session['user_home_org'] = org.strip()
             
                 if request.environ.has_key('SSL_CLIENT_S_DN'): #generating a unique_id 
+                    """
                     dn = unicode(request.environ['SSL_CLIENT_S_DN'],'iso-8859-1')
                     ca = unicode(request.environ['SSL_CLIENT_I_DN'],'iso-8859-1')
+                    """
+                    dn = request.environ['SSL_CLIENT_S_DN']
+                    ca = request.environ['SSL_CLIENT_I_DN']
                     if dn and ca:
                         unique_id = md5(dn + ca).hexdigest()
                         session['user_unique_id'] = unique_id 
@@ -89,7 +101,8 @@ class BaseController(WSGIController):
             
             # 2. get browser certificate details
             if request.environ.has_key('SSL_CLIENT_S_DN'):
-                user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'iso-8859-1')
+                #user_client_dn = unicode(request.environ['SSL_CLIENT_S_DN'].strip(),'iso-8859-1')
+                user_client_dn = request.environ['SSL_CLIENT_S_DN'].strip()
                 # if emailaddress= within DN -> fix it
                 cand = user_client_dn.split("emailAddress=")
                 if len(cand) > 1:
@@ -99,6 +112,7 @@ class BaseController(WSGIController):
 
                 session['user_client_ca'] = request.environ['SSL_CLIENT_I_DN'].strip()
 
+            log.info("User %s authenticated" % session['user_name'])
             session['authenticated'] = True
 
             # 3. set navigation bar 
