@@ -1,5 +1,5 @@
 <%inherit file="/base/user.html"/>
-<p>You are visiting the Grid Monitor of the SMSCG project.
+<p>You are visiting the Grid Monitor of the ${config['gridname']}.
 On this page you find a personalized <span class="emph"> tactical overview </span> on the current 
 situation on the Grid. 
 </p>
@@ -103,8 +103,8 @@ chs=250x90
 &amp;chxr=0,0,${num_cpus}
 &amp;chxl=1:|gridrunning|running|cpus
 &amp;chxp=50,${num_cpus}
-&amp;chtt='SMSCG GRID'"
-alt="Number of (grid) jobs on SMSCG Grid"/>
+&amp;chtt='${config['gridname']}'"
+alt="Number of (grid) jobs on ${config['gridname']}"/>
 </td>
 <td>
 <img src="http://chart.apis.google.com/chart?

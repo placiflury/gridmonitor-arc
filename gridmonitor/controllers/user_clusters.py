@@ -69,28 +69,29 @@ class UserClustersController(UserController):
             log.debug("Found for cluster %s (%s)  %d cpus" % (display_name, hostname,cpus))
             if c.max_cpus < cpus:
                 c.max_cpus = cpus
-            
+           
+            _cpus = abs(cpus) # avoid to be screwed by negative numbers 
             # populate pie-charts
             if hostname in c.allowed_clusters[c.user_slcs_dn]:
                 if not c.cl_pie_chart_labels[c.user_slcs_dn]:
                     c.cl_pie_chart_labels[c.user_slcs_dn] = display_name
-                    c.cl_pie_chart_data[c.user_slcs_dn] = "t:%s" % str(cpus)
+                    c.cl_pie_chart_data[c.user_slcs_dn] = "t:%s" % str(_cpus)
                 else:
                     c.cl_pie_chart_labels[c.user_slcs_dn] += "|%s" % display_name
-                    c.cl_pie_chart_data[c.user_slcs_dn] += ",%s" % str(cpus)
+                    c.cl_pie_chart_data[c.user_slcs_dn] += ",%s" % str(_cpus)
             if hostname in c.allowed_clusters[c.user_client_dn]:
                 if not c.cl_pie_chart_labels[c.user_client_dn]:
                     c.cl_pie_chart_labels[c.user_client_dn] = display_name
-                    c.cl_pie_chart_data[c.user_client_dn] = "t:%s" % str(cpus)
+                    c.cl_pie_chart_data[c.user_client_dn] = "t:%s" % str(_cpus)
                 else:
                     c.cl_pie_chart_labels[c.user_client_dn] += "|%s" % display_name
-                    c.cl_pie_chart_data[c.user_client_dn] += ",%s" % str(cpus)
+                    c.cl_pie_chart_data[c.user_client_dn] += ",%s" % str(_cpus)
             if not c.cl_pie_chart_labels['all']:
                 c.cl_pie_chart_labels['all'] = display_name
-                c.cl_pie_chart_data['all'] = "t:%s" % str(cpus)
+                c.cl_pie_chart_data['all'] = "t:%s" % str(_cpus)
             else:
                 c.cl_pie_chart_labels['all'] += "|%s" % display_name
-                c.cl_pie_chart_data['all'] += ",%s" % str(cpus)
+                c.cl_pie_chart_data['all'] += ",%s" % str(_cpus)
                 
          
 

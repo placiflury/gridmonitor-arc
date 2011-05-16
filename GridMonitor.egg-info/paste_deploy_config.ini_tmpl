@@ -22,6 +22,8 @@ beaker.session.key = gridmonitor
 beaker.session.secret = ${app_instance_secret}
 app_instance_uuid = ${app_instance_uuid}
 
+gridname=SMSCG Grid
+
 data_handler_type=giisdb
 #data_handler_type=infocache
 ## infosys cache block (used if data_handler_type == infocache)

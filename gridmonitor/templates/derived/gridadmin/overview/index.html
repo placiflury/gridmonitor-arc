@@ -10,7 +10,7 @@
 
 <% color_map={0: '#ffffff', 1: '#FFFBBF', 2:'#FF5000', 3: '#809DAA'} %>
 
-<p>You are visiting the Grid Monitor of the SMSCG project.
+<p>You are visiting the Grid Monitor of the ${config['gridname']}.
 On this page you find a the <span class="emph"> tactical overview </span> for your site. If you'd like to have
 more specific details please, click on the 'details' links on the right.
 </p>
@@ -134,8 +134,8 @@ chs=250x90
 &amp;chxr=0,0,${num_cpus}
 &amp;chxl=1:|gridrunning|running|cpus
 &amp;chxp=50,${num_cpus}
-&amp;chtt='SMSCG GRID'"
-alt="Number of (grid) jobs on SMSCG Grid"/>
+&amp;chtt='${config['gridname']}'"
+alt="Number of (grid) jobs on ${config['gridname']}"/>
 </td>
 <td>
 <img src="http://chart.apis.google.com/chart?
