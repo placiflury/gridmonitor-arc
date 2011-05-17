@@ -58,16 +58,15 @@ slcs_enabled=False
 slcs_ca="/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
 
 # key-value mappings for statistical objects -> don't touch
-stats_cpus= cpus
-stats_grid_running=gridrunning
-stats_grid_queued=gridqueued
-stats_local_queued=localqueued
-stats_prelrms_queued=prelrmsqueued
+tats_cpus= cpus
+stats_grid_running=grid_running
+stats_grid_queued=grid_queued
+stats_local_queued=local_queued
+stats_prelrms_queued=prelrms_queued
 stats_running=running
-stats_totaljobs=totaljobs
-stats_usedcpus=usedcpus
-stats_totalcpus=totalcpus
-stats_vo_usage=vo_usage
+stats_totaljobs=total_jobs
+stats_usedcpus=used_cpus
+stats_totalcpus=total_cpus
 
 # nagios ndoutils database
 sqlalchemy_nagios.url= <DB_URL> 

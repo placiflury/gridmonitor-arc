@@ -32,7 +32,7 @@ def get_nagios_host_services_from_group_tag(tag):
      
     query = meta.Session.query(hosttables.HostGroup)
     nagios_hgroup = query.filter_by(alias=tag).first()
-    nagios__hgroup_members = None
+    nagios_hgroup_members = None
     if nagios_hgroup:
         nagios_hgroup_members = nagios_hgroup.members
         log.debug("Found Nagios group %s (%d members)" % (tag, len(nagios_hgroup_members)))

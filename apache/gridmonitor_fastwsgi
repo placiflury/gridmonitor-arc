@@ -6,6 +6,8 @@
 
     ServerAdmin <YOUR_EMAIL_ADDRESS>
     ServerSignature Off
+    # WARNING: remove the 'index.html' file in the DocumentRoot
+    # for the GridMonitor to run smoothly
     DocumentRoot /var/www
     ErrorLog /var/log/apache2/error.log
     RewriteLog /var/log/apache2/rewrite.log

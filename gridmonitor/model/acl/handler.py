@@ -22,14 +22,14 @@ def strip_args(func):
         kwargs_stripped = dict()
 
         for arg in args:    
-            if type(arg) == str:
+            if type(arg) == str or type(arg) == unicode:
                 args_stripped.append(unicode(arg.strip()))
             else:
                 args_stripped.append(arg)
         
         if kwargs:
             for k, v in kwargs.items():
-                if type(v) == str:
+                if type(v) == str or type(v) == unicode:
                     kwargs_stripped[k] = unicode(v.strip())
                 else:
                     kwargs_stripped[k] = v
@@ -69,7 +69,7 @@ class AdminsPool():
 
         if not surname or not given_name or not email:
             raise ACLInsertError("Required parameter mssing",
-                "Either surname,given_name, emaii missing")
+                "Either surname,given_name, email missing")
         
         admin = self.session.query(schema.Admin).filter_by(shib_unique_id=unique_id).first()
         if admin:
@@ -324,20 +324,20 @@ class ServicesPool():
             self.valid_types = [x.strip() for x in valid_types.split(',')]
         
     @strip_args
-    def add_service(self, name, site_name, type, hostname, alias=None):
+    def add_service(self, name, site_name, _type, hostname, alias=None):
         """ Adding a service to the ACL pool. 
             Params: name -- name of the service 
                     site_name -- name of the site    
                     type    -- service type (currently either 'cluster' or 'other')
                     hostname -- host name (FQDN) where service runs
-                    alias   -- alias ofr service (optional)
+                    alias   -- alias for service (optional)
             Raise   ACLInsertError - it type invalid, site does not exist etc.
         """
-        if type not in self.valid_types:
+        if _type not in self.valid_types:
             log.error("Invalid type '%s' for service '%s' of site '%s'" % \
-                (type, name, site_name))
+                (_type, name, site_name))
             raise ACLInsertError("Invalid service 'type'", \
-                "Service with type '%s' can't be created." % type)
+                "Service with type '%s' can't be created." % _type)
 
         # if site service belongs to does not exist -> raise execption
         site = self.session.query(schema.Site).filter_by(name=site_name).first()
@@ -353,16 +353,16 @@ class ServicesPool():
             
         if service:
             log.info("Service '%s' ('%s') exists already" % (name, hostname))
-            if (service.type != type or \
+            if (service.type != _type or \
                  service.hostname != hostname or \
                  service.alias != alias):
-                service.type = type
+                service.type = _type
                 service.hostname = hostname
                 service.alias = alias
                 self.session.add(service)
         else:
             log.info("Adding service '%s' (%s)" % (name, hostname))
-            service = schema.Service(name, site_name, type, hostname, alias)
+            service = schema.Service(name, site_name, _type, hostname, alias)
             self.session.add(service)
 
         try:

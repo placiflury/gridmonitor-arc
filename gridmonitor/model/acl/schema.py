@@ -8,7 +8,14 @@ The ACL database is used to protect some parts of the GridMonitor portal
 from unauthorized access. 
 If has primarily been designed for a Shibboleth environment (thus the 
 naming of the table entries); this doesn't mean that the tables must 
-be populated with Shibboleth entries. 
+be populated with Shibboleth entries. For a certificate based ACL, one can 
+for example generate a unique_id by hashing the DN and CA of the certificate.
+
+Notice. ACL for a site and for a service are decoupled. That is you can be
+    an admin of a service without being admin of the site. This requires
+    additional 'logic', which checks *both* the site ACL and the service ACL
+    for each potential admin.
+    
 """
 
 

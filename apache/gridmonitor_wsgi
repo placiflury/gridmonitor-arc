@@ -1,0 +1,47 @@
+<VirtualHost *:80>
+ Redirect / https://<HOSTNAME>/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+   
+    ServerAdmin grid@switch.ch
+    ServerSignature Off
+    # WARNING: remove the 'index.html' file in the DocumentRoot
+    # for the GridMonitor to run smoothly
+    DocumentRoot /var/www
+    LogLevel info
+
+    SSLEngine on
+    SSLOptions StdEnvVars
+    SSLCertificateFile    /etc/grid-security/hostcert.pem
+    SSLCertificateKeyFile /etc/grid-security/hostkey.pem 
+    SSLCACertificatePath /etc/grid-security/certificates
+    SSLVerifyDepth 4
+    SSLOptions +ExportCertData
+    SSLVerifyClient optional_no_ca
+    #SSLVerifyClient require
+
+    # alias'ing for 'static' parts of application    
+    Alias /rrd /opt/smscg/monitor/plots/
+    Alias /jobs /opt/smscg/monitor/jobs/
+    Alias /phpmyadmin /usr/share/phpmyadmin
+
+    WSGIScriptAlias /   /opt/smscg/monitor/apache/monitor.wsgi
+    <Directory /opt/smscg/monitor>
+        Order deny,allow
+        Allow from all
+    </Directory>
+
+
+     <Location /phpmyadmin>
+        SetHandler None
+    </Location>
+
+#    WSGIScriptAlias /   /opt/smscg/monitor/apache/monitor.wsgi
+#    <Directory /opt/smscg/monitor>
+#        Order deny,allow
+#        Allow from all
+#    </Directory>
+
+
+</VirtualHost>

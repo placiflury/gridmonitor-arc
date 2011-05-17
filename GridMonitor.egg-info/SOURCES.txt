@@ -16,7 +16,9 @@ GridMonitor.egg-info/paster_plugins.txt
 GridMonitor.egg-info/requires.txt
 GridMonitor.egg-info/top_level.txt
 apache/gridmonitor_fastwsgi
+apache/gridmonitor_wsgi
 apache/monitor.fcgi
+apache/monitor.wsgi
 gridmonitor/__init__.py
 gridmonitor/websetup.py
 gridmonitor/config/__init__.py
