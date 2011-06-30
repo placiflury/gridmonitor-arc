@@ -279,6 +279,7 @@ gridmonitor/templates/derived/gridadmin/testjobs/index.html
 gridmonitor/templates/derived/gridadmin/testjobs/test.html
 gridmonitor/templates/derived/help/index.html
 gridmonitor/templates/derived/monadmin/index.html
+gridmonitor/templates/derived/monadmin/acl/.admins.html.swp
 gridmonitor/templates/derived/monadmin/acl/admin2site.html
 gridmonitor/templates/derived/monadmin/acl/admins.html
 gridmonitor/templates/derived/monadmin/acl/index.html
@@ -301,6 +302,7 @@ gridmonitor/templates/derived/siteadmin/users/index.html
 gridmonitor/templates/derived/siteadmin/vos/index.html
 gridmonitor/templates/derived/user/links.html
 gridmonitor/templates/derived/user/clusters/index.html
+gridmonitor/templates/derived/user/clusters/index.html.0
 gridmonitor/templates/derived/user/clusters/show.html
 gridmonitor/templates/derived/user/clusters/show_queue.html
 gridmonitor/templates/derived/user/error/giis_error.html
@@ -317,3 +319,4 @@ gridmonitor/templates/derived/user/vos/index.html
 gridmonitor/tests/__init__.py
 gridmonitor/tests/functional/__init__.py
 gridmonitor/tests/functional/test_ptest.py
+test/acl_test.py

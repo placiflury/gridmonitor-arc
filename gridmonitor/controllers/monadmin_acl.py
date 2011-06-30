@@ -151,17 +151,17 @@ class MonadminAclController(MonadminController):
             adm_list = self.admins_pool.list_admins()
         # If NOT AAI enabled:
         if not(request.environ.has_key(config['shib_given_name'])):
-            ADMIN_KEYMAP['aai-DN'] = ["DN:"]
-            ADMIN_KEYMAP['aai-CA'] = ["CA:"]
-            ADMIN_KEYMAP_ORDER.pop(0)
-            ADMIN_KEYMAP_ORDER.insert(0, 'aai-DN')
-            ADMIN_KEYMAP_ORDER.insert(1, 'aai-CA')
-        # AAI enabled:
+            if not ADMIN_KEYMAP.has_key('aai-DN'):
+                ADMIN_KEYMAP['aai-DN'] = ["DN:"]
+                ADMIN_KEYMAP['aai-CA'] = ["CA:"]
+                #ADMIN_KEYMAP_ORDER.pop(0)
+                ADMIN_KEYMAP_ORDER.insert(0, 'aai-DN')
+                ADMIN_KEYMAP_ORDER.insert(1, 'aai-CA')
         return self.__build_json__(adm_list, ADMIN_KEYMAP, ADMIN_KEYMAP_ORDER, { \
                             'id_key': 'shib_unique_id', \
                             'show_keys': [ 'shib_surname', 'shib_given_name'], \
                             })
-
+    
     def changeadm(self):
         """
         Store a newly added or changed admin from the db.
@@ -174,13 +174,16 @@ class MonadminAclController(MonadminController):
                 self.admins_pool.remove_admin(request.POST['shib_unique_id'])
                 return "OK;;;Deleted admin " + request.POST['shib_given_name'] + " " + request.POST['shib_surname'] + " successfully."
             elif request.POST['button'] == 'save':
-                # If NOT AAI enabled:
-                if not(request.environ.has_key(config['shib_given_name'])):
+                # If NOT AAI enabled and DN/CA are set (happens only for new user)
+                if not(request.environ.has_key(config['shib_unique_id'])) and \
+                    request.POST.has_key('aai-DN'):
                     dn = request.POST['aai-DN']
                     ca = request.POST['aai-CA']
                     if dn and ca:
                         shib_unique_id = md5(dn + ca).hexdigest()
-                    log.info('DN: %r, CA: %r, UID: %r' % (dn, ca, shib_unique_id))
+                        log.info('Added user with DN: %r, CA: %r, UID: %r' % (dn, ca, shib_unique_id))
+                    else:
+                        raise Exception('DN or CA missing')
                 # AAI enabled:
                 else:
                     shib_unique_id = request.POST['shib_unique_id']
@@ -251,7 +254,9 @@ class MonadminAclController(MonadminController):
         """
         Build JSON string with all services or just the ones that belong to a special site or
         the ones that are managed by a special admin.
+        # XXX only display services that are not already part of the 
         """
+        service_list_inactive = list()
         try:
             source_id = request.GET['source_id']
             target_id = request.GET['target_id']
@@ -266,7 +271,6 @@ class MonadminAclController(MonadminController):
             except:
                 inverse = None
             if inverse:
-                service_list_inactive = list()
                 for service in self.services_pool.list_services():
                     if not (service in self.sites_pool.list_services(request.GET['name'])):
                         service_list_inactive.append(service)
@@ -279,7 +283,6 @@ class MonadminAclController(MonadminController):
             except:
                 inverse = None
             if inverse:
-                service_list_inactive = list()
                 for service in self.services_pool.list_services():
                     if not (service in self.admins_pool.list_admin_services(request.GET['shib_unique_id'])):
                         service_list_inactive.append(service)
@@ -292,6 +295,7 @@ class MonadminAclController(MonadminController):
                             'id_key': 'hash', \
                             'show_keys': ['name', 'hostname'], \
                             'parent_key': 'site_name'})
+
 
     def changeservice(self):
         """

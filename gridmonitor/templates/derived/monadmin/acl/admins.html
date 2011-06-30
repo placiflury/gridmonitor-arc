@@ -41,7 +41,7 @@
 	var MA_site_mapper = Object.create(ListMapper);
 	MA_site_mapper.init(MA_admin_list, MA_site_list);
 	
-	var MA_service_list = Object.create(ListControllerSub);
+	var MA_service_list = Object.create(ListController);
 	MA_service_list.container = $('#MA_service_list_container');
 	MA_service_list.multiple = true;
 	MA_service_list.click = false;
@@ -79,7 +79,8 @@
 	var MA_site_mapper_inverse = Object.create(ListMapperInverse);
 	MA_site_mapper_inverse.init(MA_admin_list, MA_site_list_inactive);
 	
-	var MA_service_list_inactive = Object.create(ListControllerSub);
+	// PF var MA_service_list_inactive = Object.create(ListControllerSub);
+	var MA_service_list_inactive = Object.create(ListController);
 	MA_service_list_inactive.container = $('#MA_service_list_inactive_container');
 	MA_service_list_inactive.multiple = true;
 	MA_service_list_inactive.toggle = true;

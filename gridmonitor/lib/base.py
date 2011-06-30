@@ -19,6 +19,8 @@ from gridmonitor.model.nagios import meta as nagios_meta
 from gridmonitor.model.acl import meta as acl_meta
 from gridmonitor.model.acl import handler
 from sft.db import sft_meta
+from sgasaggregator.sgascache import session as sgascache_session
+
 
 
 log = logging.getLogger(__name__)
@@ -167,6 +169,11 @@ class BaseController(WSGIController):
             nagios_meta.Session.remove()
             acl_meta.Session.remove()
             sft_meta.Session.remove()
+            handler_type = config['data_handler_type'].lower().strip()
+            if handler_type in ['giisdb','giis_handler']:
+                from infocache.db  import meta as info_meta
+                info_meta.Session.close()
+            sgascache_session.Session.close()
             
 
 # Include the '_' function in the public names

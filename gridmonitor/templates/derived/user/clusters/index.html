@@ -52,32 +52,14 @@ cpus=app_globals.get_cluster_stats(hostname,'stats_cpus')
 </div>
 <div id="pie_slcs_browser_access" style="display:none">
 % if c.user_client_dn:
-<img src="http://chart.apis.google.com/chart?
-chs=610x200
-&amp;chds=0,${c.max_cpus}
-&amp;chd=${c.cl_pie_chart_data[c.user_client_dn]}
-&amp;chl=${c.cl_pie_chart_labels[c.user_client_dn]}
-&amp;cht=p3"
-alt="Clusters Chart"/>
+    <div id="dn_clusters_div"> </div>
 %endif
 </div>
 <div id="pie_slcs_access" style="display:none">
-<img src="http://chart.apis.google.com/chart?
-chs=610x200
-&amp;chds=0,${c.max_cpus}
-&amp;chd=${c.cl_pie_chart_data[c.user_slcs_dn]}
-&amp;chl=${c.cl_pie_chart_labels[c.user_slcs_dn]}
-&amp;cht=p3"
-alt="Clusters Chart"/>
+    <div id="slcs_clusters_div"> </div"
 </div>
 <div id="pie_all"style="display:''">
-<img src="http://chart.apis.google.com/chart?
-chs=610x200
-&amp;chds=0,${c.max_cpus}
-&amp;chd=${c.cl_pie_chart_data['all']}
-&amp;chl=${c.cl_pie_chart_labels['all']}
-&amp;cht=p3"
-alt="Clusters Chart"/>
+    <div id="all_clusters_div"> </div>
 </div>
     </td></tr>
 </table>
@@ -207,6 +189,29 @@ alt="Queue(s) status for ${cluster_name}"/>
 <%def name="js()">
     ${parent.js()}
     <script type="text/javascript" src="/js/select.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+
+      function drawChart(label, cl_names, cl_cores) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Cluster');
+        data.addColumn('number', 'Cores');
+        data.addRows(cl_name.length);
+        for (var i = 0, i < cl_names.length; i += 1){
+
+            data.setValue(i, 0, cl_names[i]);
+            data.setValue(i, 1, cl_cores[i]);
+        }
+
+        var chart = new google.visualization.PieChart(document.getElementById('all_clusters_div'));
+        chart.draw(data, {width: 600, height: 200, title: 'My Daily Activities'});
+      }
+    </script>
+
+
 </%def>
 
 
