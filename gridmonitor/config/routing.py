@@ -88,6 +88,7 @@ def make_map(config):
     map.connect(None, '/gridadmin/statistics', controller='gridadmin_statistics')
     map.connect(None, '/gridadmin/statistics/', controller='gridadmin_statistics')
     map.connect(None, '/gridadmin/statistics/{action}', controller='gridadmin_statistics')
+    map.connect(None, '/gridadmin/statistics/{action}/{ctype}', controller='gridadmin_statistics')
     map.connect(None, '/gridadmin/infosys', controller='gridadmin_infosys')
     map.connect(None, '/gridadmin/infosys/', controller='gridadmin_infosys')
     map.connect(None, '/gridadmin/infosys/{action}', controller='gridadmin_infosys')
@@ -105,14 +106,18 @@ def make_map(config):
     map.connect(None, '/monadmin/sft/', controller='monadmin_sft')
     map.connect(None, '/monadmin/sft/{action}', controller='monadmin_sft')
     map.connect(None, '/monadmin/sft/{action}/{id}', controller='monadmin_sft')
-    
+   
+
+    #json interfaces 
+    map.connect(None, '/json/cluster/{action}', controller='cluster')
+    map.connect(None, '/json/cluster/{action}/{hostname}', controller='cluster')
+    map.connect(None, '/json/cluster/{action}/{hostname}/{tag}', controller='cluster')
+
+ 
     # help 
-    map.connect(None,'/help',controller='help')
+    map.connect(None,'/help', controller='help')
 
-    """
+    # public part of monitor (non AAI protected) -> can be used as widget in other web-pages
+    map.connect(None,'/public', controller='public_summary')
 
-    # CUSTOM ROUTES HERE
-    map.connect(':controller/{action}/{id}')
-    #map.connect('*url', controller='template', action='view')
-    """
     return map

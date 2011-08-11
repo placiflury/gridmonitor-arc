@@ -175,14 +175,7 @@ class GridadminOverviewController(GridadminController):
         
         # CHECK FOR SCHEDULED DOWNTIMES 
         c.down_time_items = h.get_nagios_scheduleddowntime_items()
-        c.now_scheduled_down = list() # keep list of currenlty down items
-        if c.down_time_items:
-            for ditem in c.down_time_items:
-                hostname = ditem.generic_object.name1
-                start_t = ditem.scheduled_start_time
-                end_t = ditem.scheduled_end_time
-                if datetime.now() > start_t and datetime.now() < end_t:
-                    c.now_scheduled_down.append(hostname)  
+        c.now_scheduled_down =  h.get_cluster_names('downtime')
             
 
         # GETTING GIIS-LIST

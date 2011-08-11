@@ -23,3 +23,12 @@ class ClusterApi:
     def get_attribute_values(self, attribute_name):
         return [] 
 
+    def get_metadata(self):
+        """ returns metadata object about cluster, which must implement the
+            minimal setting: 
+            - get_status()
+            - get_response_time()
+            - get_processing_time()
+        """ 
+        return None
+

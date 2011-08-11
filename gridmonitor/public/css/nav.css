@@ -70,7 +70,8 @@ div#nav-bar {
     left:0px;
     width: 175px;
     height: 52px;
-    background: url('/img/logo.png');
+    #background: url('/img/logo.png');
+    background: url('/img/gridmon_transparent.png');
 }
 
 .invisible {

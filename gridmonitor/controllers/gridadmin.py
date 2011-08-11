@@ -87,7 +87,8 @@ class GridadminController(BaseController):
                     ('last week', '/gridadmin/infosys/show/w1'),
                     ('last year', '/gridadmin/infosys/show/y1')]
         
-        statistics_menu =[('RRD Plots', '/gridadmin/statistics/rrd'),
+        statistics_menu =[('VO Usage', '/gridadmin/statistics/vo'),
+            ('RRD Plots', '/gridadmin/statistics/rrd'),
             ('Usage Tables', '/gridadmin/statistics/sgas')]
         
         sfts = list()

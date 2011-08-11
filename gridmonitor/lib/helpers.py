@@ -5,23 +5,66 @@ available to Controllers. This module is available to both as 'h'.
 """
 import logging
 
-import urllib, datetime
+import urllib
 
-from pylons.i18n import get_lang, set_lang
+from datetime import datetime
 
 from webhelpers.html.tags import link_to
+
+# XXX use API def instead
+from infocache.db import meta as info_meta
+from infocache.db import schema as info_schema
 
 from gridmonitor.model.nagios import meta
 from gridmonitor.model.nagios import hosttables
 from gridmonitor.model.nagios import servicetables
 from gridmonitor.model.nagios import scheduleddowntimes
-
 from routes.util import url_for # used in subsequent modules, don't remove
-
 
 
 log = logging.getLogger(__name__)
 
+def get_cluster_names(state):
+    """ returns list of hostnames of clusters in given state and 
+                optionally metadata dictionary 
+
+        Valid states are:
+        inactive -- inactive cluster(s), that is the information system has
+                    lost track of cluster(s) *and* cluster did not schedule
+                    a downtime
+        downtime -- a downtime has been scheduled for cluster(s)     
+        active -- active cluster (no downtime and not inactive)
+
+        Notice, higher level logic shall deal with intersection of 
+                cluster states e.g. inactive + scheduled downtime state
+    """
+        
+    hostnames = []
+    metadata = {}
+    
+    if state in ['inactive', 'active']:
+        for cl in info_meta.Session.query(info_schema.NGCluster).filter_by(status = state).all():
+            hostnames.append(cl.hostname)
+    elif state == 'downtime':
+        now_scheduled_down = []
+        for it in get_nagios_scheduleddowntime_items():
+            hostname = it.generic_object.name1
+            start_t = it.scheduled_start_time
+            end_t = it.scheduled_end_time
+            if datetime.now() > start_t and datetime.now() < end_t:
+                now_scheduled_down.append(hostname)
+                metadata[hostname] = dict(start_t = start_t, end_t = end_t)
+
+        # now filter clusters out of all scheduled downtime items
+        if now_scheduled_down:
+            for cl in  info_meta.Session.query(info_schema.NGCluster).all():
+                if cl.hostname in now_scheduled_down:
+                    hostnames.append(cl.hostname)
+
+    hostnames.sort()
+    return hostnames, metadata
+             
+                
 def get_nagios_host_services_from_group_tag(tag):
     """ 
     pass tag of nagios host group you would like to fetch
@@ -53,6 +96,27 @@ def get_nagios_host_services_from_group_tag(tag):
 
     return res
 
+
+def get_nagios_service_statuses(hostname):
+    """ return the Nagios statuses of all
+        services of a host (and host status itself). Format dictionary with service name  as key
+        and status as value.
+    """
+    services = {}
+
+    host = meta.Session.query(hosttables.Host).filter_by(display_name = hostname).first() # yes 'display_name' ...
+    if host:
+        host_id = host.host_object_id
+        services['host ping'] = dict(status = host.status[0].current_state, output = host.status[0].output)
+        for service_obj in meta.Session.query(servicetables.Service).filter_by(host_object_id = host_id).all():
+            services[service_obj.display_name] = dict(status = service_obj.status[0].current_state, 
+                output = service_obj.status[0].output,
+                perfdata = service_obj.status[0].perfdata)
+
+    return  services
+        
+
+
 def get_nagios_scheduleddowntime_items():
     """
     returns host/services downtime object
@@ -62,14 +126,14 @@ def get_nagios_scheduleddowntime_items():
 
     if scheduleditems:
         return scheduleditems
-    return None
+    return []
 
              
 def is_epoch_time(sqldatetime):
     """
     sqldatetime is of sqlalchemy.types.DateType
     """
-    if sqldatetime == datetime.datetime(1970,1,1,1):
+    if sqldatetime == datetime(1970, 1, 1, 1):
         return True
     return False 
 
@@ -79,7 +143,7 @@ def get_sqldatetime_age(sqldatetime):
     returns datetime.timedelta object with time difference 
     from sqldatetime to current time (now).
     """ 
-    return datetime.datetime.now() - sqldatetime
+    return datetime.now() - sqldatetime
 
 
 def str_cannonize(str):
@@ -106,9 +170,9 @@ def link(url, label=None):
         the link will be named after the url.
     """
     if label:
-        return link_to(label,url)
+        return link_to(label, url)
     else:
-        return link_to(url,url)
+        return link_to(url, url)
         
    
 def format_environ(environ):
@@ -116,7 +180,7 @@ def format_environ(environ):
     keys = environ.keys()
     keys.sort()
     for key in keys:
-        result.append("%s: %r" %(key,environ[key]))
+        result.append("%s: %r" %(key, environ[key]))
     return '\n'.join(result)   
  
 def list2string(l):
@@ -158,7 +222,7 @@ def filter_unicode_accentued_string(ucode):
     str= ''
     for c in ucode.encode('Latin-1'):
         code = ord(c)
-        if code in [192,193,194,195,197]:
+        if code in [192, 193, 194, 195, 197]:
             str += 'A'
         elif code == 196:
             str += 'Ae'
@@ -166,17 +230,17 @@ def filter_unicode_accentued_string(ucode):
             str += 'AE'
         elif code == 199:
             str += 'C'
-        elif code in [200,201,202,203]:
+        elif code in [200, 201, 202, 203]:
             str += 'E'
-        elif code in [204,205,206,207]:
+        elif code in [204, 205, 206, 207]:
             str += 'I'
         elif code == 209:
             str += 'N'
-        elif code in [210,211,212,213,216]:
+        elif code in [210, 211, 212, 213, 216]:
             str += 'O'
         elif code == 214:
             str += 'Oe'
-        elif code in [217,218,219]:
+        elif code in [217, 218, 219]:
             str += 'U'
         elif code == 220:
             str += 'Ue'
@@ -184,27 +248,27 @@ def filter_unicode_accentued_string(ucode):
             str += 'Y'
         elif code == 223:
             str += 'ss'
-        elif code in [224,225,226,227,229]:
+        elif code in [224, 225, 226, 227, 229]:
             str += 'a'
-        elif code in [228,230]:
+        elif code in [228, 230]:
             str += 'ae'
         elif code == 231:
             str += 'c'
-        elif code in [232,233,234,235]:
+        elif code in [232, 233, 234, 235]:
             str += 'e'
-        elif code in [236,237,238,239]:
+        elif code in [236, 237, 238, 239]:
             str += 'i'
         elif code == 241:
             str += 'n'
-        elif code in [242,243,244,245,248]:
+        elif code in [242, 243, 244, 245, 248]:
             str += 'o'
         elif code == 246:
             str += 'oe'
-        elif code in [249,250,251]:
+        elif code in [249, 250, 251]:
             str += 'u'
         elif code == 252:
             str += 'ue'
-        elif code in [253,255]:
+        elif code in [253, 255]:
             str += 'y'
         else:
             str += c 

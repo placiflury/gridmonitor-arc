@@ -10,7 +10,6 @@ from gridmonitor.model.factories import DataHandlerFactory
 from gridmonitor.model.errors.handler import * 
 from gridmonitor.model.errors.voms import * 
 
-
 class Globals(object):
 
     """Globals acts as a container for objects available throughout the
