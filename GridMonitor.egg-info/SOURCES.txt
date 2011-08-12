@@ -104,7 +104,6 @@ gridmonitor/model/sft/__init__.py
 gridmonitor/model/sft/name_mapping.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
-gridmonitor/public/css/.public.css.swp
 gridmonitor/public/css/LC_prototypes.css
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
@@ -266,6 +265,8 @@ gridmonitor/public/js/yui/build/paginator/paginator.js
 gridmonitor/public/js/yui/build/reset/reset-min.css
 gridmonitor/public/js/yui/build/reset/reset.css
 gridmonitor/public/js/yui/build/yahoo-dom-event/yahoo-dom-event.js
+gridmonitor/templates/base/.cluster.html.swp
+gridmonitor/templates/base/cluster.html
 gridmonitor/templates/base/error.html
 gridmonitor/templates/base/gridadmin.html
 gridmonitor/templates/base/help.html
@@ -274,8 +275,10 @@ gridmonitor/templates/base/monadmin.html
 gridmonitor/templates/base/public.html
 gridmonitor/templates/base/siteadmin.html
 gridmonitor/templates/base/user.html
+gridmonitor/templates/components/.jobstable.mako.swp
 gridmonitor/templates/components/jobstable.mako
 gridmonitor/templates/components/menu.mako
+gridmonitor/templates/components/rrdplots.mako
 gridmonitor/templates/components/votable.mako
 gridmonitor/templates/derived/gridadmin/error/access_denied.html
 gridmonitor/templates/derived/gridadmin/infosys/details.html
@@ -330,7 +333,6 @@ gridmonitor/templates/derived/user/error/voms_error.html
 gridmonitor/templates/derived/user/jobs/details.html
 gridmonitor/templates/derived/user/jobs/index.html
 gridmonitor/templates/derived/user/jobs/show.html
-gridmonitor/templates/derived/user/overview/.index.html.swp
 gridmonitor/templates/derived/user/overview/core.html
 gridmonitor/templates/derived/user/overview/index.html
 gridmonitor/templates/derived/user/overview/report.html

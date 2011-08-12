@@ -53,7 +53,7 @@ $('div[status]').each(function() {
             url: 'json/cluster/get_cluster_meta_table/' + cluster_name + '/' + _status,
             method: 'post',
 			title: {
-				text:'Status'
+				text:'Current ' + _status + ' Status'
 				}
 		},
 		show : {

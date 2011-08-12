@@ -51,7 +51,8 @@
 </body>
 </html>
 
-<%def name="title(arg)">${arg or 'Grid Monitoring (AAA/SWITCH)'}</%def>
+<%def name="title(arg)">${arg or 'SMSCG GridMonitor (an AAA/SWITCH) project'}</%def>
+
 <%def name="css_link(path,media='')">
 	## making sure each css only gets included once 
 	% if path not in self.seen_css:
@@ -95,6 +96,6 @@
 
 <%def name="footer()">
 <hr style="border:2px; color: #9E9E9E; background-color: #9E9E9E; height: 1px;width:40px;" align="left"/>
-<p align='left' style="font-style:oblique; font-size:small;">GridMonitor v. 0.8.2-3 </p>
+<p align='left' style="font-style:oblique; font-size:small;">GridMonitor v. 0.9.0-rc1 </p>
 </%def>
 

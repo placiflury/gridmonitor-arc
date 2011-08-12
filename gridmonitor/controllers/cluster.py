@@ -76,10 +76,13 @@ class ClusterController(BaseController):
             else:
                 _nagios = jstatus['nagios']
                 _keys = _nagios.keys()
-                _keys.sort()
-                for k in _keys:
-                    css_class = ClusterController.CSS_STATUS_CLASS[_nagios[k]['status']]
-                    _html += '<tr class="%s"> <td> %s</td> <td> %s </td></tr>' % (css_class, k, _nagios[k]['output'])
+                if not _keys:
+                    _html += '<tr class="undef_status"> <td colspan=2> No Nagios Info available!</td></tr>' 
+                else:
+                    _keys.sort()
+                    for k in _keys:
+                        css_class = ClusterController.CSS_STATUS_CLASS[_nagios[k]['status']]
+                        _html += '<tr class="%s"> <td> %s</td> <td> %s </td></tr>' % (css_class, k, _nagios[k]['output'])
         elif tag == 'SFT':
             pass
         elif tag == 'Infosys':
@@ -211,4 +214,14 @@ class ClusterController(BaseController):
         if no_queue_flag:
             return 'NoQueueError'
         return dt.get_json()
+
+    def show_rrd_plots(self, hostname):
+        """ renders a page displaying the 
+            load, and infosys rrd plots for the given 
+            cluster (hostname).
+        """
+
+        c.cluster = hostname
+        c.title = "Information for cluster: XXX"  # XXX map to cluster name (and not host name)
+        return render('/base/cluster.html')
 

@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='GridMonitor',
-    version="0.8.2-3",
+    version="0.9.0-rc1",
     description='A monitor for Grids based on the NorduGrid ARC middleware',
     long_description=""" \
 	The GridMonitor, which has been developed within the AAA/SWITCH SMSCG project,
@@ -21,7 +21,7 @@ setup(
     author_email='grid@switch.ch',
     url='http://www.smscg.ch',
     license='BSD, see shipped LICENSE file',
-    install_requires=["Pylons>=0.9.6.2", "SQLAlchemy>=0.5"],
+    install_requires=["Pylons>=1.0.0", "SQLAlchemy>=0.6"],
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     test_suite='nose.collector',

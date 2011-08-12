@@ -1,6 +1,23 @@
+/* infobox tables */
+table.load_infobox{
+	font: 4px "Trebuchet MS", Verdana, Arial, Helvetica;
+}
+
+table.load_infobox th {
+    font: bold 4px "Trebuchet MS", Verdana, Arial, Helvetica;
+    color: #FFFFFF;
+    border-right: 1px solid #C1DAD7;
+    border-bottom: 1px solid #C1DAD7;
+    border-collapse: collapse;
+    border-top: 0px;
+    text-align: left;
+    background: #4682B4;
+}
+
 .qtip-content{
     font: italic 11px eurostyle,tahoma, sans-serif;
 }
 .qtip-title{
 	font: 12px eurostyle,Tahoma, sans-serif;
 }
+
