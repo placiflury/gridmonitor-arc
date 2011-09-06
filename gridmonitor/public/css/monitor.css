@@ -18,7 +18,8 @@ tr.even{
 }
 
 tr:hover {
-	background-color:#EAF9E7;
+	/*background-color:#EAF9E7; */
+	background-color:#EFFBFB;
 }
 
 th {
@@ -58,6 +59,7 @@ td.plot{
     padding: 0px 1px 0px 1px;
 }
 
+.table_row_emph{background-color:#FFFFE0}
 
 
 
@@ -74,9 +76,10 @@ td.plot{
 .table_cell_emph{background-color:#FFFFE0}
 .table_row_emph{background-color:#FFFFE0}
 .table_head{background-color: #eee}
-*/
 .table_head2{background-color: #F5FFFA}
 .table_head3{background-color: #F0F0F0}
+*/
+
 
 .ok_status{
     color: #4e9258;

@@ -9,7 +9,7 @@ SWITCHaai specific
 class SLCS:
     CA = "/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA"
     
-    IdP_map = { "switch.ch" : "O=Switch - Teleinformatikdienste fuer Lehre und Forschung",
+    IdP_map = { "switch.ch" : "O=SWITCH",
                 "vho-switchaai.ch" : "OU=SWITCHaai Virtual Home Organization",
                 "ethz.ch" : "O=ETH Zuerich",
                 "epfl.ch" : "O=Ecole polytechnique federale de Lausanne (EPFL)",

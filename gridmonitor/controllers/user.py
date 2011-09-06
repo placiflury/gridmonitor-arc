@@ -75,8 +75,5 @@ class UserController(BaseController):
     def index(self):
         c.title = "Monitoring System: User View"
         c.menu_active = "Overview"
-        
-        c.crumbs = ["User"]	# not implemented...
-        
 
         return render('/base/user.html')

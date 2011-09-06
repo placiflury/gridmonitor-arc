@@ -1,60 +1,79 @@
 <%inherit file="/base/user.html"/>
+
 <p>You are visiting the Grid Monitor of the ${config['gridname']}.
 On this page you find a personalized <span class="emph"> tactical overview </span> on the current 
 situation on the Grid. 
 </p>
-<% state_map={0: 'ok', 1: 'warn', 2:'critical', 3: 'unknown'} %>
 
-<table width="900">
-    <caption>Tactical Overview</caption>
-    <tr class="table_head3"> 
-        <th>Service/Performance</th> 
-        <th style=border-right-style:none>(Services) Status</th>
-        <th style="border-left-style:none"></th>
-        <th>Details</th> 
+<table id="user_overview"  width="900" summary="Personalized tactical overview for users">
+    <caption>
+        Tactical Overview
+    </caption>
+    
+    <tr> 
+        <th class="corner_left" scope="col">Service/Performance</th> 
+        <th scope="col" colspan=2>(Services) Status</th>
+        <th class="corner_right" scope="col">Details</th> 
     </tr>
+
     <tr>
-        <td> Core Services</td>
-        <td colspan=2> 
-         <!-- check/report if any host is down -->
-        % if c.core_hosts_down > 0:
-        <span class='error'> ${c.core_hosts_down} Host(s) down. </span>
-        % endif
-        %for state, value in c.core_stats_summary.items():
-        %if value > 0:
-        <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
-        %endif
-        %endfor  
-        </td>
+        <td> Core Services </td>
+        <td colspan=2 id='cores'> 
+            Hosts: 
+            <div class="ok_status" status = 'host_up'> </div>
+            <div class="ok_status"  status= 'host_sdown'> </div>
+            <div class="error_status" status = 'host_down'> </div>
+            <div class="undef_status" status= 'host_unknown'>no info yet </div>
+            <br />
+            Plugins: 
+            <div class="ok_status" status='plugins_ok'>  </div>
+            <div class="warn_status" status = 'plugins_warn'>  </div>
+            <div class="error_status" status ='plugins_crit'>  </div>
+            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+        </td>        
         <td align='center'> ${h.link('/user/overview/core#core','details')}</td>
     </tr>
-    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here-->
+
+    <tr>
+        <td> Computing Elements (Services) </td>
+        <td colspan=2 id='ces'> 
+            Hosts: 
+            <div class="ok_status" status = 'host_up'></div>
+            <div class="ok_status"  status= 'host_sdown'> </div>
+            <div class="error_status" status = 'host_down'> </div>
+            <div class="undef_status" status= 'host_unknown'>no info yet </div>
+            <br />
+            Plugins: 
+            <div class="ok_status" status='plugins_ok'>  </div>
+            <div class="warn_status" status = 'plugins_warn'>  </div>
+            <div class="error_status" status ='plugins_crit'>  </div>
+            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+        </td>        
+        <td align='center'> ${h.link('/user/overview/core#core','details')}</td>
+    </tr>
+    
+    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will not be dynamically updated! -->
     %if c.no_queue_clusters:
     <tr>
         <td>Cluster(s) with Queue problem</td>
-        <td colspan=3>
+        <td colspan=2>
             % for (display_name, hostname) in c.no_queue_clusters:
                 <% cpath =  '/user/clusters/show/' +  hostname %>
-                ${h.link(cpath, display_name)} <span class="error"> (NO QUEUE)</span><br/>
+                ${h.link(cpath, display_name)} 
+                %if hostname not in c.now_scheduled_down:
+                    <span class="error_status"> 
+                    (NO QUEUE)
+                    </span><br/>
+                %else:
+                    (NO QUEUE) (scheduled downtime)
+                %endif
             %endfor
         </td>
+        <td align='center'> ${h.link(cpath, 'details')}</td>
     </tr>
     %endif    
-    <tr>
-        <td> Computing Elements (Services)</td>
-        <td colspan=2>
-         <!-- check/report if any host is down -->
-        % if c.ce_hosts_down > 0:
-        <span class='error'> ${c.ce_hosts_down} Host(s) down. </span>
-        % endif
-        %for state, value in c.ces_stats_summary.items():
-        %if value > 0:
-            <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
-        %endif
-        %endfor  
-        </td>
-        <td align='center'> ${h.link('/user/overview/core#ces','details')}</td>
-    </tr>
+    
+
     <tr>
         <td> My Jobs </td>
         <td colspan=2> 
@@ -83,78 +102,13 @@ situation on the Grid.
      <span class="emph">${h.link('/user/clusters','details')}</span>
     </td>
 </tr>
-<tr>
 
-<td>
-<% grid_running = c.clusters_summary['queues_grid_running'] %>
-<% running = c.clusters_summary['running'] %>
-<% num_cpus = c.clusters_summary['totcpus'] %>
-<% gqd = c.clusters_summary['grid_queued'] %>
-<% loq = c.clusters_summary['local_queued'] %>
-<% plq = c.clusters_summary['prelrms_queued'] %>
-<% q_scale = abs(gqd) + abs(loq) + abs(plq) %>
-<img src="http://chart.apis.google.com/chart?
-chs=250x90
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=t:${grid_running}|${running-grid_running}|${num_cpus}&chds=0,${num_cpus}
-&amp;chdh=20
-&amp;chxt=x,x
-&amp;chxr=0,0,${num_cpus}
-&amp;chxl=1:|gridrunning|running|cpus
-&amp;chxp=50,${num_cpus}
-&amp;chtt='${config['gridname']}'"
-alt="Number of (grid) jobs on ${config['gridname']}"/>
-</td>
-<td>
-<img src="http://chart.apis.google.com/chart?
-chs=250x80
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=t:${gqd}|${loq}|${plq}
-&amp;chds=0,${q_scale}
-&amp;chdh=20
-&amp;chxt=x,x,y
-&amp;chxr=0,0,${q_scale}
-&amp;chxl=1:|gridqueued|localqueued|lrmsqueued"
-alt="Queue backlog in  SMSCG Grid"/>
-</td>
-
-
+<tr> 
+    <!-- plots -->
+    <td class="plot"><div id= "grid_load_cpu"></div></td>
+    <td class="plot"><div id= "grid_load_queue"></div></td>
     <!-- DETAILS -->
-    <td colspan="2" align="center">
-    <table width="400" >
-        <tr class="table_head3">
-        <td> # Clusters</td><td>Gridrun</td> <td>Run</td><td>Gridq</td><td>Localq</td><td>Lrmsq</td>   </tr>
-            <tr>
-                <!-- num clusters--> 
-                <td> ${len(c.cluster_menu)}</td>
-                <!-- Gridrunning-->
-                <td class="table_cell_emph"> ${c.clusters_summary['queues_grid_running']}</td>
-                <!-- running-->
-                <td> ${c.clusters_summary['queues_running']}</td>
-                <!-- queued-->
-                <td class="table_cell_emph"> ${c.clusters_summary['grid_queued']}</td>
-                <!-- localqueued-->
-                <td> ${c.clusters_summary['local_queued']}</td>
-                 <!--prelrmsqueued-->
-                <td> ${c.clusters_summary['prelrms_queued']}</td>
-            </tr>
-            <tr style="border-top-style:double">
-                <td colspan="3">running: ${c.clusters_summary['running']}</td>
-                <td colspan="3" class="table_cell_emph">gridrunning: ${c.clusters_summary['grid_running']}</td>
-            </tr>
-            <tr>
-        
-            <td colspan="3" > 
-                total jobs: ${c.clusters_summary['running']}/${c.clusters_summary['totaljobs']} </td>
-            <td colspan="3">  
-                used cpus: ${c.clusters_summary['usedcpus']}/${c.clusters_summary['totcpus']} </td>
-            </tr>
-            </table>
-            <!-- END DETAILS -->
-            </td>
-
+    <td colspan="2" align="center" id="grid_load_table"> </td>
 </tr>
  <tr> <!-- MAX LOAD CLUSTER -->
         <td> Max loaded cluster (${c.max_load_cluster['tot_cpus']} CPUS) </td>
@@ -193,12 +147,12 @@ alt="Queue backlog in  SMSCG Grid"/>
     %endif
     <tr>
     <td colspan=4>
-    <img src="rrd/Gridstats_ch24.png" alt="Grid CPU load (last 24 hours)">   
+    <img src="/rrd/Gridstats_ch24.png" alt="Grid CPU load (last 24 hours)">   
     </td>
     </tr>
     <tr>
     <td colspan=4>
-    <img src="rrd/Gridstats_qh24.png" alt="Grid queue backlog (last 24 hours)">   
+    <img src="/rrd/Gridstats_qh24.png" alt="Grid queue backlog (last 24 hours)">   
     </td>
     </tr>
 
@@ -209,7 +163,12 @@ alt="Queue backlog in  SMSCG Grid"/>
     ${self.css_link('/css/public.css', 'screen')}
 </%def>
 
-
-
-
+<%def name="js()">
+    ${parent.js()}
+    ${self.js_link("/js/jquery-1.5.min.js")}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+    ${self.js_link("/js/nagios_stats.js")}
+    ${self.js_link("https://www.google.com/jsapi")}
+    ${self.js_link("/js/grid_load.js")}
+</%def>
 

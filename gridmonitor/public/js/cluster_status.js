@@ -10,7 +10,7 @@ var refreshClusterMeta = function(){
     $('table#grid_pub_summary tr[id]').each(function(){
 
         var hostname = $(this).attr('id').replace(/-1-/g, '.');  // replacing '-1-'' with '.'
-        var _url = 'json/cluster/get_cluster_meta/' + hostname ;
+        var _url = '/json/cluster/get_cluster_meta/' + hostname ;
         
         //var status_td  =  $(this).children('td');
         var status_td  =  $(this).children('td')[1];

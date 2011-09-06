@@ -1,0 +1,57 @@
+<%inherit file="/base/public.html"/>
+<%namespace name="rrd" file="/components/rrdplots.mako"/>
+
+
+<script>
+var showSelected = function(){
+    var i, len = 3;
+    var prefix;
+    var pl, pi;
+    var choices = { 0: '#day',
+                    1: '#week',
+                    2: '#year'};
+
+    // first hide all
+    for (i=0; i < len; i++){
+        pl = choices[i] + '_load1';
+        $(pl).hide();        
+        pl = choices[i] + '_load2';
+        $(pl).hide();        
+        pi = choices[i] + '_infosys1';
+        $(pi).hide();        
+    }
+    
+    // show selected
+    for (i=0; i< len; i++){
+        if( document.plots.resolution[i].checked){
+            prefix = document.plots.resolution[i].value ;
+            pl = prefix + '_load1';
+            $(pl).show();
+            pl = prefix + '_load2';
+            $(pl).show();
+            pi = prefix + '_infosys1';
+            $(pi).show();
+        }
+    }
+
+};
+
+$(document).ready(showSelected);
+</script>
+
+<form name='plots'>
+<input type="checkbox" name='resolution' value='#day' checked onclick="showSelected()"/> last 24 hours
+<input type="checkbox" name='resolution' value='#week' onclick="showSelected()"/> last 7 days
+<input type="checkbox" name='resolution' value='#year' onclick="showSelected()"/> last year
+</form>
+
+
+${rrd.rrd_graphs(c.ce, type="load")}
+${rrd.rrd_graphs(c.ce, type="infosys")}
+
+<%def name="js()">        
+    ${parent.js()}
+    ${self.js_link("/js/jquery-1.5.min.js")}
+</%def>
+
+

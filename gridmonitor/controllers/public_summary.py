@@ -16,6 +16,9 @@ class PublicSummaryController(BaseController):
     """
 
     def index(self):
+        
+        c.title = 'SMSCG Grid Resources (Overview)'
+        c.heading = 'SMSCG Grid Resources (Overview)'
 
         clusters = g.get_clusters()
 
@@ -38,5 +41,20 @@ class PublicSummaryController(BaseController):
 
         all_clusters.sort()
         c.all_clusters = all_clusters
-        return render('/base/public.html')
+        return render('/derived/public/summary.html')
 
+    def rrd(self, ce):
+        """ fetch and display rrd graphs of given computing
+            element (ce). 
+        """
+        c.title ="RRD Graphs of %s cluster" % ce 
+        c.heading = c.title
+        c.ce = ce
+        return render('/derived/public/rrdplots.html')
+    
+    def stats(self, ce):
+        """ fetch and display usage statistics (SGAS) 
+            of given computingelement (ce). 
+        """
+        c.ce = ce
+        return render('')

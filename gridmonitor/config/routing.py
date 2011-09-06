@@ -112,6 +112,8 @@ def make_map(config):
     map.connect(None, '/json/cluster/{action}', controller='cluster')
     map.connect(None, '/json/cluster/{action}/{hostname}', controller='cluster')
     map.connect(None, '/json/cluster/{action}/{hostname}/{tag}', controller='cluster')
+    
+    map.connect(None, '/json/grid/{action}', controller='grid')
 
  
     # help 
@@ -119,5 +121,7 @@ def make_map(config):
 
     # public part of monitor (non AAI protected) -> can be used as widget in other web-pages
     map.connect(None,'/public', controller='public_summary')
+    map.connect(None,'/public/{action}', controller='public_summary')
+    map.connect(None,'/public/{action}/{ce}', controller='public_summary')
 
     return map

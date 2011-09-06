@@ -1,0 +1,101 @@
+<%inherit file="/base/public.html"/>
+<div id="doc3">
+    <div id="bd">
+        <!-- BODY -->
+        <table id="grid_pub_summary" cellspacing="0" summary="An summary of the available
+        Grid computational resources.">
+            <caption>
+                SMSCG Grid Resources Overview
+            </caption>
+            <tr>
+                <th class="corner_left" scope="col">Cluster</th>
+                <th scope="col">Status</th>
+                <th scope="col">CPU Load</th>
+                <th scope="col">Queue Load</th>
+                <th scope="col">Load Table 
+                 <span id="expand_table"> 
+                    |&lt;- -&gt;|  
+                 </span>
+                 <span id="shrink_table" style="display: none">  
+                    |-&gt;&lt;-| 
+                </span>
+                </th>
+                <th scope="col">RRD</th>
+                <th class='corner_right' scope="col">Stats</th>
+            </tr>
+            <% zebra_cnt = 0 %>
+
+% for hostname in c.all_clusters:
+<% 
+zebra_cnt += 1 
+if c.clusters_meta.has_key(hostname) and c.clusters_meta[hostname].has_key('alias'):
+    display_name = c.clusters_meta[hostname]['alias']
+else:
+    display_name = hostname
+id_tag = hostname.replace('.','-1-')
+%>
+                % if zebra_cnt % 2 == 0:
+                    <tr class="odd" id="${id_tag}">
+                    
+                % else:
+                    <tr class="even" id="${id_tag}">
+                % endif
+                    <!-- static cluster information -->
+                    <td class='emph' display_name='${display_name}'>
+                        <div class='cluster_details'>
+                            <h2> ${display_name}</h2>
+                            <table summary="Cluster details infobox">
+                                <tr><td>Hostname</td> <td>${hostname}</td> </tr>
+                                % for k, v in c.clusters_meta[hostname].items():
+                                    % if k != 'alias':
+                                        <tr>
+                                            <td> ${k} </td>
+                                            <td> ${v} </td>
+                                        </tr>
+                                    %endif
+                                % endfor
+                            </table>
+                        </div>
+                    </td>
+                    <!-- 2nd: status row (dynamic)-->
+                    <td>
+                        <div class="undef_status" status="Downtime" style="display: none;"> Downtime</div>
+                        <div group='nsi'>
+                            <div class="undef_status" status="Nagios"></div>
+                            <div class="undef_status" status="SFT"></div> 
+                            <div class="undef_status" status="Infosys"></div>
+                        </div>
+                    </td>
+                <!-- 3rd CPU load -->
+                <td class="plot"><div id= "${id_tag + '_cpu'}"></div></td>
+                <!-- 4th Queue load -->
+                <td class="plot"><div id= "${id_tag + '_queue'}"></div></td>
+                <!-- 5th CPU Queue load table -->
+                <td id="${id_tag + '_table'}"> 
+                </td>
+                <td><a href="public/rrd/${hostname}" target="_blank"><img src="./img/graph_thumb.png"
+                alt="rrd graph;logo from royalty free clip art site clker.com"/></a></td>
+                <td><a href="public/stats/${hostname}" target="_blank"><img src="./img/pie_thumb.png"
+                alt="stats; ;logo from royalty free clip art site clker.com"/></a></td>
+
+                </tr>
+            % endfor 
+            
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="/js/cluster_status.js"> </script>
+<script type="text/javascript" src="/js/qtip/cluster_details.js">// Create the tooltips only on document load</script>
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/tooltip.css', 'screen')}
+</%def>
+
+<%def name="js()">        
+    ${parent.js()}
+    ${self.js_link("/js/jquery-1.5.min.js")}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+    ${self.js_link("https://www.google.com/jsapi")}
+    ${self.js_link("/js/cluster_load.js")}
+</%def>

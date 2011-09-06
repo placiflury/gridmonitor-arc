@@ -10,7 +10,7 @@ function drawCPUChart(hostname, tag) {
     var data, options, chart;
         
 	var json_str = $.ajax({
-		url : 'json/cluster/gc_cpu_load/'+ hostname,
+		url : '/json/cluster/gc_cpu_load/'+ hostname,
 		type : 'post',
         dataType: 'text',
         async: false
@@ -51,7 +51,7 @@ function drawQueueChart(hostname, tag) {
 
         
 	var json_str = $.ajax({
-		url : 'json/cluster/gc_queue_load/' + hostname,
+		url : '/json/cluster/gc_queue_load/' + hostname,
 		type : 'post',
         dataType: 'text',
         async: false
@@ -88,7 +88,7 @@ function drawQueueChart(hostname, tag) {
 
 
 var generateLoadTable = function(hostname, tag){
-    var  _url = 'json/cluster/get_cluster_load/' + hostname;
+    var  _url = '/json/cluster/get_cluster_load/' + hostname;
     $.ajax({
         url: _url,
         type: 'POST',
@@ -172,4 +172,3 @@ $(document).ready(function() {
     addTableExpandListener();
 });
     
-google.setOnLoadCallback(cpuLoadCallback);

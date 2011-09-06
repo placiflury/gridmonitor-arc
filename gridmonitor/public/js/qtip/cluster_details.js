@@ -50,7 +50,7 @@ $('div[status]').each(function() {
 	$(this).qtip({
 		content : {
 			//text: $(this).html(), will not display dynamic data
-            url: 'json/cluster/get_cluster_meta_table/' + cluster_name + '/' + _status,
+            url: '/json/cluster/get_cluster_meta_table/' + cluster_name + '/' + _status,
             method: 'post',
 			title: {
 				text:'Current ' + _status + ' Status'

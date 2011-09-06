@@ -10,17 +10,14 @@ import urllib
 from datetime import datetime
 
 from webhelpers.html.tags import link_to
+from routes.util import url_for # used in subsequent modules, don't remove
 
 # XXX use API def instead
 from infocache.db import meta as info_meta
 from infocache.db import schema as info_schema
 
-from gridmonitor.model.nagios import meta
-from gridmonitor.model.nagios import hosttables
-from gridmonitor.model.nagios import servicetables
-from gridmonitor.model.nagios import scheduleddowntimes
-from routes.util import url_for # used in subsequent modules, don't remove
 
+from nagios_utils import get_nagios_scheduleddowntime_items
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +29,7 @@ def get_cluster_names(state):
         inactive -- inactive cluster(s), that is the information system has
                     lost track of cluster(s) *and* cluster did not schedule
                     a downtime
-        downtime -- a downtime has been scheduled for cluster(s)     
+        downtime -- a downtime has been scheduled for cluster(s) (active now!!)
         active -- active cluster (no downtime and not inactive)
 
         Notice, higher level logic shall deal with intersection of 
@@ -64,86 +61,6 @@ def get_cluster_names(state):
     hostnames.sort()
     return hostnames, metadata
              
-                
-def get_nagios_host_services_from_group_tag(tag):
-    """ 
-    pass tag of nagios host group you would like to fetch
-    returns list 
-    XXX error handling 
-    """ 
-    res = []
-     
-    query = meta.Session.query(hosttables.HostGroup)
-    nagios_hgroup = query.filter_by(alias=tag).first()
-    nagios_hgroup_members = None
-    if nagios_hgroup:
-        nagios_hgroup_members = nagios_hgroup.members
-        log.debug("Found Nagios group %s (%d members)" % (tag, len(nagios_hgroup_members)))
-    else:
-        log.warn("No members of the nagios '%s' group found in mysql's ndoutils db." % tag)
-
-    for mem in nagios_hgroup_members:
-        d = {}
-        host_object_id = mem.host_object_id
-        alias = mem.host.alias
-        display_name = mem.host.display_name
-        d['alias'] = alias
-        d['display_name'] = display_name
-        d['hoststatus_object'] = mem.host.status[0]  # 1-1 mapping expected 
-        query = meta.Session.query(servicetables.Service)
-        d['services_q'] = query.filter(servicetables.Service.host_object_id == host_object_id).all()
-        res.append(d)
-
-    return res
-
-
-def get_nagios_service_statuses(hostname):
-    """ return the Nagios statuses of all
-        services of a host (and host status itself). Format dictionary with service name  as key
-        and status as value.
-    """
-    services = {}
-
-    host = meta.Session.query(hosttables.Host).filter_by(display_name = hostname).first() # yes 'display_name' ...
-    if host:
-        host_id = host.host_object_id
-        services['host ping'] = dict(status = host.status[0].current_state, output = host.status[0].output)
-        for service_obj in meta.Session.query(servicetables.Service).filter_by(host_object_id = host_id).all():
-            services[service_obj.display_name] = dict(status = service_obj.status[0].current_state, 
-                output = service_obj.status[0].output,
-                perfdata = service_obj.status[0].perfdata)
-
-    return  services
-        
-
-
-def get_nagios_scheduleddowntime_items():
-    """
-    returns host/services downtime object
-    """
-    query = meta.Session.query(scheduleddowntimes.ScheduledDownTime)
-    scheduleditems = query.all()
-
-    if scheduleditems:
-        return scheduleditems
-    return []
-
-             
-def is_epoch_time(sqldatetime):
-    """
-    sqldatetime is of sqlalchemy.types.DateType
-    """
-    if sqldatetime == datetime(1970, 1, 1, 1):
-        return True
-    return False 
-
-def get_sqldatetime_age(sqldatetime):
-    """
-    sqldatetime is of sqlalchemy.types.DateType
-    returns datetime.timedelta object with time difference 
-    from sqldatetime to current time (now).
-    """ 
-    return datetime.now() - sqldatetime
 
 
 def str_cannonize(str):

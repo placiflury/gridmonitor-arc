@@ -33,9 +33,9 @@ cpus=app_globals.get_cluster_stats(hostname,'stats_cpus')
              % if cpus == 0:
                <% cpus = app_globals.get_cluster_stats(hostname,'stats_totalcpus') %>
                % if cpus == 0: 
-                  <span class="error"> (${cpus} CPUs)</span>
+                  <span class="error_status"> (${cpus} CPUs)</span>
                % else:
-                 <span class="warn"> (${cpus} CPUs)</span>
+                 <span class="warn_status"> (${cpus} CPUs)</span>
                % endif
             %else:
                    (${cpus} CPUs) 

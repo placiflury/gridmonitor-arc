@@ -5,7 +5,8 @@ from datetime import datetime
 
 from pylons import tmpl_context as c
 from pylons import app_globals as g
-import gridmonitor.lib.helpers as h
+from  gridmonitor.lib.nagios_utils import get_nagios_scheduleddowntime_items, get_nagios_service_statuses
+
 import gridmonitor.lib.time_utils as tu
 
 from gridmonitor.lib.base import BaseController, render
@@ -108,7 +109,7 @@ class ClusterController(BaseController):
                 status = 'unknown')
         
         # nagios information 
-        for it in h.get_nagios_scheduleddowntime_items():
+        for it in get_nagios_scheduleddowntime_items():
             if  it.generic_object.name1 == hostname:
                 start_t = it.scheduled_start_time
                 end_t = it.scheduled_end_time
@@ -118,7 +119,7 @@ class ClusterController(BaseController):
                     jstatus['end_t'] = tu.datetime2utcstring(end_t)
  
         if jstatus['status'] != 'Downtime': # get services statuses
-            services = h.get_nagios_service_statuses(hostname)
+            services = get_nagios_service_statuses(hostname, dates2utc = True)
             jstatus['nagios'] = services 
             
 
@@ -159,7 +160,6 @@ class ClusterController(BaseController):
             obj['q'][q_name]['grid_running'] = g.get_queue_stats(hostname,q_name,'stats_grid_running')
             
         return json.dumps(obj)
-         
 
     def gc_cpu_load(self, hostname):
         """ Returns a json string that can be passed

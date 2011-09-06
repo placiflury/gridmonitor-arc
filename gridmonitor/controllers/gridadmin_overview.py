@@ -40,7 +40,7 @@ class GridadminOverviewController(GridadminController):
                 continue
             for service in host['services_q']:
                 if service.status:
-                    if h.is_epoch_time(service.status[0].last_check):  # UNKNOWN STATE
+                    if h.start_epoch_time(service.status[0].last_check):  # UNKNOWN STATE
                         c.core_stats_summary[3] = c.core_stats_summary[3] +1
                     else:
                         record_age = h.get_sqldatetime_age(service.status[0].last_check).days
@@ -63,7 +63,7 @@ class GridadminOverviewController(GridadminController):
                 continue
             for service in host['services_q']:
                 if service.status:
-                    if h.is_epoch_time(service.status[0].last_check):  # UNKNOWN STATE
+                    if h.start_epoch_time(service.status[0].last_check):  # UNKNOWN STATE
                         c.ces_stats_summary[3] = c.ces_stats_summary[3] +1
                     
                     else: 
