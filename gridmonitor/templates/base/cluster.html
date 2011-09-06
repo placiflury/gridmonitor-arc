@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>SMSCG Grid Resources (Overview)</title>
+        <link rel="shortcut icon" type="image/x-icon" href="/img/gm_favicon.png" /> 
+
+        <link rel="stylesheet" type="text/css" href="/css/yui/build/reset-fonts-grids/reset-fonts-grids.css">
+        <link rel="stylesheet" type="text/css" href="/css/yui/build/base/base-min.css">
+        <link rel="stylesheet" type="text/css" href="/css/monitor.css">
+    </head>
+
+<body class="yui-skin-sam">
+<div id="custom-doc" class="yui-t2" > 
+   <div id="hd"> 
+	 <div id="logo"><h1 class="invisible">GridMonitor (AAA/SWITCH)</h1></div>
+	 <div id="nav-items">
+     	     <div id="nav-bar">
+		        ${self.top_nav()}
+                <div id="user-info">${self.user_info()} </div>
+      	     </div>
+    	</div>
+   </div>
+ <!--  <style type ="text/css">
+  div{ border:1px solid #888;}
+   </style> --> 
+   <div id="bd">
+	<div id="yui-main">
+	    <div class="yui-b">
+        
+        <!-- body --> 
+
+
+        <p> THIS WILL BECOME THE BODY </p>
+
+
+
+	    </div>
+	</div>
+	<div style='z-index:10' class="yui-b">
+	    <h1></h1> <!-- just some quick and dirty padding -->
+	</div>
+   </div>
+   <div id="ft">
+     ${self.footer()}
+   </div>
+</div>
+</body>
+</html>
+
+<%def name="title(arg)">${arg or 'SMSCG GridMonitor (an AAA/SWITCH project)'}</%def>
+
+
+<%def name="top_nav()"></%def>
+<%def name="heading()"><h1>${c.heading or 'No Title'}</h1><a name="top"></a></%def>
+<%def name="user_info()"></%def>
+<%def name="footer()">
+<hr style="border:2px; color: #9E9E9E; background-color: #9E9E9E; height: 1px;width:40px;" align="left"/>
+<p align='left' style="font-style:oblique; font-size:small;">GridMonitor v. 0.9.0-rc1 </p>
+</%def>
+
