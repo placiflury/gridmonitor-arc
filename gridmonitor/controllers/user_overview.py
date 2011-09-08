@@ -25,61 +25,39 @@ class UserOverviewController(UserController):
         c.heading = "Welcome  %s %s" % (c.user_name, c.user_surname)
 
         c.now_scheduled_down = h.get_cluster_names('downtime')
-        c.down_time_items = get_nagios_scheduleddowntime_items()
 
-        # MY JOBS SUMMARY
-        num_finished = 0
-        num_failed = 0
-        num_killed = 0
-        num_deleted = 0
-        num_fetched = 0
-        num_orphaned = 0
-        num_tot_slcs = 0
-        num_tot_browser = 0
+
+        # DOWNTIME INFO        
+        dti = {} 
+        for ditem in get_nagios_scheduleddowntime_items():
+            hostname = ditem.generic_object.name1
+            if not dti.has_key(hostname):
+                dti[hostname] = {'services' : []}
+            if ditem.generic_object.name2:
+                service = ditem.generic_object.name2
+                dti[hostname]['services'].append(service)
+            # notice, we assume that all services of the host have
+            # the very same scheduled downtime (which is necessarily true...)
+            dti[hostname]['start_t'] = ditem.scheduled_start_time
+            dti[hostname]['end_t'] = ditem.scheduled_end_time
+            dti[hostname]['reason'] = ditem.comment_data
         
-        c.job_state_distribution = dict(FINISHED = 0,
-                            FAILED = 0,
-                            KILLED = 0,
-                            DELETED = 0,
-                            FETCHED = 0,
-                            other = 0, 
-                            orphaned = 0)
+        c.down_time_items  = dti
+
+
+        # MY JOBS INFO
+        c.slcs_dn = None
+        c.browser_dn = None
 
         if session.has_key('user_slcs_obj'):
             user_slcs_obj = session['user_slcs_obj']
-            slcs_dn = user_slcs_obj.get_dn()
-            num_finished = g.data_handler.get_num_user_jobs(slcs_dn, status = 'FINISHED')
-            num_failed = g.data_handler.get_num_user_jobs(slcs_dn, status = 'FAILED') 
-            num_killed = g.data_handler.get_num_user_jobs(slcs_dn, status = 'KILLED') 
-            num_deleted = g.data_handler.get_num_user_jobs(slcs_dn, status = 'DELETED') 
-            num_fetched = g.data_handler.get_num_user_jobs(slcs_dn, status = 'FETCHED') 
-            num_orphaned = g.data_handler.get_num_user_jobs(slcs_dn, status = 'orphaned')
-            num_tot_slcs = g.data_handler.get_num_user_jobs(slcs_dn) 
-
-
+            c.slcs_dn = user_slcs_obj.get_dn()
+        
         if session.has_key('user_client_dn'):
-            browser_dn = session['user_client_dn']
-            num_finished += g.data_handler.get_num_user_jobs(browser_dn, status = 'FINISHED')
-            num_failed += g.data_handler.get_num_user_jobs(browser_dn, status = 'FAILED') 
-            num_killed += g.data_handler.get_num_user_jobs(browser_dn, status = 'KILLED')
-            num_deleted += g.data_handler.get_num_user_jobs(browser_dn, status = 'DELETED')
-            num_fetched += g.data_handler.get_num_user_jobs(browser_dn, status = 'FETCHED')
-            num_orphaned += g.data_handler.get_num_user_jobs(browser_dn, status = 'orphaned')
-            num_tot_browser = g.data_handler.get_num_user_jobs(browser_dn)
+            c.browser_dn = session['user_client_dn']
 
-        c.job_state_distribution['FINISHED'] = num_finished
-        c.job_state_distribution['FAILED'] = num_failed
-        c.job_state_distribution['KILLED'] = num_killed
-        c.job_state_distribution['DELETED'] = num_deleted
-        c.job_state_distribution['FETCHED'] = num_fetched
-        c.job_state_distribution['orphaned'] = num_orphaned
 
-        num_other = num_tot_slcs + num_tot_browser - num_finished -\
-                num_killed - num_deleted - num_orphaned - num_failed - num_fetched
-
-        c.job_state_distribution['other'] = num_other
-
-        # GRID LOAD + max load cluster + min load cluster
+        # GRID LOAD + max load cluster + min load cluster => XXX dynamic!!!
         c.max_load_cluster=dict(name = None, tot_running = 0,
                 tot_cpus = 0, tot_queued = 0, relative_load = -1)
         c.min_load_cluster=dict(name = None, tot_running = 0,

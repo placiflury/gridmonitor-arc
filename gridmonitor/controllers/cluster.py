@@ -12,7 +12,6 @@ import gridmonitor.lib.time_utils as tu
 from gridmonitor.lib.base import BaseController, render
 from gridmonitor.lib.charts_table import DataTable
 
-
 log = logging.getLogger(__name__)
 
 class ClusterController(BaseController):

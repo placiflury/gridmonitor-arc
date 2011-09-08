@@ -1,10 +1,9 @@
 <%inherit file="/base/user.html"/>
-
 <p> Displaying general information about cluster ${c.cluster_display_name}. The cluster
 has following queue(s):
 <ul>
 % if not c.queues_names:
-<li class="error"> NO QUEUE AVAILABLE</li>
+<li class="error_status"> NO QUEUE AVAILABLE</li>
 %else:
     %for queue in c.queues_names:
         <%id = c.cluster_hostname + '/' + queue %>
@@ -13,9 +12,6 @@ has following queue(s):
 %endif
 </ul>
 All available paramters about this cluster are:</p>
-
-
-
 <div id="${c.cluster_hostname}_container">
 <table id="${c.cluster_hostname}_table">
     <thead> 

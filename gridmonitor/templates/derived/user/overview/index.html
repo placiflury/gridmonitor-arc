@@ -72,25 +72,12 @@ situation on the Grid.
         <td align='center'> ${h.link(cpath, 'details')}</td>
     </tr>
     %endif    
-    
 
     <tr>
         <td> My Jobs </td>
-        <td colspan=2> 
-        %if not c.job_state_distribution:
-          No Jobs    
-        %else:
-            %for job_status, num in c.job_state_distribution.items():
-            % if num > 0:
-                % if job_status == 'orphaned':
-                <span class="warn"> ${num} ${job_status}</span> 
-                 %else:
-                    ${num} ${job_status}
-                 % endif
-            % endif
-        %endfor
-    %endif
-</td>
+        <td colspan=2 id='jobs'> 
+            no info yet
+       </td>
         <td align='center'>${h.link('/user/jobs','details')}</td>
     </tr>
 
@@ -129,18 +116,19 @@ situation on the Grid.
     </td>
     </tr>
 
-    %for ditem in  c.down_time_items:
+    %for host in  c.down_time_items.keys():
     <tr> 
     <td>
-        %if ditem.generic_object.name2:
-            ${ditem.generic_object.name2}
-            (${ditem.generic_object.name1})
-        %else:
-            ${ditem.generic_object.name1}
+        <b>Host</b>: ${host} <br />
+        %if c.down_time_items[host]['services']: # i.e. list not empty
+            <b>Services</b>: 
+            %for service in c.down_time_items[host]['services']:
+                '${service}' &nbsp;
+            %endfor
         %endif
     </td>
-    <td colspan="3"> Will be down from: ${ditem.scheduled_start_time} to ${ditem.scheduled_end_time} <br/>
-        Reason: ${ditem.comment_data}
+    <td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to${c.down_time_items[host]['end_t']}  <br/>
+        Reason: ${c.down_time_items[host]['reason']}
     </td>
     </tr>
     %endfor
@@ -157,6 +145,7 @@ situation on the Grid.
     </tr>
 
 </table>
+    
 
 <%def name="css()">
     ${parent.css()}
@@ -170,5 +159,6 @@ situation on the Grid.
     ${self.js_link("/js/nagios_stats.js")}
     ${self.js_link("https://www.google.com/jsapi")}
     ${self.js_link("/js/grid_load.js")}
+    ${self.js_link("/js/job_states.js")}
 </%def>
 
