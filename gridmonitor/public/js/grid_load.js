@@ -101,19 +101,61 @@ var generateLoadTable = function(){
             _html += '<tr style="border-top-style: double;">' + 
                     ' <td colspan="3">running: ' +  data['running'] + '</td>' + 
                     ' <td colspan="3">gridrunning: ' +  data['grid_running'] + '</td> </tr>' +
-                    ' <tr> <td colspan="3"> total jobs: '+  data['running'] +'/'+ data['totaljobs'] + '</td>'+
-                    ' <td colspan="3"> used cpus: ' +  data['usedcpus'] +'/' + data['totalcpus'] + '</td></tr></tbody></table>';
+                    ' <tr> <td colspan="3" id="run_total"> total jobs: '+  data['running'] +'/'+ data['totaljobs'] + '</td>'+
+                    ' <td colspan="3" id="used_total"> used cpus: ' +  data['usedcpus'] +'/' + data['totalcpus'] + '</td></tr></tbody></table>';
 
            $('td#grid_load_table').html(_html);
+         $('#run_total').qtip({
+                content: 'Ratio of "Total running" / "Sum of all jobs"'
+                });
+         $('#used_total').qtip({
+                content: 'Ratio of "Total used CPUs" / "Sum of all  CPUs or Cores"'
+                });
+        }
+
+    });
+}
+
+
+var generateMinMaxClusterRow = function(){
+    
+    var _url = '/json/grid/get_min_max_clusters';
+    $.ajax({
+        url: _url,
+        type: 'POST',
+        dataType: 'json',
+
+         success: function(data){
+            // build table row 
+            _html = '<td> Max loaded cluster (' + data.max_load_cluster.tot_cpus + ' CPUS) </td>' +
+                    '<td colspan=2> <span class="emph">' + data.max_load_cluster.name +  '</span>: ' +
+                    data.max_load_cluster.tot_running + '/' + data.max_load_cluster.tot_cpus + 
+                    ' running,' + data.max_load_cluster.tot_queued + ' queued </td>' + 
+                    '<td align="center"> <a href="/user/clusters/#' + 
+                    data.max_load_cluster.cname + '">details</a></td>';
+           
+            $('tr#max_cluster').html(_html);
+            
+            _html = '<td> Min loaded cluster (' + data.min_load_cluster.tot_cpus + ' CPUS) </td>' +
+                    '<td colspan=2> <span class="emph">' + data.min_load_cluster.name +  '</span>: ' +
+                    data.min_load_cluster.tot_running + '/' + data.min_load_cluster.tot_cpus + 
+                    ' running,' + data.min_load_cluster.tot_queued + ' queued </td>' + 
+                    '<td align="center"> <a href="/user/clusters/#' + 
+                    data.min_load_cluster.cname + '">details</a></td>';
+           
+            $('tr#min_cluster').html(_html);
+
         }
     });
 }
+
 
 
 function _cpuLoadCallback(){
 	drawCPUChart();
 	drawQueueChart();
     generateLoadTable();
+    generateMinMaxClusterRow();
 }
 
 function cpuLoadCallback(){

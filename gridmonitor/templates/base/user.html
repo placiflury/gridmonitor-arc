@@ -16,7 +16,53 @@ ${next.body()}\
 </%def>
 
 <%def name="user_info()">
-${c.user_name} ${c.user_surname}
+
+%if c.user_name != 'Guest':
+<script type="text/javascript"> 
+   
+    $('div#user-info').qtip({
+        content : {
+            text: 'XXX why does it not work???',
+            title: {
+                text:'User Details'
+                }
+        },
+        show : {
+                 when: { event:'click'}
+               },
+        hide : {
+                when: {event: 'unfocus'},
+                delay: 500
+                },
+        style: {
+            width:{
+                max:400,
+                min:120
+            },
+        padding: 5,
+        background:'#FFFFFF',
+        color: '#055670',
+        textAlign: 'left',
+        border: {
+             width: 1,
+            radius: 5,
+            color: '#4682B4'
+        },
+        tip: {
+            corner: 'leftMiddle',
+        },
+
+      name: 'blue' // Inherit the rest of the attributes from the preset dark style
+    }
+
+    }).html("${c.user_name} ${c.user_surname}").show();
+
+</script>
+
+%endif
+
+
+
 </%def>
 
 <%def name="menu()">
@@ -25,5 +71,7 @@ ${c.user_name} ${c.user_surname}
 
 <%def name="css()">
   ${parent.css()}
+    ${self.js_link("/js/jquery-1.5.min.js")}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
 </%def>
 

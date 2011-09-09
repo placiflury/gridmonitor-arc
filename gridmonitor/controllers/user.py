@@ -56,7 +56,7 @@ class UserController(BaseController):
         for state in job_states:
             jobs.append((state, '/user/jobs/show/%s' % state))		
         
-        overview = [('Core Services', '/user/overview/core')]
+        overview = [('Nagios Plugins', '/user/overview/nagios')]
 
         c.top_nav = session['top_nav_bar']
 

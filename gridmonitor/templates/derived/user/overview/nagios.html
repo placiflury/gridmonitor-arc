@@ -19,8 +19,18 @@ state_map = {'up': 'ok_status', 'ok': 'ok_status', 'scheduleddown': 'ok_status',
             'unknown': 'undef_status', 'unknown': 'undef_status'}
 %>
 
+<p>
+The following two tables display the output of Nagios, a monitoring system, 
+which runs (local) probes on the listed hosts at regular time intervals. 
+The first table lists the output of the core Grid services of the ${config['gridname']}, 
+while the second table the output of the probes (called plugins) of all front-ends of
+the Grid. <br /> <br/>
+<b>Notice</b>, you can click on the hostname to get some additional information about e.g.the host's 
+response time.
+</p>
 
 
+<a name="core"></a> 
 <table width="920" id="nagios_core_services" summary="Display of nagios checks for Grid core services and hosts">
     <caption> Core Services of ${config['gridname']}</caption>
     <tr> 
@@ -76,7 +86,7 @@ state_map = {'up': 'ok_status', 'ok': 'ok_status', 'scheduleddown': 'ok_status',
 </table>
 
 <!-- CES TABLE -->
-
+<a name="ces"></a>
 <table width="920" id="nagios_ces_services" summary="Display of nagios checks for all moniotre Grid Computing element  services and hosts">
     <caption> Grid Computing Elements  Services of ${config['gridname']}</caption>
     <tr> 
@@ -180,6 +190,4 @@ $('table.nagios_host_details').each(function() {
 
 <%def name="js()">
     ${parent.js()}
-    ${self.js_link("/js/jquery-1.5.min.js")}
-    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
 </%def>

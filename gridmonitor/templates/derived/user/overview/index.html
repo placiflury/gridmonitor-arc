@@ -31,7 +31,7 @@ situation on the Grid.
             <div class="error_status" status ='plugins_crit'>  </div>
             <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
         </td>        
-        <td align='center'> ${h.link('/user/overview/core#core','details')}</td>
+        <td align='center'> ${h.link('/user/overview/nagios#core','details')}</td>
     </tr>
 
     <tr>
@@ -49,7 +49,7 @@ situation on the Grid.
             <div class="error_status" status ='plugins_crit'>  </div>
             <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
         </td>        
-        <td align='center'> ${h.link('/user/overview/core#core','details')}</td>
+        <td align='center'> ${h.link('/user/overview/nagios#ces','details')}</td>
     </tr>
     
     <!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will not be dynamically updated! -->
@@ -76,7 +76,7 @@ situation on the Grid.
     <tr>
         <td> My Jobs </td>
         <td colspan=2 id='jobs'> 
-            no info yet
+            <span class="undef_status"> no info yet</span>
        </td>
         <td align='center'>${h.link('/user/jobs','details')}</td>
     </tr>
@@ -97,16 +97,10 @@ situation on the Grid.
     <!-- DETAILS -->
     <td colspan="2" align="center" id="grid_load_table"> </td>
 </tr>
- <tr> <!-- MAX LOAD CLUSTER -->
-        <td> Max loaded cluster (${c.max_load_cluster['tot_cpus']} CPUS) </td>
-        <td colspan=2> <span class="emph"> ${c.max_load_cluster['name']}</span>: ${c.max_load_cluster['tot_running']}/${c.max_load_cluster['tot_cpus']} running, ${c.max_load_cluster['tot_queued']} queued </td>
-        <td align='center'> <a href="/user/clusters/#${h.str_cannonize(c.max_load_cluster['name'])}">details</a></td>
+ <tr id='max_cluster'> <!-- MAX LOAD CLUSTER --> </tr>
     
-    <tr> <!-- MIN LOAD CLUSTER -->
-        <td> Min loaded cluster (${c.min_load_cluster['tot_cpus']} CPUS)</td>
-        <td colspan=2> <span class="emph">${c.min_load_cluster['name']}</span>: ${c.min_load_cluster['tot_running']}/${c.min_load_cluster['tot_cpus']} running, ${c.min_load_cluster['tot_queued']} queued </td>
-        <td align='center'> <a href="/user/clusters/#${h.str_cannonize(c.min_load_cluster['name'])}">details</a></td>
-    </tr>   
+    <tr id='min_cluster'> <!-- MIN LOAD CLUSTER --> </tr>
+ 
 
     <!-- DOWNTIME/MAINTENANCE-->
     %if c.down_time_items: 

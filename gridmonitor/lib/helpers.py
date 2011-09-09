@@ -42,6 +42,7 @@ def get_cluster_names(state):
     if state in ['inactive', 'active']:
         for cl in info_meta.Session.query(info_schema.NGCluster).filter_by(status = state).all():
             hostnames.append(cl.hostname)
+            metadata[cl.hostname] = dict(alias = cl.alias)
     elif state == 'downtime':
         now_scheduled_down = []
         for it in get_nagios_scheduleddowntime_items():

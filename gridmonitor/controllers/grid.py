@@ -115,4 +115,103 @@ class GridController(BaseController):
 
 
 
+    def get_min_max_clusters(self):
+        """ returns a json string with info about the 
+            cluster with the maximal and the cluster 
+            with the minimal load on the grid.
+        """
+
+        max_load_cluster=dict(name = None, cname = None,  tot_running = 0,
+                tot_cpus = 0, tot_queued = 0, relative_load = -1)
+        min_load_cluster=dict(name = None, cname = None, tot_running = 0,
+                tot_cpus = 0, tot_queued = 0, relative_load = -1)
+
+
+        hosts, meta = h.get_cluster_names('active')
+        
+        for hostname in hosts:
+
+            if meta[hostname]['alias']:
+                display_name = meta[hostname]['alias']
+            else:
+                display_name = hostname
+
+            cname = h.str_cannonize(display_name)
+
+            cpus = g.get_cluster_stats(hostname,'stats_cpus')
+            totaljobs = g.get_cluster_stats(hostname,'stats_totaljobs')
+            usedcpus = g.get_cluster_stats(hostname,'stats_usedcpus')
+
+            tot_queued = 0
+            for qname in g.get_cluster_queues_names(hostname):
+                gqd = g.get_queue_stats(hostname, qname, 'stats_grid_queued')
+                lqd= g.get_queue_stats(hostname, qname, 'stats_local_queued')
+                plrms = g.get_queue_stats(hostname, qname, 'stats_prelrms_queued')
+
+                tot_queued = gqd + lqd + plrms
+
+            # Finding max loaded cluster and min loaded cluster         
+            # totaljobs ~ # jobs_running + # jobs_queued
+            if cpus > 0:
+                if totaljobs == 0: # little trick to favor large clusters over small if no jobs are around
+                    tj = 0.5
+                else:
+                    tj = totaljobs
+                tj += tot_queued
+                relative_cluster_load = tj/float(cpus)
+            else:
+                continue
+        
+            if not max_load_cluster['name']:   # set both min=max load  (first cluster)
+                max_load_cluster['name'] = display_name
+                min_load_cluster['name'] = display_name
+                max_load_cluster['cname'] = cname
+                min_load_cluster['cname'] = cname
+                min_load_cluster['tot_running'] = usedcpus  # instead of grid_running + running
+                max_load_cluster['tot_running'] = usedcpus
+                max_load_cluster['tot_cpus'] = cpus
+                min_load_cluster['tot_cpus'] = cpus
+                max_load_cluster['tot_queued'] = tot_queued
+                min_load_cluster['tot_queued'] = tot_queued
+                max_load_cluster['relative_load'] = relative_cluster_load
+                min_load_cluster['relative_load'] = relative_cluster_load
+            elif relative_cluster_load > max_load_cluster['relative_load']:
+                max_load_cluster['name'] = display_name
+                max_load_cluster['cname'] = cname
+                max_load_cluster['tot_running'] = usedcpus
+                max_load_cluster['tot_cpus'] = cpus
+                max_load_cluster['tot_queued'] = tot_queued
+                max_load_cluster['relative_load'] = relative_cluster_load
+            elif (relative_cluster_load == max_load_cluster['relative_load'] ) and \
+                    (cpus < max_load_cluster['tot_cpus']):
+                max_load_cluster['name'] = display_name
+                max_load_cluster['cname'] = cname
+                max_load_cluster['tot_running'] = usedcpus
+                max_load_cluster['tot_cpus'] = cpus
+                max_load_cluster['tot_queued'] = tot_queued
+                max_load_cluster['relative_load'] = relative_cluster_load
+
+            if relative_cluster_load <  min_load_cluster['relative_load']:
+                min_load_cluster['name'] = display_name
+                min_load_cluster['cname'] = cname
+                min_load_cluster['tot_running'] = usedcpus
+                min_load_cluster['tot_cpus'] = cpus
+                min_load_cluster['tot_queued'] = tot_queued
+                min_load_cluster['relative_load'] = relative_cluster_load
+            elif (relative_cluster_load == min_load_cluster['relative_load'] ) and \
+                (cpus > min_load_cluster['tot_cpus']):
+                min_load_cluster['name'] = display_name
+                min_load_cluster['cname'] = cname
+                min_load_cluster['tot_running'] = usedcpus
+                min_load_cluster['tot_cpus'] = cpus
+                min_load_cluster['tot_queued'] = tot_queued
+                min_load_cluster['relative_load'] = relative_cluster_load
+
+        min_max_cl = dict(min_load_cluster = min_load_cluster, max_load_cluster = max_load_cluster)
+        
+        return json.dumps(min_max_cl)
+        
+
+
+
 

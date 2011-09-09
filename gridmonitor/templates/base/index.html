@@ -23,6 +23,7 @@
      	     <div id="nav-bar">
 		        ${self.top_nav()}
                 <div id="user-info">
+                Guest
                 ${self.user_info()} 
             </div>
       	     </div>
@@ -33,7 +34,6 @@
    </style> --> 
    <div id="bd">
 	<div id="yui-main">
-		 ${self.breadcrumbs()}
 	    <div class="yui-b">
 	        ${self.heading()}
 		${next.body()}
@@ -92,7 +92,6 @@
 <%def name="user_info()"></%def>
 <%def name="menu()"></%def>
 <%def name="heading()"><h1>${c.heading or 'No Title'}</h1><a name="top"></a></%def>
-<%def name="breadcrumbs()"></%def>
 
 <%def name="footer()">
 <hr style="border:2px; color: #9E9E9E; background-color: #9E9E9E; height: 1px;width:40px;" align="left"/>
