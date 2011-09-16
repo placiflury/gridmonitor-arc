@@ -235,6 +235,7 @@ gridmonitor/public/img/logo.png
 gridmonitor/public/img/pie_thumb.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
+gridmonitor/public/js/.grid_load.js.swp
 gridmonitor/public/js/LC_prototypes-min.js
 gridmonitor/public/js/LC_prototypes.js
 gridmonitor/public/js/cluster_load.js
@@ -285,9 +286,7 @@ gridmonitor/templates/components/votable.mako
 gridmonitor/templates/derived/gridadmin/error/access_denied.html
 gridmonitor/templates/derived/gridadmin/infosys/details.html
 gridmonitor/templates/derived/gridadmin/infosys/index.html
-gridmonitor/templates/derived/gridadmin/overview/.index.html.swp
 gridmonitor/templates/derived/gridadmin/overview/index.html
-gridmonitor/templates/derived/gridadmin/overview/index.html.0
 gridmonitor/templates/derived/gridadmin/overview/report.html
 gridmonitor/templates/derived/gridadmin/sfts/change.html
 gridmonitor/templates/derived/gridadmin/sfts/form.html

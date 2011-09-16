@@ -46,8 +46,8 @@ class GridadminOverviewController(GridadminController):
         c.down_time_items  = dti
 
         # inactive COMPUTING ELEMENTS 
-        query = meta.Session.query(schema.NGCluster)
-        c.db_inactive_clusters = query.filter_by(status='inactive').all()
+
+        c.db_inactive_clusters = h.get_cluster_names('inactive')
 
 
         # GETTING GIIS-LIST
@@ -55,12 +55,12 @@ class GridadminOverviewController(GridadminController):
         
         return render('/derived/gridadmin/overview/index.html')
     
-    def core(self):
+    def nagios(self):
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Nagios Plugins"
         c.heading = "Details about Nagios Plugins"
         
-        return render('/derived/user/overview/core.html')
+        return render('/derived/user/overview/nagios.html')
 
     def reports(self):
         c.title = "Monitoring System: VO/Grid Admin View"

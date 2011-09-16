@@ -40,7 +40,7 @@ more specific details please, click on the 'details' links on the right.
             <div class="error_status" status ='plugins_crit'>  </div>
             <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
         </td>        
-        <td align='center'> ${h.link('/user/overview/nagios#core','details')}</td>
+        <td align='center'> ${h.link('/gridadmin/overview/nagios#core','details')}</td>
     </tr>
 
     <tr>
@@ -58,7 +58,7 @@ more specific details please, click on the 'details' links on the right.
             <div class="error_status" status ='plugins_crit'>  </div>
             <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
         </td>        
-        <td align='center'> ${h.link('/user/overview/nagios#ces','details')}</td>
+        <td align='center'> ${h.link('/gridadmin/overview/nagios#ces','details')}</td>
     </tr>
     <! -- GIIS'es -->
     <% num_giises = len(c.giises) %>
@@ -103,7 +103,7 @@ more specific details please, click on the 'details' links on the right.
         <td>Cluster(s) with Queue problem</td>
         <td colspan=2>
             % for (display_name, hostname) in c.no_queue_clusters:
-                <% cpath =  '/user/clusters/show/' +  hostname %>
+                <% cpath =  '/gridadmin/clusters/show/' +  hostname %>
                 ${h.link(cpath, display_name)} 
                 %if hostname not in c.now_scheduled_down:
                     <span class="error_status"> 
@@ -124,7 +124,7 @@ more specific details please, click on the 'details' links on the right.
     <td colspan=3>
     <span class="emph">Grid Load </span></td>
     <td> 
-     <span class="emph">${h.link('/user/clusters','details')}</span>
+     <span class="emph">${h.link('/gridadmin/clusters','details')}</span>
     </td>
 </tr>
 
