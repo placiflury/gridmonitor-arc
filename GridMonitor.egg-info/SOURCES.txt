@@ -107,7 +107,6 @@ gridmonitor/model/sft/__init__.py
 gridmonitor/model/sft/name_mapping.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
-gridmonitor/public/css/.nav.css.swp
 gridmonitor/public/css/LC_prototypes.css
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
@@ -238,14 +237,12 @@ gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
 gridmonitor/public/js/LC_prototypes-min.js
 gridmonitor/public/js/LC_prototypes.js
-gridmonitor/public/js/calendar.js
 gridmonitor/public/js/cluster_load.js
 gridmonitor/public/js/cluster_status.js
 gridmonitor/public/js/grid_load.js
 gridmonitor/public/js/job_states.js
 gridmonitor/public/js/jquery-1.5.min.js
 gridmonitor/public/js/nagios_stats.js
-gridmonitor/public/js/pop.js
 gridmonitor/public/js/select.js
 gridmonitor/public/js/wz_jsgraphics.js
 gridmonitor/public/js/qtip/cluster_details.js
@@ -272,7 +269,6 @@ gridmonitor/public/js/yui/build/paginator/paginator.js
 gridmonitor/public/js/yui/build/reset/reset-min.css
 gridmonitor/public/js/yui/build/reset/reset.css
 gridmonitor/public/js/yui/build/yahoo-dom-event/yahoo-dom-event.js
-gridmonitor/templates/base/.user.html.swp
 gridmonitor/templates/base/cluster.html
 gridmonitor/templates/base/error.html
 gridmonitor/templates/base/gridadmin.html
@@ -289,7 +285,9 @@ gridmonitor/templates/components/votable.mako
 gridmonitor/templates/derived/gridadmin/error/access_denied.html
 gridmonitor/templates/derived/gridadmin/infosys/details.html
 gridmonitor/templates/derived/gridadmin/infosys/index.html
+gridmonitor/templates/derived/gridadmin/overview/.index.html.swp
 gridmonitor/templates/derived/gridadmin/overview/index.html
+gridmonitor/templates/derived/gridadmin/overview/index.html.0
 gridmonitor/templates/derived/gridadmin/overview/report.html
 gridmonitor/templates/derived/gridadmin/sfts/change.html
 gridmonitor/templates/derived/gridadmin/sfts/form.html
@@ -341,8 +339,6 @@ gridmonitor/templates/derived/user/error/voms_error.html
 gridmonitor/templates/derived/user/jobs/details.html
 gridmonitor/templates/derived/user/jobs/index.html
 gridmonitor/templates/derived/user/jobs/show.html
-gridmonitor/templates/derived/user/overview/.nagios.html.swp
-gridmonitor/templates/derived/user/overview/core.html
 gridmonitor/templates/derived/user/overview/index.html
 gridmonitor/templates/derived/user/overview/nagios.html
 gridmonitor/templates/derived/user/overview/report.html

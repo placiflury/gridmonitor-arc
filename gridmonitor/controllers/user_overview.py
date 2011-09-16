@@ -1,9 +1,5 @@
 import logging
-from datetime import datetime
-from pylons import session
-from pylons import config 
 from pylons import tmpl_context as c
-from pylons import app_globals as g
 from pylons.templating import render_mako as render
 
 import gridmonitor.lib.helpers as h
@@ -36,7 +32,7 @@ class UserOverviewController(UserController):
                 service = ditem.generic_object.name2
                 dti[hostname]['services'].append(service)
             # notice, we assume that all services of the host have
-            # the very same scheduled downtime (which is necessarily true...)
+            # the very same scheduled downtime (which is not necessarily true...)
             dti[hostname]['start_t'] = ditem.scheduled_start_time
             dti[hostname]['end_t'] = ditem.scheduled_end_time
             dti[hostname]['reason'] = ditem.comment_data
@@ -48,14 +44,14 @@ class UserOverviewController(UserController):
  
     def nagios(self):
         c.title = "Monitoring System: User View"
-        c.menu_active="Nagios Plugins"
+        c.menu_active = "Nagios Plugins"
         c.heading = "Details about Nagios Plugins"
     
         return render('/derived/user/overview/nagios.html')
     
     def reports(self):
         c.title = "Monitoring System: User View"
-        c.menu_active="Reports"
+        c.menu_active = "Reports"
         c.heading = "Reports"
         return render('/derived/user/overview/report.html')
 	 

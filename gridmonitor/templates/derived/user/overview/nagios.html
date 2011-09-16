@@ -46,40 +46,47 @@ response time.
         <% 
         hostname = host_info['hostname']  
         h_last_check =  host_info['date']
-        h_ping = host_info['output']
+        h_output = host_info['output']
         key = hostname.replace('.', DELIMITER) 
-        n_services = cores['details'][key]
+        if (status == 'scheduleddown'):
+            n_services = 1
+        else:
+            n_services = len(cores['details'][key])
         first_flg = True
         %> 
         
         <tr>
-        <td rowspan=${len(n_services)} />    <!-- HOST INFO -->
+        <td rowspan=${n_services} />    <!-- HOST INFO -->
             <!-- qtip display info -->
             <table class="nagios_host_details" summary="Host details infobox" status = '${state_map[status]}' hn='${hostname}'>
                 <tr><td>Hostname</td> <td>${hostname}</td> </tr>
                 <tr><td>Last chedk </td> <td>${h_last_check} </td> </tr>
-                <tr><td>Ouptput </td> <td>${h_ping} </td> </tr>
+                <tr><td>Ouptput </td> <td>${h_output} </td> </tr>
             </table>
             <!-- end qtip -->
         </td>
 
-        %for _service, s_details in cores['details'][key].items():
-            %if not first_flg :
-                <tr>
-            %endif
-            <% 
-            service_name = cores['service_name_map'][_service] 
-            first_flg = False
-            s_status = s_details['status']
-            %>
+        %if (status == 'scheduleddown'):
+            <td colspan=4> <span class='ok_status'> Scheduled downtime: ${h_output}</span> </td> </tr> 
+        %else:   
+            %for _service, s_details in cores['details'][key].items():
+                %if not first_flg :
+                    <tr>
+                %endif
+                <% 
+                service_name = cores['service_name_map'][_service] 
+                first_flg = False
+                s_status = s_details['status']
+                %>
 
-            <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
-           </tr> 
+                <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
+               </tr> 
 
-        %endfor
+            %endfor
+        %endif
     %endfor 
 %endfor 
 
@@ -102,39 +109,47 @@ response time.
         <% 
         hostname = host_info['hostname']  
         h_last_check =  host_info['date']
-        h_ping = host_info['output']
+        h_output = host_info['output']
         key = hostname.replace('.', DELIMITER) 
-        n_services = ces['details'][key]
+        if (status == 'scheduleddown'):
+            n_services = 1
+        else:
+            n_services = len(ces['details'][key])
         first_flg = True
         %> 
         
         <tr>
-        <td rowspan=${len(n_services)} />    <!-- HOST INFO -->
+        <td rowspan=${n_services} />    <!-- HOST INFO -->
             <!-- qtip display info -->
             <table class="nagios_host_details" summary="Host details infobox" status = '${state_map[status]}' hn='${hostname}'>
                 <tr><td>Hostname</td> <td>${hostname}</td> </tr>
                 <tr><td>Last chedk </td> <td>${h_last_check} </td> </tr>
-                <tr><td>Ouptput </td> <td>${h_ping} </td> </tr>
+                <tr><td>Ouptput </td> <td>${h_output} </td> </tr>
             </table>
             <!-- end qtip -->
         </td>
-        %for _service, s_details in ces['details'][key].items():
-            %if not first_flg :
-                <tr>
-            %endif
-            <% 
-            service_name = ces['service_name_map'][_service] 
-            first_flg = False
-            s_status = s_details['status']
-            %>
+        
+        %if (status == 'scheduleddown'):
+            <td colspan=4> <span class='ok_status'> Scheduled downtime: ${h_output}</span> </td> </tr> 
+        %else:   
+            %for _service, s_details in ces['details'][key].items():
+                %if not first_flg :
+                    <tr>
+                %endif
+                <% 
+                service_name = ces['service_name_map'][_service] 
+                first_flg = False
+                s_status = s_details['status']
+                %>
 
-            <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
-            <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
-           </tr> 
+                <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
+               </tr> 
 
-        %endfor
+            %endfor
+        %endif
     %endfor 
 %endfor 
 
@@ -190,4 +205,5 @@ $('table.nagios_host_details').each(function() {
 
 <%def name="js()">
     ${parent.js()}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
 </%def>

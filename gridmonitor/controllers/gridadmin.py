@@ -81,7 +81,7 @@ class GridadminController(BaseController):
  
 
         # static menu information
-        overview = [('Reports','/gridadmin/overview/reports')]
+        overview = [('Nagios Plugins', '/gridadmin/overview/nagios')]
        
         infosys_intervals = [('last 24 hours', '/gridadmin/infosys/show/h24'),
                     ('last week', '/gridadmin/infosys/show/w1'),
