@@ -91,8 +91,8 @@ more specific details please, click on the 'details' links on the right.
                     </tr><tr>
                 %endif
                 <% count += 1 %>
-                <td><span class="error">${hostname}</span></td>
-                <td><span class="error">since: ${c.db_inactive_clusters[1][hostname][db_lastmodified]} (UTC)</span> </td>
+                <td><span class="error_status">${hostname}</span></td>
+                <td><span class="error_status">since: ${c.db_inactive_clusters[1][hostname]['db_lastmodified']} (UTC)</span> </td>
                 <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${hostname}');"> details (history) </a></td>
                 
             %endfor
@@ -131,7 +131,7 @@ more specific details please, click on the 'details' links on the right.
     </td>
 </tr>
 
-<tr> 
+<tr class='nohover'> 
     <!-- plots -->
     <td class="plot"><div id= "grid_load_cpu"></div></td>
     <td class="plot"><div id= "grid_load_queue"></div></td>
