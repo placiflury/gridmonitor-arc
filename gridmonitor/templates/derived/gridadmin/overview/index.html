@@ -79,22 +79,25 @@ more specific details please, click on the 'details' links on the right.
     %endfor
     <! -- INACTIVE CLUSTERS --> 
     %if c.db_inactive_clusters:
-
-    <% num_inactive = len(c.db_inactive_clusters[0]) %>
-    <% count =0 %>
-    <tr>
-        <td rowspan=${num_inactive}> Inactive Clusters (according to Infosys)</td>
-    %for hostname in c.db_inactive_clusters[0]:  
-        %if count >0:
-            </tr><tr>
-        %endif
-        <% count += 1 %>
-        <td><span class="error">${hostname}</span></td>
-        <td><span class="error">since: ${c.db_inactive_clusters[1][hostname][db_lastmodified]} (UTC)</span> </td>
-        <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${hostname}');"> details (history) </a></td>
-        
-    %endfor
-    </tr>
+        <% 
+        num_inactive = len(c.db_inactive_clusters[0]) 
+        count = 0 
+        %>
+        % if num_inactive > 0:
+            <tr>
+                <td rowspan=${num_inactive}> Inactive Clusters (according to Infosys)</td>
+            %for hostname in c.db_inactive_clusters[0]:  
+                %if count >0:
+                    </tr><tr>
+                %endif
+                <% count += 1 %>
+                <td><span class="error">${hostname}</span></td>
+                <td><span class="error">since: ${c.db_inactive_clusters[1][hostname][db_lastmodified]} (UTC)</span> </td>
+                <td> <a href="javascript:poptastic('/gridadmin/infosys/show_all/${hostname}');"> details (history) </a></td>
+                
+            %endfor
+            </tr>
+         %endif
     %endif
     
     <!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will NOT  be dynamically updated! -->

@@ -107,7 +107,6 @@ gridmonitor/model/sft/__init__.py
 gridmonitor/model/sft/name_mapping.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
-gridmonitor/public/css/.monitor.css.swp
 gridmonitor/public/css/LC_prototypes.css
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
@@ -334,7 +333,6 @@ gridmonitor/templates/derived/user/clusters/show.html
 gridmonitor/templates/derived/user/clusters/show_queue.html
 gridmonitor/templates/derived/user/error/giis_error.html
 gridmonitor/templates/derived/user/error/voms_error.html
-gridmonitor/templates/derived/user/jobs/.index.html.swp
 gridmonitor/templates/derived/user/jobs/details.html
 gridmonitor/templates/derived/user/jobs/index.html
 gridmonitor/templates/derived/user/jobs/index.html.0
