@@ -21,9 +21,40 @@ ${next.body()}
 <%def name="menu()">
     ${menu_nav.menu(c.menu,c.menu_active,'siteadminmenu')}
 </%def>
- 
+
 <%def name="user_info()">
-  ${c.user_name} ${c.user_surname}
+
+<% 
+if session.has_key('user_client_dn'):
+    dn =  session['user_client_dn'] 
+    ca = session['user_client_ca'] 
+elif session.has_key('user_slcs_obj'):
+    slc_obj = session['user_slcs_obj']
+    dn = slcs_obj.get_dn() 
+    ca = slcs_obj.get_ca() 
+else:
+    dn = 'Guest'
+    ca = ''
+%>
+
+
+<script type="text/javascript"> 
+
+    var tag = 'div#user-info';
+    var _html = "<div id='ui_short'>${c.user_name} ${c.user_surname} </div>";
+
+    _html += "<div id= 'ui_long'>${dn} <br />(${ca}) </div>";
+    
+    $(tag).html(_html);
+    
+    $('#ui_short').css('display','inline');
+    $('#ui_long').hide();
+    
+    $(tag).click(function() {
+        $("#ui_long").toggle();
+        $("#ui_short").toggle();
+    });
+</script>
 </%def>
 
 

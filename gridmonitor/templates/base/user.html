@@ -22,10 +22,11 @@ if session.has_key('user_client_dn'):
     dn =  session['user_client_dn'] 
     ca = session['user_client_ca'] 
 elif session.has_key('user_slcs_obj'):
-    dn = session['user_slcs_obj'].get_dn() 
-    ca = session['user_slcs_obj'].get_ca() 
+    slc_obj = session['user_slcs_obj']
+    dn = slcs_obj.get_dn() 
+    ca = slcs_obj.get_ca() 
 else:
-    dn = Guest
+    dn = 'Guest'
     ca = ''
 %>
 
@@ -35,7 +36,7 @@ else:
     var tag = 'div#user-info';
     var _html = "<div id='ui_short'>${c.user_name} ${c.user_surname} </div>";
 
-    _html += "<div id= 'ui_long'>${dn} <br />(${ca}) </div>";
+    _html += "<div id= 'ui_long'>${dn} <br /><br />(${ca}) </div>";
     
     $(tag).html(_html);
     
@@ -46,9 +47,6 @@ else:
         $("#ui_long").toggle();
         $("#ui_short").toggle();
     });
-
-    
-
 </script>
 
 

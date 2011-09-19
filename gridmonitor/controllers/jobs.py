@@ -113,7 +113,7 @@ class JobsController(BaseController):
             dn - dn of the user (must be double url encoded!!), if no dn is given
                  the session 'dns' will be used 
             tag - selector for clusters that should be considered. Not yet impl. i.e.
-                rith now all clusters get selected (default).
+                 now all clusters get selected (default).
         """
 
 
@@ -135,11 +135,11 @@ class JobsController(BaseController):
                 for host in ucj1.keys(): # summary is also included
                     if ucj2.has_key(host):
                         for k in JobsController.JOB_STATES:
-                            ret[host][k] += ucj[host][k]
+                            ucj2[host][k] += ucj1[host][k]
                         ucj2[host]['total'] += ucj1[host]['total']
                     else:
                         for k in JobsController.JOB_STATES:
-                            ret[host][k] = ucj[host][k]
+                            ucj2[host][k] = ucj1[host][k]
                         ucj2[host]['total'] = ucj1[host]['total']
                 
             else:
@@ -148,13 +148,13 @@ class JobsController(BaseController):
 
             return json.dumps(ucj2)
 
-    def gc_ucj_states(self, dn, tag = None):
+    def gc_ucj_states(self, dn = None, tag = None):
         """ Returns a json string that can be passed
             unmodified to the google charts API. 
             
-            dn - dn of the user (must be double url encoded!!)
+            dn - dn of the user 
             tag - selector for clusters that should be considered. Not yet impl. i.e.
-                rith now all clusters get selected (default).
+                   now all clusters get selected (default).
 
         """
         key_order = ['cluster', 'fin', 'fail', 'kil', 'del','ftchd', 'run','other','orph']
@@ -170,20 +170,21 @@ class JobsController(BaseController):
 
         dt = DataTable(description, key_order)
 
-        ucj = self._get_ucj_states(dn, tag)
+        ucj = json.loads(self.get_ucj_states(dn, tag))
 
         clusters = ucj.keys()
         clusters.sort()
 
         for cl in clusters:
-            dt.add_row(cl, ucj[cl]['FINISHED'], \
-                ucj[cl]['FAILED'],\
-                ucj[cl]['KILLED'],\
-                ucj[cl]['DELETED'],\
-                ucj[cl]['FETCHED'],\
-                ucj[cl]['RUN'],\
-                ucj[cl]['other'],\
-                ucj[cl]['orphaned'])
+            if cl != 'summary':
+                dt.add_row(cl, ucj[cl]['FINISHED'], \
+                    ucj[cl]['FAILED'],\
+                    ucj[cl]['KILLED'],\
+                    ucj[cl]['DELETED'],\
+                    ucj[cl]['FETCHED'],\
+                    ucj[cl]['RUN'],\
+                    ucj[cl]['other'],\
+                    ucj[cl]['orphaned'])
         
         return dt.get_json()
 

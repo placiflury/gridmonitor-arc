@@ -11,7 +11,7 @@ p{width: 750px;}
 /* table formating (general) */
 
 tr.odd{
-	background-color: #E7F3F9;
+	background-color: #ECF4FF;
 }
 tr.even{
 	background-color: #FFFFFF;
@@ -21,6 +21,7 @@ tr:hover {
 	/*background-color:#EAF9E7; */
 	background-color:#EFFBFB;
 }
+
 
 th {
     font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica;
@@ -58,6 +59,11 @@ td{
 td.plot{
     padding: 0px 1px 0px 1px;
 }
+
+.nohover:hover {
+    background-color: transparent;
+}
+    
 
 .table_row_emph{background-color:#FFFFE0}
 
