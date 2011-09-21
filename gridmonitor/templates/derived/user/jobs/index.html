@@ -1,162 +1,168 @@
 <%inherit file="/base/user.html"/>
 
-<% 
-_height  = len(c.jobs_states.keys()) * 25
-zebra_cnt=0
-sorted_clusters = c.jobs_states.keys()
-sorted_clusters.sort()
-sorted_clusters.remove('summary')
-jobs_summary = c.jobs_states['summary']
-%>
+%if not c.jobs_states:
+    <p> You don't have any jobs on the grid, as you are not allowed on any of
+        the Grid resources.
+    </p>
+%else:
+
+    <% 
+    _height  = len(c.jobs_states.keys()) * 25
+    zebra_cnt=0
+    sorted_clusters = c.jobs_states.keys()
+    sorted_clusters.sort()
+    sorted_clusters.remove('summary')
+    jobs_summary = c.jobs_states['summary']
+    %>
 
 
-<script type="text/javascript">
-    google.load("visualization", "1", {packages:["corechart"]});
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"]});
 
-    function drawJobsPerCluster(){
-        var data, options, chart;
-    
-        var json_str = $.ajax({
-            url : '/json/jobs/gc_ucj_states',
-            type : 'post',
-            dataType: 'text',
-            async: false
-            }).responseText;
-
-        data = new google.visualization.DataTable(json_str, 0.6);
+        function drawJobsPerCluster(){
+            var data, options, chart;
         
-        options = {
-            colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
-            axisTitlesPosition : 'none',
-            backgroundColor : '#ffffff',
-            width : 550,
-            height : '${_height}',
-            hAxis : {
-                baseline: 0
-        },
-        isStacked : true,
-        title: 'My Jobs per Clsuter'
-    };
+            var json_str = $.ajax({
+                url : '/json/jobs/gc_ucj_states',
+                type : 'post',
+                dataType: 'text',
+                async: false
+                }).responseText;
 
-    chart = new google.visualization.BarChart(document.getElementById('my_jobs_per_cluster'));
-    chart.draw(data, options);
-
-
-    }
-
-    function drawJobsPerState(){
-        var data, options, chart;
-   
-         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Job Status');
-        data.addColumn('number', 'Number of Jobs');
-        data.addRows(8);
-        data.setValue(0, 0, 'FINISHED');
-        data.setValue(0, 1, parseInt('${jobs_summary["FINISHED"]}'));
-        data.setValue(1, 0, 'FAILED');
-        data.setValue(1, 1, parseInt('${jobs_summary["FAILED"]}'));
-        data.setValue(2, 0, 'KILLED');
-        data.setValue(2, 1,  parseInt('${jobs_summary["KILLED"]}'));
-        data.setValue(3, 0, 'DELETED');
-        data.setValue(3, 1, parseInt('${jobs_summary["DELETED"]}'));
-        data.setValue(4, 0, 'FETCHED');
-        data.setValue(4, 1, parseInt('${jobs_summary["FETCHED"]}')); 
-        data.setValue(5, 0, 'RUNNING');
-        data.setValue(5, 1, parseInt('${jobs_summary["RUN"]}')); 
-        data.setValue(6, 0, 'other');
-        data.setValue(6, 1, parseInt('${jobs_summary["other"]}')); 
-        data.setValue(7, 0, 'orphaned');
-        data.setValue(7, 1, parseInt('${jobs_summary["orphaned"]}')); 
-
-        
-        options = {
-            colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
-            width: 450, 
-            height: 150,
-            backgroundColor : '#ffffff',
-            title: 'My Jobs per State'
+            data = new google.visualization.DataTable(json_str, 0.6);
+            
+            options = {
+                colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
+                axisTitlesPosition : 'none',
+                backgroundColor : '#ffffff',
+                width : 550,
+                height : '${_height}',
+                hAxis : {
+                    baseline: 0
+            },
+            isStacked : true,
+            title: 'My Jobs per Clsuter'
         };
 
-        chart = new google.visualization.PieChart(document.getElementById('my_jobs_per_state'));
+        chart = new google.visualization.BarChart(document.getElementById('my_jobs_per_cluster'));
         chart.draw(data, options);
 
-    }
 
-    google.setOnLoadCallback(drawJobsPerCluster);
-    google.setOnLoadCallback(drawJobsPerState);
-        
-</script>
-<table> 
-<tr class='nohover'>
-    <td>
-    <table width="500">
-    <tr class="table_head2"> 
-        <th> Cluster\Jobstatus</th>
-        <th> FIN</th>
-        <th> FAIL </th>
-        <th> KIL </th>
-        <th> DEL</th>
-        <th> FTCH</th>
-        <th> RUN</th>
-        <th> other </th>
-        %if c.orphaned:
-            <th> orph </th>
-        %endif
-        <th> total </th>
-    </tr>
+        }
 
+        function drawJobsPerState(){
+            var data, options, chart;
+       
+             var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Job Status');
+            data.addColumn('number', 'Number of Jobs');
+            data.addRows(8);
+            data.setValue(0, 0, 'FINISHED');
+            data.setValue(0, 1, parseInt('${jobs_summary["FINISHED"]}'));
+            data.setValue(1, 0, 'FAILED');
+            data.setValue(1, 1, parseInt('${jobs_summary["FAILED"]}'));
+            data.setValue(2, 0, 'KILLED');
+            data.setValue(2, 1,  parseInt('${jobs_summary["KILLED"]}'));
+            data.setValue(3, 0, 'DELETED');
+            data.setValue(3, 1, parseInt('${jobs_summary["DELETED"]}'));
+            data.setValue(4, 0, 'FETCHED');
+            data.setValue(4, 1, parseInt('${jobs_summary["FETCHED"]}')); 
+            data.setValue(5, 0, 'RUNNING');
+            data.setValue(5, 1, parseInt('${jobs_summary["RUN"]}')); 
+            data.setValue(6, 0, 'other');
+            data.setValue(6, 1, parseInt('${jobs_summary["other"]}')); 
+            data.setValue(7, 0, 'orphaned');
+            data.setValue(7, 1, parseInt('${jobs_summary["orphaned"]}')); 
 
-    
-    %for cluster in sorted_clusters:
-        % if zebra_cnt % 2 == 0:
-           <tr class="odd">
-        % else:
-            <tr class="even">
-        % endif
-        <% zebra_cnt += 1  %>
-            <td>${cluster} </td>
-            <td>${c.jobs_states[cluster]['FINISHED']} </td>           
-            <td>${c.jobs_states[cluster]['FAILED']} </td>           
-            <td>${c.jobs_states[cluster]['KILLED']} </td>           
-            <td>${c.jobs_states[cluster]['DELETED']} </td>           
-            <td>${c.jobs_states[cluster]['FETCHED']} </td>           
-            <td>${c.jobs_states[cluster]['RUN']} </td>           
-            <td>${c.jobs_states[cluster]['other']} </td>           
+            
+            options = {
+                colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
+                width: 450, 
+                height: 150,
+                backgroundColor : '#ffffff',
+                title: 'My Jobs per State'
+            };
+
+            chart = new google.visualization.PieChart(document.getElementById('my_jobs_per_state'));
+            chart.draw(data, options);
+
+        }
+
+        google.setOnLoadCallback(drawJobsPerCluster);
+        google.setOnLoadCallback(drawJobsPerState);
+            
+    </script>
+    <table> 
+    <tr class='nohover'>
+        <td>
+        <table width="500">
+        <tr class="table_head2"> 
+            <th> Cluster\Jobstatus</th>
+            <th> FIN</th>
+            <th> FAIL </th>
+            <th> KIL </th>
+            <th> DEL</th>
+            <th> FTCH</th>
+            <th> RUN</th>
+            <th> other </th>
             %if c.orphaned:
-                <td>< span class="warn_status">${c.jobs_states[cluster]['orphaned']} </span></td>           
+                <th> orph </th>
             %endif
-            <td>${c.jobs_states[cluster]['total']} </td>           
-        </tr>
-    %endfor
-
-    <!-- SUMMARY -->
-        <tr style="border-top-style: double;" class="table_row_emph">
-        <td>total</td>    
-        <td>${jobs_summary['FINISHED']} </td>           
-        <td>${jobs_summary['FAILED']} </td>           
-        <td>${jobs_summary['KILLED']} </td>           
-        <td>${jobs_summary['DELETED']} </td>           
-        <td>${jobs_summary['FETCHED']} </td>           
-        <td>${jobs_summary['RUN']} </td>           
-        <td>${jobs_summary['other']} </td>           
-        %if c.orphaned:
-            <td>< span class="warn_status">${jobs_summary['orphaned']} </span></td>           
-        %endif
-        <td>${jobs_summary['total']} </td>           
+            <th> total </th>
         </tr>
 
+
+        
+        %for cluster in sorted_clusters:
+            % if zebra_cnt % 2 == 0:
+               <tr class="odd">
+            % else:
+                <tr class="even">
+            % endif
+            <% zebra_cnt += 1  %>
+                <td>${cluster} </td>
+                <td>${c.jobs_states[cluster]['FINISHED']} </td>           
+                <td>${c.jobs_states[cluster]['FAILED']} </td>           
+                <td>${c.jobs_states[cluster]['KILLED']} </td>           
+                <td>${c.jobs_states[cluster]['DELETED']} </td>           
+                <td>${c.jobs_states[cluster]['FETCHED']} </td>           
+                <td>${c.jobs_states[cluster]['RUN']} </td>           
+                <td>${c.jobs_states[cluster]['other']} </td>           
+                %if c.orphaned:
+                    <td>< span class="warn_status">${c.jobs_states[cluster]['orphaned']} </span></td>           
+                %endif
+                <td>${c.jobs_states[cluster]['total']} </td>           
+            </tr>
+        %endfor
+
+        <!-- SUMMARY -->
+            <tr style="border-top-style: double;" class="table_row_emph">
+            <td>total</td>    
+            <td>${jobs_summary['FINISHED']} </td>           
+            <td>${jobs_summary['FAILED']} </td>           
+            <td>${jobs_summary['KILLED']} </td>           
+            <td>${jobs_summary['DELETED']} </td>           
+            <td>${jobs_summary['FETCHED']} </td>           
+            <td>${jobs_summary['RUN']} </td>           
+            <td>${jobs_summary['other']} </td>           
+            %if c.orphaned:
+                <td>< span class="warn_status">${jobs_summary['orphaned']} </span></td>           
+            %endif
+            <td>${jobs_summary['total']} </td>           
+            </tr>
+
+        </table>
+        </td>
+        <td>
+            <div id="my_jobs_per_cluster"> </div>
+            <div id="my_jobs_per_state"> </div>
+        </td>
+        </tr>
     </table>
-    </td>
-    <td>
-        <div id="my_jobs_per_cluster"> </div>
-        <div id="my_jobs_per_state"> </div>
-    </td>
-    </tr>
-</table>
-    
+        
 
-<%def name="js()">
-    ${parent.js()}
-    ${self.js_link("https://www.google.com/jsapi")}
-</%def>
-
+    <%def name="js()">
+        ${parent.js()}
+        ${self.js_link("https://www.google.com/jsapi")}
+    </%def>
+%endif

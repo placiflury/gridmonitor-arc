@@ -22,7 +22,7 @@ class UserJobsController(UserController):
          
         c.jobs_states =  json.loads(jc.get_ucj_states())
 
-        if c.jobs_states['summary']['orphaned'] > 0:
+        if c.jobs_states and c.jobs_states['summary']['orphaned'] > 0:
             c.orphaned = True
         else:
             c.orphaned = False
