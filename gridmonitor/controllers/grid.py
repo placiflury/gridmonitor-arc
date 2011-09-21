@@ -2,6 +2,7 @@ import logging
 import json
 
 from pylons import config
+from pylons import request
 from pylons import app_globals as g
 
 from gridmonitor.lib.base import BaseController
@@ -40,6 +41,19 @@ class GridController(BaseController):
         tag = config['nagios_ces']
         core_hosts = get_hostnames_from_group_tag(tag)
         return json.dumps(get_nagios_summary(core_hosts, dates2utc = True))
+
+
+    def get_nagios_stats(self):
+        """
+        Should allow to get nagios info for specifies 'hostlist[]', 
+        which is passed by a POST request
+
+        returns a json (dictionary) object
+        """
+        ddict = request.POST # doubleDict
+        hlist = ddict.getall('hostlist[]') # XXX why did it got the '[]' suffix ???
+
+        return json.dumps(get_nagios_summary(hlist, dates2utc = True))
 
 
 

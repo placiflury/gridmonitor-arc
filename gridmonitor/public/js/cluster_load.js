@@ -17,33 +17,38 @@ function drawCPUChart(hostname, tag) {
 	}).responseText;
 
 	
-    data = new google.visualization.DataTable(json_str, 0.6);
+    if (json_str === 'SchedduledDown'){ 
+       $('#' + tag).html('<div class="ok_status"> Scheduled Downtime </div>');
+    }
+    else{
+        data = new google.visualization.DataTable(json_str, 0.6);
 
-    options = {
-		axisTitlesPosition : 'none',
-		backgroundColor : '#ffffff',
-		chartArea : {
-			left : 10,
-			top : 10,
-			width : "90%",
-			height : "40%"
-		},
-		colors : ['#ffa500', '#055670', '#4682b4'],
-		width : 250,
-		height : 75,
-		hAxis : {
-			textPosition : 'out',
-            baseline: 0
-		},
-		isStacked : true,
-		legend : 'none',
-		vAxis : {
-			title : 'none'
-		}
-	};
+        options = {
+            axisTitlesPosition : 'none',
+            backgroundColor : '#ffffff',
+            chartArea : {
+                left : 10,
+                top : 10,
+                width : "90%",
+                height : "40%"
+            },
+            colors : ['#ffa500', '#055670', '#4682b4'],
+            width : 250,
+            height : 75,
+            hAxis : {
+                textPosition : 'out',
+                baseline: 0
+            },
+            isStacked : true,
+            legend : 'none',
+            vAxis : {
+                title : 'none'
+            }
+        };
 
-	chart = new google.visualization.BarChart(document.getElementById(tag));
-	chart.draw(data, options);
+        chart = new google.visualization.BarChart(document.getElementById(tag));
+        chart.draw(data, options);
+    }
 }
 
 function drawQueueChart(hostname, tag) {
@@ -59,6 +64,9 @@ function drawQueueChart(hostname, tag) {
 
     if (json_str === 'NoQueueError'){ 
        $('#' + tag).html('<div class="error_status"> No Queue </div>');
+    }
+    else if (json_str === 'SchedduledDown'){ 
+       $('#' + tag).html('<div class="ok_status"> Scheduled Downtime </div>');
     }
     else{
         data = new google.visualization.DataTable(json_str, 0.6);

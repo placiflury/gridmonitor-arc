@@ -20,7 +20,7 @@ class UserOverviewController(UserController):
         c.menu_active = "Overview"
         c.heading = "Welcome  %s %s" % (c.user_name, c.user_surname)
 
-        c.now_scheduled_down = h.get_cluster_names('downtime')
+        c.now_scheduled_down = h.get_cluster_names('downtime')[0]
 
         # DOWNTIME INFO        
         dti = {} 

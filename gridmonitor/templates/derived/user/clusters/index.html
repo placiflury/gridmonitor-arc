@@ -1,217 +1,118 @@
 <%inherit file="/base/user.html"/>
+
 <p>
-This page displays all clusters the Grid consists of (estimated <span class="emph"> ${c.tot_cpus} </span>logical CPUs.) with their current usage patterns. 
-<br/>
-If you click on  <a href="javascript:showUserClusters('slcs')">SLCS</a> only the 
-clusters you can access with your SLCS certificate are displayed. 
-By clicking on <a href="javascript:showUserClusters('browser_cert')">browser cert</a>
-you get the clusters you can access with the certificate, which is in your browsers (if any). 
-To get back to all clusters click <a href="javascript:showUserClusters('all')">all</a>. <p>
-
-<table width="900">
-<tr><td>
-    View: [<a href="javascript:showUserClusters('all')">all</a> | 
-          <a href="javascript:showUserClusters('slcs')">SLCS</a> | 
-          <a href="javascript:showUserClusters('browser_cert')">browser cert</a>]
-    <ul>
-% for cluster in c.cluster_menu:
-<% 
-hostname= cluster[1].split('/')[-1]
-cpus=app_globals.get_cluster_stats(hostname,'stats_cpus') 
-%>
-        % if hostname in c.allowed_clusters['slcs_browser']: 
-            <div class="slcs_browser_access" style="display:''">
-        % elif hostname in c.allowed_clusters[c.user_slcs_dn]:
-          <div class="slcs_access" style="display:inline">
-        %elif hostname in c.allowed_clusters[c.user_client_dn]:
-            <div class="browser_dn_access" style="display:''">
-        % else:
-            <div class="no_access"style="display:''">
-        %endif
-        <li>
-            ${h.link(cluster[1], cluster[0])} 
-             % if cpus == 0:
-               <% cpus = app_globals.get_cluster_stats(hostname,'stats_totalcpus') %>
-               % if cpus == 0: 
-                  <span class="error_status"> (${cpus} CPUs)</span>
-               % else:
-                 <span class="warn_status"> (${cpus} CPUs)</span>
-               % endif
-            %else:
-                   (${cpus} CPUs) 
-            % endif
-        </li>
-        </div>
-    %endfor
-    </ul>
-    </td>
-
-<td>
-<div>
-<span align="center" style="font-weight:bold;"> Cluster Sizes [logical CPUs]</span>
-</div>
-<div id="pie_slcs_browser_access" style="display:none">
-% if c.user_client_dn:
-    <div id="dn_clusters_div"> </div>
-%endif
-</div>
-<div id="pie_slcs_access" style="display:none">
-    <div id="slcs_clusters_div"> </div"
-</div>
-<div id="pie_all"style="display:''">
-    <div id="all_clusters_div"> </div>
-</div>
-    </td></tr>
-</table>
-
-
-<table width="900">
-    <tr class="table_head">
-        <th colspan="3"> Load on Clusters</th>
-    </tr>
-    <tr class="table_head"><td>Cluster</td><td>Queues</td><td>Details</td> </tr>
-
-%for cluster in c.cl_bar_chart:
-<% 
-cluster_name = cluster[0] 
-grid_running = cluster[1]
-running = cluster[2]
-num_cpus = cluster[3]
-total_jobs = cluster[4]
-used_cpus = cluster[5]
-hostname = cluster[6]
-
-queue_stats=c.cl_detailstats[cluster_name]
-
-if c.cl_qbar_chart.has_key(cluster_name):
-    q_data = c.cl_qbar_chart[cluster_name][0]
-    q_scaling=c.cl_qbar_chart[cluster_name][1]
-    if q_scaling < 10:
-        q_scaling = 10
-
-    q_labels=c.cl_qbar_chart[cluster_name][2]
-    num_queues =c.cl_qbar_chart[cluster_name][3]
-else:
-    continue
-%>
-
-% if hostname in c.allowed_clusters['slcs_browser']: 
-    <tr  class="slcs_browser_access" > 
-% elif hostname in c.allowed_clusters[c.user_slcs_dn]:
-    <tr class="slcs_access" >
-%elif hostname in c.allowed_clusters[c.user_client_dn]:
-    <tr class="browser_dn_access">
-% else:
-    <tr class="no_access">
-%endif
-<td>
-<img src="http://chart.apis.google.com/chart?
-chs=250x90
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=t:${grid_running}|${running-grid_running}|${num_cpus}&chds=0,${num_cpus}
-&amp;chdh=20
-&amp;chxt=x,x
-&amp;chxr=0,0,${num_cpus}
-&amp;chxl=
-1:|gridrunning|running|cpus
-&amp;chxp=50,${num_cpus}
-&amp;chtt='${cluster_name}'"
-alt="Number of (grid) jobs on ${cluster_name}"/>
-        </td>
-
-        <td>
-<img src="http://chart.apis.google.com/chart?
-%if num_queues == 1:
-chs=250x80
-%elif num_queues == 2:
-chs=250x110
-%elif num_queues == 3:
-chs=250x140
-%elif num_queues == 4:
-chs=250x170
-%elif num_queues == 5:
-chs=250x190
+%if c.user_slcs_dn and c.user_client_dn:
+    From the AAI credentials (SCLS certificate) and the certificate, which 
+    was presented by your browser, you may be allowed to submit 
+    jobs on below listed clusters.
+%elif c.user_slcs_dn:
+    From the AAI credentials (SCLS certificate), you may be allowed to submit 
+    jobs on below listed clusters.
+%elif c.user_client_dn:
+    From the browser certificate, which was presented by your browser, you 
+    may be allowd to submit jobs on the clusters listed in below table.
 %else:
-chs=250x220
+    Dear ${c.user_name}, from the crendentials by which you accessed this site, there are no 
+    clusters you may be allowed to run jobs on. 
+% endif
+
+</p>
+
+% if c.user_slcs_dn or c.user_client_dn:
+    <table id="grid_pub_summary" cellspacing="0" summary="An summary of the 
+            Grid computational resources the ${c.user_name} ${c.user_surname} user may be
+            allowed to access">
+                <caption>
+                    ${config['gridname']} Resources Overview for ${c.user_name} ${c.user_surname}.
+                </caption>
+                <tr>
+                    <th class="corner_left" scope="col">Cluster</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">CPU Load</th>
+                    <th scope="col">Queue Load</th>
+                    <th scope="col">Load Table 
+                     <span id="expand_table"> 
+                        |&lt;- -&gt;|  
+                     </span>
+                     <span id="shrink_table" style="display: none">  
+                        |-&gt;&lt;-| 
+                    </span>
+                    </th>
+                    <th scope="col">RRD</th>
+                </tr>
+                <% zebra_cnt = 0 %>
+
+    % for hostname in c.user_clusters:
+    <% 
+    zebra_cnt += 1 
+    if c.clusters_meta.has_key(hostname) and c.clusters_meta[hostname].has_key('alias'):
+        display_name = c.clusters_meta[hostname]['alias']
+    else:
+        display_name = hostname
+    id_tag = hostname.replace('.','-1-')
+    %>
+                    % if zebra_cnt % 2 == 0:
+                        <tr class="odd" id="${id_tag}">
+                        
+                    % else:
+                        <tr class="even" id="${id_tag}">
+                    % endif
+                        <!-- static cluster information -->
+                        <td class='emph' display_name='${display_name}'>
+                            <div class='cluster_details'>
+                                <h2> ${display_name}</h2>
+                                <table summary="Cluster details infobox">
+                                    <tr><td>Hostname</td> <td>${hostname}</td> </tr>
+                                    %if c.clusters_meta.has_key(hostname):
+                                        % for k, v in c.clusters_meta[hostname].items():
+                                            % if k != 'alias':
+                                                <tr>
+                                                    <td> ${k} </td>
+                                                    <td> ${v} </td>
+                                                </tr>
+                                            %endif
+                                        % endfor
+                                    %else:
+                                        <tr><td colspan=2 > <span class="warn_status">No up-to-date info available </span> </td> </tr>
+                                    %endif
+                                </table>
+                            </div>
+                        </td>
+                        <!-- 2nd: status row (dynamic)-->
+                        <td>
+                            <div class="undef_status" status="Downtime" style="display: none;"> Downtime</div>
+                            <div group='nsi'>
+                                <div class="undef_status" status="Nagios"></div>
+                                <div class="undef_status" status="SFT"></div> 
+                                <div class="undef_status" status="Infosys"></div>
+                            </div>
+                        </td>
+                    <!-- 3rd CPU load -->
+                    <td class="plot"><div id= "${id_tag + '_cpu'}"></div></td>
+                    <!-- 4th Queue load -->
+                    <td class="plot"><div id= "${id_tag + '_queue'}"></div></td>
+                    <!-- 5th CPU Queue load table -->
+                    <td id="${id_tag + '_table'}"> 
+                    </td>
+                    <td><a href="/public/rrd/${hostname}" target="_blank"><img src="/img/graph_thumb.png"
+                    alt="rrd graph;logo from royalty free clip art site clker.com"/></a></td>
+                    </tr>
+                % endfor 
+                
+            </table>
+    <script type="text/javascript" src="/js/cluster_status.js"> </script>
+    <script type="text/javascript" src="/js/qtip/cluster_details.js">// Create the tooltips only on document load</script>
+
+    <%def name="css()">
+        ${parent.css()}
+        ${self.css_link('/css/tooltip.css', 'screen')}
+    </%def>
+
+    <%def name="js()">        
+        ${parent.js()}
+        ${self.js_link("/js/jquery-1.5.min.js")}
+        ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+        ${self.js_link("https://www.google.com/jsapi")}
+        ${self.js_link("/js/cluster_load.js")}
+    </%def>
 %endif
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=${q_data}
-&amp;chds=0,${q_scaling}
-&amp;chdh=20
-&amp;chxt=x,x,y
-&amp;chxr=0,0,${q_scaling}
-&amp;chxl=${q_labels}"
-alt="Queue(s) status for ${cluster_name}"/>
-</td>
-<td>
-<a name="${h.str_cannonize(cluster_name)}"> </a>
-
-<!-- DETAILS -->
-<table width="350">
-    <tr class="table_head3">
-    <td>Name</td><td>Gridrun</td> <td>Run</td><td>Gridq</td><td>Localq</td><td>Lrmsq</td>
-    </tr>
-    %for qname in queue_stats.keys():
-        <tr>
-        <td>
-        <!-- queue name-->
-        ${qname}
-        </td>
-        <!-- Gridrunning-->
-        <td> ${queue_stats[qname][0]}</td>
-        <!-- running-->
-        <td> ${queue_stats[qname][1]}</td>
-        <!-- queued-->
-        <td> ${queue_stats[qname][2]}</td>
-        <!-- localqueued-->
-        <td> ${queue_stats[qname][3]}</td>
-        <!-- lrmsqueued-->
-        <td> ${queue_stats[qname][4]}</td>
-    </tr>
-    %endfor
-    <tr style="border-top-style:double">
-    <td colspan="3">running: ${running}</td>
-    <td colspan="3">gridrunning: ${grid_running}</td>
-    </tr>
-    <tr> 
-    <td colspan="3"> total jobs: ${running}/${total_jobs} </td>
-    <td colspan="3"> used cpus: ${used_cpus}/${num_cpus} </td>
-    </tr>
-</table>
-<!-- END DETAILS -->
-</td>
-</tr>
-%endfor
-</table>
-
-<%def name="js()">
-    ${parent.js()}
-    <script type="text/javascript" src="/js/select.js"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-
-      function drawChart(label, cl_names, cl_cores) {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Cluster');
-        data.addColumn('number', 'Cores');
-        data.addRows(cl_name.length);
-        for (var i = 0, i < cl_names.length; i += 1){
-
-            data.setValue(i, 0, cl_names[i]);
-            data.setValue(i, 1, cl_cores[i]);
-        }
-
-        var chart = new google.visualization.PieChart(document.getElementById('all_clusters_div'));
-        chart.draw(data, {width: 600, height: 200, title: 'My Daily Activities'});
-      }
-    </script>
-
-
-</%def>
-
-

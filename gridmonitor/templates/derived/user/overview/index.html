@@ -65,7 +65,7 @@ situation on the Grid.
                     (NO QUEUE)
                     </span><br/>
                 %else:
-                    (NO QUEUE) (scheduled downtime)
+                    scheduled downtime
                 %endif
             %endfor
         </td>
@@ -139,10 +139,27 @@ situation on the Grid.
     </tr>
 
 </table>
+
+<script language="javascript" type="text/javascript">
+function _nagiosSummary(){
+    nagiosSummary('cores');
+    nagiosSummary('ces');
+}
+
+function refreshCallback(){
+    var secs = 120;
+    setInterval( "_nagiosSummary()", secs * 1000);
+}
+
+$(document).ready(function() {
+    _nagiosSummary();
+    refreshCallback();
+});
+</script>
+
     
 <%def name="js()">
     ${parent.js()}
-    ${self.js_link("/js/jquery-1.5.min.js")}
     ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
     ${self.js_link("/js/nagios_stats.js")}
     ${self.js_link("https://www.google.com/jsapi")}

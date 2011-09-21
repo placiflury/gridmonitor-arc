@@ -175,10 +175,13 @@ def get_nagios_summary( hostlist, dates2utc = False):
 
 
     for hostname in hostlist:
+        ngs = get_nagios_service_statuses(hostname)
+        if not ngs: # there's no info about host
+            log.debug("No nagios info found for %s" % hostname)
+            continue
         _hostname = hostname.replace('.','-1-')
         host_plugins_info[_hostname] = {}
 
-        ngs = get_nagios_service_statuses(hostname)
                     
         # get host info 
         hstatus = ngs['host ping']['status']

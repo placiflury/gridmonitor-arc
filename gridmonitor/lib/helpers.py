@@ -40,25 +40,22 @@ def get_cluster_names(state):
     metadata = {}
     
     if state in ['inactive', 'active']:
+        down_clusters = get_cluster_names('downtime')[0]
         for cl in info_meta.Session.query(info_schema.NGCluster).filter_by(status = state).all():
-            hostnames.append(cl.hostname)
-            metadata[cl.hostname] = dict(alias = cl.alias, db_lastmodified = cl.db_lastmodified)
+            if (cl.hostname not in down_clusters):
+                hostnames.append(cl.hostname)
+                metadata[cl.hostname] = dict(alias = cl.alias, db_lastmodified = cl.db_lastmodified)
     elif state == 'downtime':
         now_scheduled_down = []
-        for it in get_nagios_scheduleddowntime_items():
+        for it in get_nagios_scheduleddowntime_items(currently_down = True):
             hostname = it.generic_object.name1
-            start_t = it.scheduled_start_time
-            end_t = it.scheduled_end_time
-            if datetime.now() > start_t and datetime.now() < end_t:
-                now_scheduled_down.append(hostname)
-                metadata[hostname] = dict(start_t = start_t, end_t = end_t)
+            if (hostname not in hostnames):
+                metadata[hostname] = dict( start_t = it.scheduled_start_time, \
+                        end_t = it.scheduled_end_time)
+                hostnames.append(hostname)
+        
 
-        # now filter clusters out of all scheduled downtime items
-        if now_scheduled_down:
-            for cl in  info_meta.Session.query(info_schema.NGCluster).all():
-                if cl.hostname in now_scheduled_down:
-                    hostnames.append(cl.hostname)
-
+    log.debug("clusters (state: %s)  %r " % (state, hostnames))
     hostnames.sort()
     return hostnames, metadata
              

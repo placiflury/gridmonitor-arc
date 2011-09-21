@@ -1,4 +1,5 @@
 import logging
+from pylons import config
 from pylons import tmpl_context as c
 from pylons import app_globals as g
 from pylons.templating import render_mako as render
@@ -6,82 +7,43 @@ from pylons.templating import render_mako as render
 import gridmonitor.lib.helpers as h
 
 from gridadmin import GridadminController
+from gridmonitor.controllers.cluster import ClusterController
 
 
 log = logging.getLogger(__name__)
 
-QUEUE_NAME_LEN=11   # default len of queue names. Names will either be padded or cut to that size
 
 class GridadminClustersController(GridadminController):    
 
     def index(self):
-        c.title = "Monitoring System: Site Admin View"
+        c.title = 'GridMonitor: Site Admin View. Resources of %s' % config['gridname']
         c.menu_active = "Grid Clusters"
-        c.heading = "Grid Clusters"  
+        c.heading = '%s  Resources (Overview)' % config['gridname']
+
+        clusters = g.get_clusters()
+
+        c.clusters_meta = {}
+        for hostname, cl_obj in clusters.items():
+            c.clusters_meta[hostname] = {}
+            for key in ClusterController.CLUSTER_META:
+                values = cl_obj.get_attribute_values(key)
+                if values:
+                    c.clusters_meta[hostname][key] = values[0]
+        
+        active_clusters = h.get_cluster_names('active')[0]
+        inactive_clusters = h.get_cluster_names('inactive')[0]
+        scheddown_clusters = h.get_cluster_names('downtime')[0]
+        
+        all_clusters = []
+        for cl in active_clusters + inactive_clusters + scheddown_clusters:
+            if cl not in all_clusters:
+                all_clusters.append(cl)
+
+        all_clusters.sort()
+        c.all_clusters = all_clusters
         
         
-        # vars for cluster and queue bar charts
-        c.cl_bar_chart = list()  # [(displayname,grid_running,running,cpu),...]
-        c.cl_qbar_chart = dict() # {displayname : (chart_data,)}
-        c.cl_detailstats = dict() # {displayname: {q_name:(grid_running,running,gridqd,localqd,plrmsqd)},..}
-        
-        for cluster in c.cluster_menu:
-            hostname = cluster[1].split('/')[-1] # stripping hostname from url
-            display_name = cluster[0]
-            c.cl_detailstats[display_name]=dict()
-
-            cpus = g.get_cluster_stats(hostname,'stats_cpus')
-
-            # populate cluster bar-chart and statistics for cluster 'detail' displaying
-            grid_running = g.get_cluster_stats(hostname,'stats_grid_running')
-            running = g.get_cluster_stats(hostname,'stats_running')
-            totaljobs = g.get_cluster_stats(hostname,'stats_totaljobs')
-            usedcpus = g.get_cluster_stats(hostname,'stats_usedcpus')
-            c.cl_bar_chart.append((display_name,grid_running,running,cpus,totaljobs,usedcpus))
-
-            # populate queue bar-chart(s)
-            queues_names = g.get_cluster_queues_names(hostname)
-            # handle case of no queues 
-            if not queues_names:
-                c.cl_qbar_chart[hostname]=(None,None,None,0)
-            else:
-                grid_queued = list()
-                local_queued = list()
-                prelrms_queued = list()
-                chart_xlabels="1:|gridqueued|localqueued|lrmsqueued|2:"
-                for qname in queues_names:
-                    gqd = g.get_queue_stats(hostname,qname,'stats_grid_queued')
-                    lqd= g.get_queue_stats(hostname,qname,'stats_local_queued')
-                    plrms = g.get_queue_stats(hostname,qname,'stats_prelrms_queued')
-                    run = g.get_queue_stats(hostname,qname,'stats_running')
-                    grun = g.get_queue_stats(hostname,qname,'stats_grid_running')
-
-                    grid_queued.append(gqd)
-                    local_queued.append(lqd)
-
-                    prelrms_queued.append(plrms)
-
-                    c.cl_detailstats[display_name][qname]=(grun,run,gqd,lqd,plrms)
-
-                    qlen = len(qname)
-                    if qlen <= QUEUE_NAME_LEN:
-                        pass
-                    else: # too long
-                        qname = qname[:QUEUE_NAME_LEN-3] + "..."
-                    chart_xlabels+= "|"+qname
-
-                grid_queued.reverse()
-                local_queued.reverse()
-                prelrms_queued.reverse()
-
-                chart_data="t:%s|%s|%s" % (h.list2string(grid_queued),h.list2string(local_queued),h.list2string(prelrms_queued))
-                c1 = max(grid_queued)
-                c2 = max(local_queued)
-                c3 = max(prelrms_queued)
-                chart_scaling= c1+c2+c3
-                c.cl_qbar_chart[display_name]=(chart_data,chart_scaling,chart_xlabels,len(queues_names))
-        
-        return render('/derived/siteadmin/clusters/index.html')
+        return render('/derived/gridadmin/clusters/index.html')
 
 
     def show(self, id, queue =None):
@@ -101,9 +63,9 @@ class GridadminClustersController(GridadminController):
             c.queue_obj = g.get_queue(c.cluster_hostname, c.queue_name)
             if not c.queue_obj:
                 # XXX -> error message
-                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id,queue))
+                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id, queue))
                 return render("/derived/user/clusters/index.html")
-            c.heading = "Queue '%s' of cluster '%s'" % (queue,c.cluster_display_name)
+            c.heading = "Queue '%s' of cluster '%s'" % (queue, c.cluster_display_name)
             return render('/derived/user/clusters/show_queue.html')
 
 

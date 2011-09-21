@@ -2,13 +2,19 @@
  * @author Placi Flury
  */
 
-var nagiosSummary = function (tag){
+var nagiosSummary = function (tag, hlist){
     /* tag -- either cores or ces  */
  
     var _url = '/json/grid/get_nagios_ces_stats';
 
     if (tag === 'cores'){
         _url = '/json/grid/get_nagios_cores_stats';
+    }
+    else if (tag == 'ces'){
+        _url = '/json/grid/get_nagios_ces_stats';
+    }
+    else {
+        _url = '/json/grid/get_nagios_stats'; /* requires to post a hostlist */
     }
     
     var condShow = function(div_tag, val, _html, _details, _title){
@@ -59,6 +65,7 @@ var nagiosSummary = function (tag){
         url: _url,
         type: 'POST',
         dataType: 'json',
+        data: {'hostlist': hlist },
         success: function(data){
             var n, host, service;
             var i, _html, _details, _title;
@@ -208,21 +215,3 @@ var nagiosSummary = function (tag){
         }
     });
 }
-
-
-
-function _nagiosSummary(){
-    nagiosSummary('cores');
-    nagiosSummary('ces');
-}
-
-function refreshCallback(){
-    var secs = 120;
-    setInterval( "_nagiosSummary()", secs * 1000);
-}       
-     
-$(document).ready(function() {
-    _nagiosSummary();
-    refreshCallback();
-});
-

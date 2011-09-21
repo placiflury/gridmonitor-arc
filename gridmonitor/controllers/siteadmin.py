@@ -44,29 +44,29 @@ class SiteadminController(BaseController):
                     for service in site.services:
                         if service.type == 'CE':
                             log.info("Access to CE service %s granted." % service.hostname)
-                            self.clusters.append(service.hostname)
+                            self.clusters.append(service.hostname.encode('utf-8'))
                         else: 
                             log.info("Access to core service %s granted." % service.hostname)
-                            self.cores.append(service.hostname)
+                            self.cores.append(service.hostname.encode('utf-8'))
                 for service in admin.services:
                     if service.type == 'CE':
                         if service.hostname not in self.clusters:
                             log.info("Access to CE service %s granted." % service.hostname)
-                            self.clusters.append(service.hostname)
+                            self.clusters.append(service.hostname.encode('utf-8'))
                     else:
                         if service.hostname not in self.cores:
                             log.info("Access to core service %s granted." % service.hostname)
-                            self.cores.append(service.hostname)
+                            self.cores.append(service.hostname.encode('utf-8'))
         
 
         # static menu information
         test_jobs = [('test_suit1','/siteadmin/testjobs/test/suit1')]
         
-        overview = [('My Services','/siteadmin/overview/core'),
+        overview = [('My Services','/siteadmin/overview/nagios'),
             ('Reports','/siteadmin/overview/reports')]
         
 
-        # dynamic menu information
+        # dynamic menu information 
         c.cluster_menu = list()
         c.no_queue_clusters = list()
         for cluster_hostname in self.clusters:
@@ -79,13 +79,13 @@ class SiteadminController(BaseController):
             queues_names = g.get_cluster_queues_names(cluster_hostname)
             if not queues_names:
                 log.debug("Cluster has no queue")
-                cluster_queues = [(SiteadminController.NO_QUEUE_FOUND,cluster_path)]
-                c.no_queue_clusters.append((cluster_display_name,cluster_hostname))
+                cluster_queues = [(SiteadminController.NO_QUEUE_FOUND, cluster_path)]
+                c.no_queue_clusters.append((cluster_display_name, cluster_hostname))
             else:
                 for name  in queues_names:
                     log.debug("Got queue '%s'" % name)
                     cluster_queues.append((name, cluster_path + '/' + h.str_cannonize(name)))
-            c.cluster_menu.append((cluster_display_name,cluster_path, cluster_queues))
+            c.cluster_menu.append((cluster_display_name, cluster_path, cluster_queues))
          
         c.top_nav= session['top_nav_bar']
         

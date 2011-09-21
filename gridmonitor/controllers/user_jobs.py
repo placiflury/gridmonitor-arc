@@ -1,6 +1,5 @@
 import logging
 import json
-from pylons import session
 from pylons import tmpl_context as c
 from pylons import app_globals as g
 from pylons.templating import render_mako as render
@@ -32,18 +31,10 @@ class UserJobsController(UserController):
  
     def show(self, status):
          
-        c.user_slcs_dn = None       
-        c.user_client_dn = None
-        
-        if session.has_key('user_slcs_obj'):
-            user_slcs_obj = session['user_slcs_obj']
-            c.user_slcs_dn = user_slcs_obj.get_dn()
-            c.user_slcs_ca = user_slcs_obj.get_ca()
-
-        if session.has_key('user_client_dn'):
-            c.user_client_dn = session['user_client_dn']
-            if session.has_key('user_client_ca'):
-                c.user_client_ca = session['user_client_ca']
+        c.user_slcs_dn = self.user_slcs_dn
+        c.user_slcs_ca = self.user_slcs_ca
+        c.user_client_dn = self.user_client_dn
+        c.user_client_ca = self.user_client_ca
         
         c.job_list = list()  # double list        
 
@@ -57,18 +48,18 @@ class UserJobsController(UserController):
             else:
                 c.heading = "Jobs in status: '%s'" % c.job_status
                 c.title = c.heading
-            jl = g.get_user_jobs(c.user_slcs_dn, status)
+            jl = g.get_user_jobs(self.user_slcs_dn, status)
             c.job_list.append(jl)
             if c.user_client_dn:
-                jl = g.get_user_jobs(c.user_client_dn, status)
+                jl = g.get_user_jobs(self.user_client_dn, status)
                 c.job_list.append(jl)
         else:
             c.heading = "All of Your Jobs"
             c.title = "All of Your Jobs"
-            jl = g.get_user_jobs(c.user_slcs_dn)
+            jl = g.get_user_jobs(self.user_slcs_dn)
             c.job_list.append(jl)
             if c.user_client_dn:
-                jl = g.get_user_jobs(c.user_client_dn)
+                jl = g.get_user_jobs(self.user_client_dn)
                 c.job_list.append(jl)
             
             log.debug(c.job_list)

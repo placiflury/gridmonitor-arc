@@ -1,5 +1,6 @@
 import logging
 
+from pylons import config
 from pylons import tmpl_context as c
 from pylons import app_globals as g
 import gridmonitor.lib.helpers as h
@@ -17,8 +18,8 @@ class PublicSummaryController(BaseController):
 
     def index(self):
         
-        c.title = 'SMSCG Grid Resources (Overview)'
-        c.heading = 'SMSCG Grid Resources (Overview)'
+        c.title = '%s Resources (Overview)' % config['gridname']
+        c.heading = '%s  Resources (Overview)' % config['gridname']
 
         clusters = g.get_clusters()
 

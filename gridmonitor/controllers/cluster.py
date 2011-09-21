@@ -5,6 +5,8 @@ from datetime import datetime
 
 from pylons import tmpl_context as c
 from pylons import app_globals as g
+import gridmonitor.lib.helpers as h
+
 from  gridmonitor.lib.nagios_utils import get_nagios_scheduleddowntime_items, get_nagios_service_statuses
 
 import gridmonitor.lib.time_utils as tu
@@ -20,8 +22,8 @@ class ClusterController(BaseController):
         provide json query urls to populate data/plots
     """
 
-    CLUSTER_META = ['alias','support','cache',
-                'middlewares','cert_expiration',
+    CLUSTER_META = ['alias', 'support', 'cache',
+                'middlewares', 'cert_expiration',
                 'operating_systems']
     
 
@@ -166,6 +168,10 @@ class ClusterController(BaseController):
 
             hostname - host name of the cluster front-end.
         """
+        if hostname in h.get_cluster_names('downtime')[0]:
+            return 'SchedduledDown'
+
+
         key_order = ['cluster', 'gridrun', 'run','cpus']
         description = {'cluster': ('Cluster','string'),
                     'gridrun': ('Grid Running', 'number'),
@@ -194,6 +200,9 @@ class ClusterController(BaseController):
 
             hostname - host name of the cluster front-end.
         """
+        if hostname in h.get_cluster_names('downtime')[0]:
+            return 'SchedduledDown'
+
         key_order=['queue','gridqueued', 'localqueued','lrmsqueued']
 
         description = {'queue': ('Queue','string'),

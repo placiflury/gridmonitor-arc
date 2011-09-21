@@ -113,7 +113,7 @@ more specific details please, click on the 'details' links on the right.
                     (NO QUEUE)
                     </span><br/>
                 %else:
-                    (NO QUEUE) (scheduled downtime)
+                    scheduled downtime
                 %endif
             %endfor
         </td>
@@ -189,6 +189,23 @@ more specific details please, click on the 'details' links on the right.
     </tr>
 
 </table>
+
+<script language="javascript" type="text/javascript">
+function _nagiosSummary(){
+    nagiosSummary('cores');
+    nagiosSummary('ces');
+}
+
+function refreshCallback(){
+    var secs = 120;
+    setInterval( "_nagiosSummary()", secs * 1000);
+}
+
+$(document).ready(function() {
+    _nagiosSummary();
+    refreshCallback();
+});
+</script>
 
 <%def name="js()">
     ${parent.js()}

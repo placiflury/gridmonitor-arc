@@ -22,13 +22,33 @@ class UserController(BaseController):
         c.user_name = session['user_name']
         c.user_surname = session['user_surname']
         
+        self.user_slcs_dn = None       
+        self.user_slcs_ca = None       
+        self.user_client_dn = None
+        self.user_client_ca = None
+        self.apt_user_clusters = []
+        
+        if session.has_key('user_slcs_obj'):
+            user_slcs_obj = session['user_slcs_obj']
+            self.user_slcs_dn = user_slcs_obj.get_dn()
+            self.user_slcs_ca = user_slcs_obj.get_ca()
+            self.apt_user_clusters = g.data_handler.get_user_clusters(self.user_slcs_dn)
+
+        if session.has_key('user_client_dn'):
+            self.user_client_dn = session['user_client_dn']
+            self.user_client_ca = session['user_client_ca']
+            for hname in g.data_handler.get_user_clusters(self.user_client_dn):
+                if hname not in self.apt_user_clusters:
+                    self.apt_user_clusters.append(hname)
+        
         # build up menu (dynamic part)
         c.cluster_menu = list()
         c.no_queue_clusters = list()    
-
         clusters = g.get_clusters()
-        
+
         for cluster_hostname, cluster_obj in clusters.items():
+            if cluster_hostname not in self.apt_user_clusters: # skipp those user has no access
+                continue
             cluster_queues = list()
             cluster_display_name = cluster_obj.get_alias() 
            

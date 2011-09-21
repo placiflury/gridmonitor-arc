@@ -1,110 +1,137 @@
 <%inherit file="/base/siteadmin.html"/>
 
-<% color_map={0: '#ffffff', 1: '#FFFBBF', 2:'#FF5000', 3: '#809DAA'} %>
-
-<p>You are visiting the Grid Monitor of the SMSCG project.
-On this page you find a the <span class="emph"> tactical overview </span> for your site. If you'd like to have 
-more specific details please, click on the 'details' links on the right.
+<p>You are visiting the Grid Monitor of the ${config['gridname']}.
+This page displays the<span class="emph"> tactical overview </span> for a site administrator.. 
 </p>
 
-<% state_map={0: 'ok', 1: 'warn', 2:'critical', 3: 'unknown'} %>
 
-<table width="600">
-    <caption>Tactical Overview</caption>
-    <tr class="table_head3"> 
-        <th>Service/Performance</th> 
-        <th>(Services) Status</th>
-        <th>Details</th> 
-    </tr>
-    % if c.cores_admin or (c.core_hosts_down > 0) :
-    <tr>
-        <td> Core Services</td>
-        <td> 
-         <!-- check/report if any host is down -->
-        % if c.core_hosts_down > 0:
-        <span class='error'> ${c.core_hosts_down} Host(s) down. </span>
-        % endif
-        %for state, value in c.core_stats_summary.items():
-        %if value > 0:
-        <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
-        %endif
-        %endfor  
-        </td>
-        <td> ${h.link('/siteadmin/overview/core#core','details')}</td>
-    </tr>
-    % endif
-   <!-- check whether all CEs admin is administering have been displayed --> 
-    % for core_name in c.missing_cores:
-        <tr>
-            <td> ${core_name} </td>
-            <td colspan=2> No Nagios info available. (missing)</td>
-        </tr>
-    %endfor
+<table id="siteadmin_overview"  width="900" summary="Personalized tactical overview for site admins">
+    <caption>
+        Tactical Overview for a site admin
+    </caption>
     
-    % if c.ce_admin or (c.ce_hosts_down > 0) :
-    <tr>
-        <td> Computing Elements (Services)</td>
-        <td>
-         <!-- check/report if any host is down -->
-        % if c.ce_hosts_down > 0:
-        <span class='error'> ${c.ce_hosts_down} Host(s) down. </span>
-        % endif
-        %for state, value in c.ces_stats_summary.items():
-        %if value > 0:
-            <span class='${state_map[state]}'> ${value} ${state_map[state].upper()} </span>
-        %endif
-        %endfor
-        </td>
-        <td> ${h.link('/siteadmin/overview/core#ces','details')}</td>
+    <tr> 
+        <th class="corner_left" scope="col">Service/Performance</th> 
+        <th scope="col" colspan=2>(Services) Status</th>
+        <th class="corner_right" scope="col">Details</th> 
     </tr>
-    %endif
+
+    <tr>
+        <td> Core Services </td>
+        <td colspan=2 id='site_cores'> 
+            Hosts: 
+            <div class="ok_status" status = 'host_up'> </div>
+            <div class="ok_status"  status= 'host_sdown'> </div>
+            <div class="error_status" status = 'host_down'> </div>
+            <div class="undef_status" status= 'host_unknown'>no info yet </div>
+            <br />
+            Plugins: 
+            <div class="ok_status" status='plugins_ok'>  </div>
+            <div class="warn_status" status = 'plugins_warn'>  </div>
+            <div class="error_status" status ='plugins_crit'>  </div>
+            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+        </td>        
+        <td align='center'> ${h.link('/siteadmin/overview/nagios#core','details')}</td>
+    </tr>
+
+    <tr>
+        <td> Computing Elements (Services) </td>
+        <td colspan=2 id='site_ces'> 
+            Hosts: 
+            <div class="ok_status" status = 'host_up'></div>
+            <div class="ok_status"  status= 'host_sdown'> </div>
+            <div class="error_status" status = 'host_down'> </div>
+            <div class="undef_status" status= 'host_unknown'>no info yet </div>
+            <br />
+            Plugins: 
+            <div class="ok_status" status='plugins_ok'>  </div>
+            <div class="warn_status" status = 'plugins_warn'>  </div>
+            <div class="error_status" status ='plugins_crit'>  </div>
+            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+        </td>        
+        <td align='center'> ${h.link('/siteadmin/overview/nagios#ces','details')}</td>
+    </tr>
     
-    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here-->
+    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will NOT  be dynamically updated! -->
     %if c.no_queue_clusters:
     <tr>
         <td>Cluster(s) with Queue problem</td>
         <td colspan=2>
             % for (display_name, hostname) in c.no_queue_clusters:
-                <% cpath =  '/siteadmin/clusters/show/' +  hostname %>
-                ${h.link(cpath, display_name)} <span class="error"> (NO QUEUE)</span><br/>
+                <% cpath =  '/user/clusters/show/' +  hostname %>
+                ${h.link(cpath, display_name)} 
+                %if hostname not in c.now_scheduled_down:
+                    <span class="error_status"> 
+                    (NO QUEUE)
+                    </span><br/>
+                %else:
+                    scheduled downtime
+                %endif
             %endfor
         </td>
+        <td align='center'> ${h.link(cpath, 'details')}</td>
     </tr>
     %endif    
-    <!--VOs supported resp. Pool account usage  on: -->
-    % for cluster_name in  c.admin_ces.keys():
-        % for service_name in c.admin_ces[cluster_name].keys():
-        <tr>
-            <td>${service_name} (${cluster_name})</td>
-            <%bg_color=color_map[c.admin_ces[cluster_name][service_name]['current_state']]%>
-            <td BGCOLOR="${bg_color}" colspan=2>
-             ${c.admin_ces[cluster_name][service_name]['output']}</td> 
-        </tr>
-        %endfor
-    %endfor
-   <!-- check whether all CEs admin is administering have been displayed --> 
-    % for cluster_name in c.missing_clusters:
-        <tr>
-            <td> ${cluster_name} </td>
-            <td colspan=2> No (Nagios) info available. (missing)</td>
-        </tr>
-    %endfor
 
-    <!--Usage of pool-accounts --> 
+    <!-- DOWNTIME/MAINTENANCE-->
+    %if c.down_time_items: 
+    <tr class="table_row_emph" align="center"> 
+    <td colspan=4>
+    <span class="emph"> Scheduled Downtimes</span>
+    </td>
+    </tr>
+
+    %for host in  c.down_time_items.keys():
+    <tr> 
+    <td>
+        <b>Host</b>: ${host} <br />
+        %if c.down_time_items[host]['services']: # i.e. list not empty
+            <b>Services</b>: 
+            %for service in c.down_time_items[host]['services']:
+                '${service}' &nbsp;
+            %endfor
+        %endif
+    </td>
+    <td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to${c.down_time_items[host]['end_t']}  <br/>
+        Reason: ${c.down_time_items[host]['reason']}
+    </td>
+    </tr>
+    %endfor
+    %endif
+
 </table>
+    
+<%def name="js()">
+    ${parent.js()}
+    ${self.js_link("/js/jquery-1.5.min.js")}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+    ${self.js_link("/js/nagios_stats.js")}
+    ${self.js_link("https://www.google.com/jsapi")}
+    ${self.js_link("/js/grid_load.js")}
+    ${self.js_link("/js/job_states.js")}
+</%def>
 
-<h3> Mocking Page </h3>
+<script language="javascript" type="text/javascript">
+function _nagiosSummary(){
+    nagiosSummary('site_cores',${c.site_cores});
+    nagiosSummary('site_ces', ${c.site_ces});
+}
 
-<ul>
-<li>Tactical Overview: </li>
-    <ul>
-    <li> # jobs at site</li>
-    <li> # jobs per VO (if possible)</li>
-    <li> Pool account usage (%) -> Plot would be fine</li>
-    </ul>
-<li> GRIS response time(s): avg/current</li>
-<li> Age of current displayed data</li>
-</ul>
+function refreshCallback(){
+    var secs = 120;
+    setInterval( "_nagiosSummary()", secs * 1000);
+}
 
+$(document).ready(function() {
+    _nagiosSummary();
+    refreshCallback();
+});
+</script>
 
+    
+<%def name="js()">
+    ${parent.js()}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+    ${self.js_link("/js/nagios_stats.js")}
+</%def>
 
