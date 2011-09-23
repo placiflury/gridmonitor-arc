@@ -1,5 +1,9 @@
 <%inherit file="/base/siteadmin.html"/>
 
+<% 
+from datetime import datetime 
+t_now = datetime.utcnow()
+%>
 <p>You are visiting the Grid Monitor of the ${config['gridname']}.
 This page displays the<span class="emph"> tactical overview </span> for a site administrator.. 
 </p>
@@ -92,25 +96,54 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
             %endfor
         %endif
     </td>
-    <td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to${c.down_time_items[host]['end_t']}  <br/>
+    <td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to ${c.down_time_items[host]['end_t']}  <br/>
         Reason: ${c.down_time_items[host]['reason']}
     </td>
     </tr>
     %endfor
     %endif
 
-</table>
-    
-<%def name="js()">
-    ${parent.js()}
-    ${self.js_link("/js/jquery-1.5.min.js")}
-    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
-    ${self.js_link("/js/nagios_stats.js")}
-    ${self.js_link("https://www.google.com/jsapi")}
-    ${self.js_link("/js/grid_load.js")}
-    ${self.js_link("/js/job_states.js")}
-</%def>
+    <! -- CLUSTER DETAILS -->
+    %for hostname in c.clusters_details.keys():
+        <% 
+            clo = c.clusters_details[hostname]
+            age = t_now - clo.get_db_lastmodified() 
+            info_age = (age.days * 84600 + age.seconds) / 60.0
+            cdl = clo.get_hostexpiration_date() - t_now
+            c_days_left = cdl.days + cdl.seconds * (1.0/84600)
+        %> 
+        <tr>
+            <td rowspan=2>
+                ${hostname} <br />
+                 <span class="emph"> (info age: ${'%0.2f' % info_age} minutes)</span> </td>
+            <td> Response Time: ${clo.get_response_time()}</td>
+            <td> Processing Time: ${clo.get_processing_time()}</td>
+            <td> (details) </td>
+        </tr>
+        <tr>
+            <td colspan=2> 
+                %if (c_days_left < 0):
+                    <span class="error_status"> Grid hostcertificate 
+                    has expired ${abs(c_days_left)} day(s) ago. </span>
+                %elif (c_days_left < 7): 
+                    <span class="warn_status"> Grid hostcertificate will 
+                        expire in ${c_days_left } day(s). Please renew it before. 
+                    </span>
+                %else:
+                    <span class="ok_status"> Grid hostcertificate is 
+                        valid for ${'%.3f' % c_days_left} more days. </span>
+                % endif
+            </td>
+            <td> (details) </td>
+        </tr>
+    %endfor
 
+
+</table>
+
+
+
+    
 <script language="javascript" type="text/javascript">
 function _nagiosSummary(){
     nagiosSummary('site_cores',${c.site_cores});

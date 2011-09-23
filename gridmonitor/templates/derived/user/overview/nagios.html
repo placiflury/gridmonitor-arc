@@ -60,7 +60,7 @@ response time.
             <!-- qtip display info -->
             <table class="nagios_host_details" summary="Host details infobox" status = '${state_map[status]}' hn='${hostname}'>
                 <tr><td>Hostname</td> <td>${hostname}</td> </tr>
-                <tr><td>Last chedk </td> <td>${h_last_check} </td> </tr>
+                <tr><td>Last check </td> <td>${h_last_check} </td> </tr>
                 <tr><td>Ouptput </td> <td>${h_output} </td> </tr>
             </table>
             <!-- end qtip -->
@@ -203,3 +203,7 @@ $('table.nagios_host_details').each(function() {
 
 </script>
 
+<%def name="js()">        
+    ${parent.js()}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+</%def>

@@ -7,7 +7,7 @@ import gridmonitor.lib.helpers as h
 from gridmonitor.lib.nagios_utils import get_nagios_scheduleddowntime_items
 from gridadmin import GridadminController
 
-from infocache.db import meta, schema
+from infocache.db import meta, schema # XXX not clean -> move to API
 
 log = logging.getLogger(__name__)
 

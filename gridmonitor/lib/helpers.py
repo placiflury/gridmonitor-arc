@@ -4,11 +4,12 @@ Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to both as 'h'.
 """
 import logging
-
 import urllib
+import types
 
 from datetime import datetime
 
+from pylons import app_globals as g
 from webhelpers.html.tags import link_to
 from routes.util import url_for # used in subsequent modules, don't remove
 
@@ -58,7 +59,44 @@ def get_cluster_names(state):
     log.debug("clusters (state: %s)  %r " % (state, hostnames))
     hostnames.sort()
     return hostnames, metadata
-             
+
+
+def get_cluster_details(hostname):
+    """ returns an object with the following methods
+            - get_status()
+            - get_response_time()
+            - get_processing_time()
+            - get_lastcheck()
+            - get_hostexpiration_date()
+
+        or  None if no info about cluster is available
+
+    """
+    cl = g.get_cluster(hostname) 
+    if not cl:
+        return None
+
+    meta = cl.get_metadata()
+
+    hdate = '1970-01-01 00:00:00'
+    hdates = cl.get_attribute_values('cert_expiration')
+    if hdates:
+        hdate = hdates[0] 
+        # convert utc string e.g.' 2012-01-24 14:41:52 ' to datetime
+        
+
+    meta.hostexpiration_date = datetime.strptime(hdate, "%Y-%m-%d %H:%M:%S")
+
+    # adding method to meta (only instance will get methods *not* class    
+    def get_hostexpiration_date(_instance):
+        return _instance.hostexpiration_date
+
+    meta.get_hostexpiration_date = types.MethodType(get_hostexpiration_date, meta)
+
+
+    return meta
+
+ 
 
 
 def str_cannonize(str):

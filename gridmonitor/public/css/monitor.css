@@ -74,7 +74,9 @@ td.plot{
     font-size: 93%;
     }
 
-.emph{font-style: italic;}
+.emph{
+    font: italic 11px eurostyle,tahoma, sans-serif;
+}
 
 .vo_emph{background-color: #FFFFE0}
 /*

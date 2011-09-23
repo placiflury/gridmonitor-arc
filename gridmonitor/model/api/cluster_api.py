@@ -29,6 +29,7 @@ class ClusterApi:
             - get_status()
             - get_response_time()
             - get_processing_time()
+            - get_db_lastmodified() // optional
         """ 
         return None
 
