@@ -51,21 +51,30 @@
         %if 'day' in time_period:
             <tr id='day_infosys1'>
             <td>
-            <img src="/rrd/${CE}_h24.png" alt="Processing time of GRIS: ${CE}">
+            <img src="/rrd/${CE}_h24r.png" alt="Response time of GRIS: ${CE}">
+            </td>
+            <td>
+            <img src="/rrd/${CE}_h24p.png" alt="Processing time of GRIS: ${CE}">
             </td>
             </tr>
         %endif
         %if 'week' in time_period:
             <tr id='week_infosys1'>
             <td>
-            <img src="/rrd/${CE}_w1.png" alt="Processing time of GRIS: ${CE}">
+            <img src="/rrd/${CE}_w1r.png" alt="Response time of GRIS: ${CE}">
+            </td>
+            <td>
+            <img src="/rrd/${CE}_w1p.png" alt="Processing time of GRIS: ${CE}">
             </td>
             </tr>
         %endif
         %if 'year' in time_period:
             <tr id='year_infosys1'>
             <td>
-            <img src="/rrd/${CE}_y1.png" alt="Processing time of GRIS: ${CE}">
+            <img src="/rrd/${CE}_y1r.png" alt="Response time of GRIS: ${CE}">
+            </td>
+            <td>
+            <img src="/rrd/${CE}_y1p.png" alt="Processing time of GRIS: ${CE}">
             </td>
             </tr>
         %endif

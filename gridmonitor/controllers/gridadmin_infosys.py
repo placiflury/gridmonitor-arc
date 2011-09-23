@@ -50,15 +50,15 @@ class GridadminInfosysController(GridadminController):
             c.suffix = None
         elif interval == 'w1':
             c.menu_active = "last week"
-            c.suffix= '_w1.png'
+            c.suffix= '_w1p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of current week."
         elif interval == 'y1':
             c.menu_active = "last year"
-            c.suffix= '_y1.png'
+            c.suffix= '_y1p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of current  year."
         else:
             c.menu_active = "last 24 hours"
-            c.suffix= '_h24.png'
+            c.suffix= '_h24p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of last 24 hours."
             
         return render('/derived/gridadmin/infosys/index.html')

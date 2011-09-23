@@ -1,5 +1,5 @@
 <%inherit file="/base/gridadmin.html"/>
-<% suffixes = ['_h24.png', '_w1.png', '_y1.png'] %>
+<% suffixes = ['_h24p.png', '_w1p.png', '_y1p.png'] %>
 <!-- PLOT RRD GRAPHS -->
 <table>
 <% count=0 %>
@@ -7,7 +7,7 @@
     <% name = c.cluster_name + suffix %>
             <tr>
             <td>
-                <img src="/rrd/${name}" alt="response time of GRIS/GIIS: ${c.cluster_name}">    
+                <img src="/rrd/${name}" alt="Processing time of GRIS/GIIS: ${c.cluster_name}">    
             </td>
             </tr>
 %endfor
