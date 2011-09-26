@@ -4,6 +4,7 @@ from pylons import app_globals as g
 from pylons.templating import render_mako as render
 
 import gridmonitor.lib.helpers as h
+from gridmonitor.model.api.job_api import JobApi
 
 from siteadmin import SiteadminController
 
@@ -15,8 +16,6 @@ USER_NAME_LEN = 11
 class SiteadminJobsController(SiteadminController):    
 
     JOB_STATES = ['FINISHED','FAILED','KILLED','DELETED','INLRMS: R']
-    JOB_FETCHED = ['FIN_FETCHED','FLD_FETCHED','KIL_FETCHED']
-    JOB_DELETED = ['FIN_DELETED','FLD_DELETED','KIL_DELETED','DELETED']
 
     def index(self):
         c.title = "Monitoring System: Site Admin View"
@@ -60,9 +59,9 @@ class SiteadminJobsController(SiteadminController):
                 
                 if status in SiteadminJobsController.JOB_STATES:
                     users_bag[user][status]+=1
-                elif status in SiteadminJobsController.JOB_FETCHED:
+                elif status in JobApi.JOB_FETCHED:
                     users_bag[user]['FETCHED']+=1
-                elif status in SiteadminJobsController.JOB_DELETED:
+                elif status in JobApi.JOB_DELETED:
                     users_bag[user]['DELETED']+=1
                 else:
                     users_bag[user]['other']+=1

@@ -4,9 +4,13 @@ import urllib
 
 from pylons import app_globals as g
 from pylons import session
+from pylons import request
 
+import gridmonitor.lib.helpers as h
 from gridmonitor.lib.base import BaseController
 from gridmonitor.lib.charts_table import DataTable
+from gridmonitor.model.api.job_api import JobApi
+
 
 log = logging.getLogger(__name__)
 
@@ -15,8 +19,8 @@ class JobsController(BaseController):
     """ This controller doesn't serve a web page of
         the GridMonitor application. It does instead
         provide json query urls to populate data/plots
-    """
 
+    """
     JOB_STATES = ['FINISHED', 
             'KILLED',
             'FAILED',
@@ -107,6 +111,8 @@ class JobsController(BaseController):
 
     def get_ucj_states(self, dn = None, tag = None):
         """
+            User-Cluster-Job states.
+            
             returns json object with corresponding states for each cluster for
                     given user and cluster_list.
 
@@ -149,7 +155,10 @@ class JobsController(BaseController):
             return json.dumps(ucj2)
 
     def gc_ucj_states(self, dn = None, tag = None):
-        """ Returns a json string that can be passed
+        """
+            User-Cluster-Job states.
+            
+            Returns a json string that can be passed
             unmodified to the google charts API. 
             
             dn - dn of the user 
@@ -157,7 +166,7 @@ class JobsController(BaseController):
                    now all clusters get selected (default).
 
         """
-        key_order = ['cluster', 'fin', 'fail', 'kil', 'del','ftchd', 'run','other','orph']
+        key_order = ['cluster', 'fin', 'fail', 'kil', 'del', 'ftchd', 'run', 'other', 'orph']
         description = {'cluster': ('Cluster','string'),
                     'fin': ('FINISHED', 'number'),
                     'fail': ('FAILED', 'number'),
@@ -190,17 +199,155 @@ class JobsController(BaseController):
 
 
 
-    def cluster_summary(self, cluster):
+    def get_cj_states(self, cluster_list = None):
         """
-            cluster - hostname of cluster front-end
-            XXX not yet implemented
-        """
-        pass 
-
-    def status_summary(self, state):
-        """
-            state - job state
+            Cluster-Job states.
             
-            XXX not yet implemented
+            param: cluster_list - list of hostnames of the cluster front-end
+                                if no list is passed, hostnames of considered clusters
+                                expected to be passed via  http POST
+
+            returns a json dictionary with corresponding states for each cluster 
+
         """
-        pass 
+        if  not cluster_list:
+            ddict = request.POST # doubleDict
+            cluster_list = ddict.getall('hostlist[]') # XXX why did it got the '[]' suffix ???
+
+        ret = {}
+        sum_cluster_jobs = 0
+        
+        ret['summary'] = dict(total = 0)
+        for k in JobsController.JOB_STATES:
+            ret['summary'][k] = 0
+
+        for cluster in cluster_list:
+            nfin = nfld = nkil = ndel = nftchd = nrun = 0
+            norphaned = nother = ntot = 0
+            
+            active_clusters = h.get_cluster_names('active')[0]
+
+            cjobs = g.data_handler.get_cluster_jobs(cluster)
+            if cluster not in active_clusters: # all orphaned
+                norphanded = len(cjobs)
+                ret[cluster] = dict(FINISHED = nfin,
+                                    FAILED = nfld,
+                                    KILLED = nkil,
+                                    DELETED = ndel,
+                                    FETCHED = nftchd,
+                                    RUN = nrun,
+                                    orphaned = norphaned,
+                                    other = nother,
+                                    total = norphaned)
+                ret['summary']['orphaned'] += norphaned
+                continue                
+            
+            allowed_users = g.data_handler.get_cluster_users(cluster)
+        
+            for job in cjobs:
+                _status = job.get_status()
+                _dn = job.get_globalowner()
+           
+                if job.get_globalowner() not in allowed_users:
+                    norphaned += 1
+                elif _status == 'FINISHED':
+                    nfin += 1 
+                elif _status == 'FAILED':
+                    nfld += 1 
+                elif _status == 'KILLED':
+                    nkil += 1 
+                elif _status == 'INRLMS: R':
+                    nrun +=1 
+                elif _status in JobApi.JOB_STATES_DEL:
+                    ndel += 1 
+                elif _status in JobApi.JOB_STATES_FETCHED:
+                    nftchd += 1 
+                else:
+                    nother += 1 
+            
+                ntot += 1
+
+            ret[cluster] = dict(FINISHED = nfin,
+                                FAILED = nfld,
+                                KILLED = nkil,
+                                DELETED = ndel,
+                                FETCHED = nftchd,
+                                RUN = nrun,
+                                orphaned = norphaned,
+                                other = nother,
+                                total = ntot)
+
+            ret['summary']['FINISHED'] += nfin
+            ret['summary']['FAILED'] += nfld
+            ret['summary']['KILLED'] += nkil
+            ret['summary']['DELETED'] += ndel
+            ret['summary']['FETCHED'] += nftchd
+            ret['summary']['RUN'] += nrun
+            ret['summary']['orphaned'] += norphaned
+            ret['summary']['other'] += nother
+
+
+            sum_cluster_jobs += ntot
+
+        ret['summary']['total'] = sum_cluster_jobs
+        
+        return json.dumps(ret)
+
+
+    def gc_cj_states(self):
+        """ 
+            Cluster-Job-states.
+            
+            Returns a json string that can be passed
+            unmodified to the google charts API. 
+            
+            cluster_list -- list of hostnames of considered clusters
+                             passed in http POST
+        """
+        ddict = request.POST # doubleDict
+        cluster_list = ddict.getall('hostlist[]') # XXX why did it got the '[]' suffix ???
+       
+        log.debug("Got cluster_list %r" % cluster_list) 
+
+        key_order = ['cluster', 'fin', 'fail', 'kil', 'del', 'ftchd', 'run', 'other', 'orph']
+        description = {'cluster': ('Cluster','string'),
+                    'fin': ('FINISHED', 'number'),
+                    'fail': ('FAILED', 'number'),
+                    'kil': ('KILLED', 'number'),
+                    'del': ('DELETED', 'number'),
+                    'ftchd': ('FETCHED', 'number'),
+                    'run': ('Running','number'),
+                    'other': ('Other state', 'number'),
+                    'orph': ('Orphaned', 'number')}
+
+        dt = DataTable(description, key_order)
+
+        cj = json.loads(self.get_cj_states(cluster_list))
+
+        cluster_list.sort()
+
+        for _cl in cluster_list:
+            cl = _cl.encode('utf-8')
+            dt.add_row(cl, cj[cl]['FINISHED'], \
+                cj[cl]['FAILED'],\
+                cj[cl]['KILLED'],\
+                cj[cl]['DELETED'],\
+                cj[cl]['FETCHED'],\
+                cj[cl]['RUN'],\
+                cj[cl]['other'],\
+                cj[cl]['orphaned'])
+        
+
+        # add summary (if more then one cluster)
+        if len(cluster_list) > 1:
+            cl = 'summary'
+            dt.add_row(cl, cj[cl]['FINISHED'], \
+                cj[cl]['FAILED'],\
+                cj[cl]['KILLED'],\
+                cj[cl]['DELETED'],\
+                cj[cl]['FETCHED'],\
+                cj[cl]['RUN'],\
+                cj[cl]['other'],\
+                cj[cl]['orphaned'])
+
+        return dt.get_json()

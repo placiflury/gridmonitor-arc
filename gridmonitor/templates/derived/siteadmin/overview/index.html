@@ -77,6 +77,8 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
     </tr>
     %endif    
 
+
+
     <!-- DOWNTIME/MAINTENANCE-->
     %if c.down_time_items: 
     <tr class="table_row_emph" align="center"> 
@@ -127,7 +129,7 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
                     has expired ${abs(c_days_left)} day(s) ago. </span>
                 %elif (c_days_left < 7): 
                     <span class="warn_status"> Grid hostcertificate will 
-                        expire in ${c_days_left } day(s). Please renew it before. 
+                        expire in ${'%.3f' % c_days_left } day(s). Please renew it before. 
                     </span>
                 %else:
                     <span class="ok_status"> Grid hostcertificate is 
@@ -137,11 +139,145 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
             <td> (details) </td>
         </tr>
     %endfor
+    
+    <! -- CLUSTER ABOUT WHICH CACHE CONTAINS NO INF -->
+    %for hostname in c.no_info_clusters:
+        <tr>
+            <td>${hostname}</td> 
+            <td colspan=2><span class="undef_status"> Grid information system has no data about this cluster.</span> <td>
+        </tr>
+    %endfor
 
+    <!-- Charts of Jobs + states  per Cluster --> 
+    <tr> 
+        <td colspan=4> 
+            <div id='jobs_per_cluster_chart'> </div>
+        </td>
+    </tr>
+    <tr class="nohover"> 
+        <td colspan=4> 
+            <div id='jobs_per_cluster_table'> </div>
+        </td>
+    </tr>
+    <!-- SFT SUMMARY -->
+
+    <tr> 
+        <td colspan=4> 
+            <span class='undef_status'> Summary on SFT tests for site clusters (TODO) </span>
+        </td>
+    </tr>
 
 </table>
 
 
+<% 
+_height  = len(c.site_ces) * 25 + 80
+%>
+
+<script language="javascript" type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+
+    function drawJobsPerCluster(){
+        var data, options, chart;
+    
+        var json_str = $.ajax({
+            data: {'hostlist': ${c.site_ces}} ,
+            url : '/json/jobs/gc_cj_states',
+            type : 'post',
+            dataType: 'text',
+            async: false
+            }).responseText;
+
+        data = new google.visualization.DataTable(json_str, 0.6);
+        
+        options = {
+            colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
+            axisTitlesPosition : 'out',
+            backgroundColor : '#ffffff',
+            width : 820,
+            height : '${_height}',
+            hAxis : {
+                baseline: 0
+            },
+            chartArea: {left: 130},
+            isStacked : true,
+            legend: 'top',
+            title: 'Jobs per Cluster'
+        };
+
+    chart = new google.visualization.BarChart(document.getElementById('jobs_per_cluster_chart'));
+    chart.draw(data, options);
+    }
+
+</script>
+
+
+<script language="javascript" type="text/javascript">
+    
+function jobsPerClusterTable(cluster_list){
+    
+    var _url = '/json/jobs/get_cj_states';
+    $.ajax({
+        url: _url,
+        type: 'POST',
+        data: {'hostlist': cluster_list} ,
+        dataType: 'json',
+        success: function(data){
+            var n = cluster_list.length;
+            var hostname;
+            /* table head */
+            var  _html = ' <table width="800"> <tr class="table_head2">  <th> Cluster\Jobstatus</th>' +
+                        '<th> FIN</th> <th> FAIL </th> <th> KIL </th> <th> DEL</th> <th> FTCH</th>' +
+                        ' <th> RUN</th> <th> other </th>';
+
+            if (data.summary.orphaned > 0){
+                _html += '<th> orph </th>';
+            }
+            _html += '<th> total </th></tr>';
+
+            /* table body */
+            
+            for (var i= 0; i < n; i++) {
+                hn = cluster_list[i];
+                _html += '<tr> <td>' + hn + '</td>';
+                _html += '<td>' + data[hn]['FINISHED'] +'</td>';
+                _html+='<td>'+ data[hn]['FAILED'] +'</td>';          
+                _html+='<td>'+ data[hn]['KILLED'] + '</td>';          
+                _html+='<td>'+ data[hn]['DELETED'] +'</td>';         
+                _html+='<td>'+ data[hn]['FETCHED']+' </td>';           
+                _html+='<td>'+ data[hn]['RUN'] +' </td>';       
+                _html+='<td>'+ data[hn]['other'] +' </td>';
+                if (data.summary.orphaned > 0){
+                    _html += '<td><span class="warn_status">' ;
+                    _html += data[hn]['orphaned']+ ' </span></td>';          
+                }
+                _html +='<td>' + data[hn]['total'] + '</td></tr>';          
+
+            }
+            if (n != 1){
+                _html += '<tr style="border-top-style: double;" class="table_row_emph"> <td> total </td>';
+                _html += '<td>' + data.summary['FINISHED'] +'</td>';
+                _html+='<td>'+ data.summary['FAILED'] +'</td>';          
+                _html+='<td>'+ data.summary['KILLED'] + '</td>';          
+                _html+='<td>'+ data.summary['DELETED'] +'</td>';         
+                _html+='<td>'+ data.summary['FETCHED']+' </td>';           
+                _html+='<td>'+ data.summary['RUN'] +' </td>';       
+                _html+='<td>'+ data.summary['other'] +' </td>';
+                if (data.summary.orphaned > 0){
+                    _html += '<td><span class="warn_status">' ;
+                    _html += data.summary['orphaned']+ ' </span></td>';          
+                }
+                _html +='<td>' + data.summary['total'] + '</td></tr>';          
+                }
+            _html += '</table>';
+
+            $('#jobs_per_cluster_table').html(_html);
+        }
+    });
+}
+                    
+
+</script> 
 
     
 <script language="javascript" type="text/javascript">
@@ -157,13 +293,16 @@ function refreshCallback(){
 
 $(document).ready(function() {
     _nagiosSummary();
-    refreshCallback();
+    drawJobsPerCluster();
+    jobsPerClusterTable(${c.site_ces});
+    refreshCallback()
 });
 </script>
 
     
 <%def name="js()">
     ${parent.js()}
+    ${self.js_link("https://www.google.com/jsapi")}
     ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
     ${self.js_link("/js/nagios_stats.js")}
 </%def>

@@ -21,7 +21,7 @@ class SiteadminOverviewController(SiteadminController):
     def index(self):
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Overview"
-        c.heading = "<span class='warn_status'> You are not authorized to view content of this page.</span>"  # default
+        c.heading = "<span class='warn_status'> You are not authorized to view the content of this page.</span>"  # default
         
         if not self.authorized:
             c.heading= "Site Overview"
@@ -53,19 +53,22 @@ class SiteadminOverviewController(SiteadminController):
         c.down_time_items  = dti
 
 
-
-        inactives = h.get_cluster_names('inactive')[0]
+        actives = h.get_cluster_names('active')[0]
         cld = {}
     
+
+        c.no_info_clusters =  []
         for hostname in self.clusters:
-            if hostname in c.now_scheduled_down or (hostname in inactives): 
-                continue
-            cld[hostname] = h.get_cluster_details(hostname)
+            if hostname in actives:
+                cld[hostname] = h.get_cluster_details(hostname)
+            # else: -> report cluster is not 'known' despite been in the ACL
+            else:
+                c.no_info_clusters.append(hostname)
 
         c.clusters_details = cld
 
-        #XXX jobs @ site, jobs/VO, pool account usage,
-        # most recent sft's results 
+        #XXX  most recent SFT results 
+        #XXX jobs/VO (?)
 
 
         return render('/derived/siteadmin/overview/index.html')

@@ -4,6 +4,11 @@ minimal set of fuct that a job object needs to implement
 
 class JobApi:
 
+    # label for deleted states (in cache)
+    JOB_STATES_DEL = ['FIN_DELETED', 'FLD_DELETED','KIL_DELETED', 'DELETED'] 
+    # label for fetched states (in cache)
+    JOB_STATES_FETCHED = ['FIN_FETCHED', 'FLD_FETCHED', 'KIL_FETCHED']
+
     def get_globalid(self):
         """ returns global job id """
         pass

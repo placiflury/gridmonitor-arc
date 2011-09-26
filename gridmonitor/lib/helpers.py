@@ -30,7 +30,7 @@ def get_cluster_names(state):
         inactive -- inactive cluster(s), that is the information system has
                     lost track of cluster(s) *and* cluster did not schedule
                     a downtime
-        downtime -- a downtime has been scheduled for cluster(s) (active now!!)
+        downtime -- a downtime has been scheduled for cluster(s) (downtime is active now!!)
         active -- active cluster (no downtime and not inactive)
 
         Notice, higher level logic shall deal with intersection of 

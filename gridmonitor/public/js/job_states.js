@@ -11,7 +11,7 @@ var UserJobStates = function (html_tag){
         dataType: 'json',
         success: function(data){
             
-            _html = '';
+            var _html = '';
             for (prop in data.summary){
                 if (prop != 'total' && data.summary[prop] != 0){
                     _html  += data.summary[prop] + ' ' +  prop + ' '; 
