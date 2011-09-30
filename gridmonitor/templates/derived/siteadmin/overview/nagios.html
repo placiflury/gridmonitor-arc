@@ -1,0 +1,204 @@
+<%inherit file="/base/siteadmin.html"/>
+
+<% 
+from gridmonitor.lib.nagios_utils import get_nagios_summary
+DELIMITER = '-1-'
+
+if c.site_cores:
+    cores = get_nagios_summary(c.site_cores, dates2utc = True)
+if c.site_ces:
+    ces = get_nagios_summary(c.site_ces, dates2utc = True)
+
+state_map = {'up': 'ok_status', 'ok': 'ok_status', 'scheduleddown': 'ok_status',
+            'down': 'error_status', 'error': 'error_status', 'critical': 'error_status',
+            'warn': 'warn_status',  
+            'unknown': 'undef_status', 'unknown': 'undef_status'}
+%>
+
+<p>
+The following table(s) display(s) the Nagios plugins output for the hosts you
+have been granted access to view. The intention is to show the Nagios output for
+the services you are administering.
+<br /> <br/>
+<b>Notice</b>, you can click on the hostname to get some additional information about e.g.the host's 
+response time.
+</p>
+
+
+<a name="core"></a> 
+<table width="920" id="nagios_core_services" summary="Display of nagios checks for Grid core services and hosts">
+    <caption> Core Services of ${config['gridname']}</caption>
+    <tr> 
+        <th> Host</th> <!--Host checktime and performance display by qTip --> 
+        <th> Service</th>
+        <th> Last Check </th>
+        <th> Plugin Output</th>
+        <th> Performance Data</th>
+    </tr>
+
+%for status in ['scheduleddown','down','up','unknown']:
+    %for host_info in cores['host_summary'][status]:
+        <% 
+        hostname = host_info['hostname']  
+        h_last_check =  host_info['date']
+        h_output = host_info['output']
+        key = hostname.replace('.', DELIMITER) 
+        if (status == 'scheduleddown'):
+            n_services = 1
+        else:
+            n_services = len(cores['details'][key])
+        first_flg = True
+        %> 
+        
+        <tr>
+        <td rowspan=${n_services} />    <!-- HOST INFO -->
+            <!-- qtip display info -->
+            <table class="nagios_host_details" summary="Host details infobox" status = '${state_map[status]}' hn='${hostname}'>
+                <tr><td>Hostname</td> <td>${hostname}</td> </tr>
+                <tr><td>Last check </td> <td>${h_last_check} </td> </tr>
+                <tr><td>Ouptput </td> <td>${h_output} </td> </tr>
+            </table>
+            <!-- end qtip -->
+        </td>
+
+        %if (status == 'scheduleddown'):
+            <td colspan=4> <span class='ok_status'> Scheduled downtime: ${h_output}</span> </td> </tr> 
+        %else:   
+            %for _service, s_details in cores['details'][key].items():
+                %if not first_flg :
+                    <tr>
+                %endif
+                <% 
+                service_name = cores['service_name_map'][_service] 
+                first_flg = False
+                s_status = s_details['status']
+                %>
+
+                <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
+               </tr> 
+
+            %endfor
+        %endif
+    %endfor 
+%endfor 
+
+</table>
+
+<!-- CES TABLE -->
+<a name="ces"></a>
+<table width="920" id="nagios_ces_services" summary="Display of nagios checks for all moniotre Grid Computing element  services and hosts">
+    <caption> Grid Computing Elements  Services of ${config['gridname']}</caption>
+    <tr> 
+        <th> Host</th> <!--Host checktime and performance display by qTip --> 
+        <th> Service</th>
+        <th> Last Check </th>
+        <th> Plugin Output</th>
+        <th> Performance Data</th>
+    </tr>
+
+%for status in ['scheduleddown','down','up','unknown']:
+    %for host_info in ces['host_summary'][status]:
+        <% 
+        hostname = host_info['hostname']  
+        h_last_check =  host_info['date']
+        h_output = host_info['output']
+        key = hostname.replace('.', DELIMITER) 
+        if (status == 'scheduleddown'):
+            n_services = 1
+        else:
+            n_services = len(ces['details'][key])
+        first_flg = True
+        %> 
+        
+        <tr>
+        <td rowspan=${n_services} />    <!-- HOST INFO -->
+            <!-- qtip display info -->
+            <table class="nagios_host_details" summary="Host details infobox" status = '${state_map[status]}' hn='${hostname}'>
+                <tr><td>Hostname</td> <td>${hostname}</td> </tr>
+                <tr><td>Last chedk </td> <td>${h_last_check} </td> </tr>
+                <tr><td>Ouptput </td> <td>${h_output} </td> </tr>
+            </table>
+            <!-- end qtip -->
+        </td>
+        
+        %if (status == 'scheduleddown'):
+            <td colspan=4> <span class='ok_status'> Scheduled downtime: ${h_output}</span> </td> </tr> 
+        %else:   
+            %for _service, s_details in ces['details'][key].items():
+                %if not first_flg :
+                    <tr>
+                %endif
+                <% 
+                service_name = ces['service_name_map'][_service] 
+                first_flg = False
+                s_status = s_details['status']
+                %>
+
+                <td>  <span class="${state_map[s_status]}"> ${service_name}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['last_check']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['output']}</span></td>
+                <td>  <span class="${state_map[s_status]}"> ${s_details['perfdata']}</span></td>
+               </tr> 
+
+            %endfor
+        %endif
+    %endfor 
+%endfor 
+
+
+
+</table>
+
+<script type="text/javascript"> 
+$('table.nagios_host_details').each(function() {
+   
+    var hostname = $(this).attr('hn');
+    var _status = $(this).attr('status');    
+
+    $(this).qtip({
+        content : {
+            text: $(this).html(),
+            title: {
+                text:'Host Details'
+                }
+        },
+        show : {
+                 when: { event:'click'}
+               },
+        hide : {
+                when: {event: 'unfocus'},
+                delay: 500
+                },
+        style: {
+            width:{
+                max:400,
+                min:120
+            },
+        padding: 5,
+        background:'#FFFFFF',
+        color: '#055670',
+        textAlign: 'left',
+        border: {
+             width: 1,
+            radius: 5,
+            color: '#4682B4'
+        },
+        tip: {
+            corner:'leftTop'
+        },
+
+      name: 'blue' // Inherit the rest of the attributes from the preset dark style
+    }
+
+    }).html('<span class='+ _status + '>' + hostname + '</span>').show();
+});
+
+</script>
+
+<%def name="js()">        
+    ${parent.js()}
+    ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
+</%def>

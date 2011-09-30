@@ -109,14 +109,14 @@ def make_map(config):
    
 
     #json interfaces 
-    map.connect(None, '/json/jobs/{action}', controller='jobs')
-    map.connect(None, '/json/jobs/{action}/{dn}', controller='jobs')
 
     map.connect(None, '/json/cluster/{action}', controller='cluster')
     map.connect(None, '/json/cluster/{action}/{hostname}', controller='cluster')
     map.connect(None, '/json/cluster/{action}/{hostname}/{tag}', controller='cluster')
-    
     map.connect(None, '/json/grid/{action}', controller='grid')
+    map.connect(None, '/json/jobs/{action}', controller='jobs')
+    map.connect(None, '/json/jobs/{action}/{arg1}', controller='jobs')
+    map.connect(None, '/json/jobs/{action}/{arg1}/{arg2}', controller='jobs')
 
  
     # help 

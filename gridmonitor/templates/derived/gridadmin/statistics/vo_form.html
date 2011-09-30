@@ -1,0 +1,237 @@
+<%inherit file="/base/gridadmin.html"/>
+
+<!--begin custom header content for this example-->
+<style type="text/css">
+#fromContainer { display:none; position:absolute; left:327px; top:5px; z-index:2}
+#toContainer { display:none; position:absolute; left:327px; top:245px; z-index:1}
+#inlinetable {width:240px}
+.cell_left {text-align:right; float:left; width:5em;}
+.cell_right {text-align:left; float:left;}
+</style>
+
+
+<!-- CHARTS stuff -->
+
+<script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+</script>
+<script type="text/javascript">
+    var json_jobs_str = '${c.json_vo_jobs}';
+    var json_wall_str = '${c.json_vo_wall}';
+    var json_jobs_sum = '${c.json_sum_jobs}';
+    var json_wall_sum = '${c.json_sum_wall}';
+
+    var jdata = new google.visualization.DataTable(json_jobs_str, 0.6);
+    var wdata = new google.visualization.DataTable(json_wall_str, 0.6);
+   
+    var jsum = new google.visualization.DataTable(vo_jobs_sum, 0.6); 
+    var wsum = new google.visualization.DataTable(vo_wall_sum, 0.6); 
+
+    function hideVOs(){
+        // returns index list of VOs to 'hide' 
+        // listens on event
+
+        var hide_list = []
+        for (var i=0; i < document.vos.index.length; i++){
+            if (!document.vos.index[i].checked){
+                hide_list.push(parseInt(document.vos.index[i].value))
+            }
+        }
+        console.log(hide_list);
+        return hide_list;
+    }
+    
+    function drawVisualization() {
+
+        var hidden_vos = hideVOs();
+        var jview = new google.visualization.DataView(jdata);
+        var wview = new google.visualization.DataView(wdata);
+        var jsum_view = new google.visualization.DataView(jsum);
+        var wsum_view = new google.visualization.DataView(wsum);
+       
+        jview.hideColumns(hidden_vos); 
+        var jc = new google.visualization.ColumnChart(document.getElementById('vo_jobs'));
+        jc.draw(jview, {
+        title : 'VO usage on SMSCG Grid',
+        isStacked: true,
+        width: 1100,
+        height: 400,
+        vAxis: {title: "Number of Grid Jobs"},
+        hAxis: {title: "Date"}
+        }); 
+
+      var _hidden_vos = []
+        for (var i=0; i< hidden_vos.length; i++){
+        _hidden_vos[i] = hidden_vos[i] - 1;
+        console.log(_hidden_vos)
+        }
+
+        // walltime
+        wview.hideColumns(hidden_vos); 
+        var wc = new google.visualization.ColumnChart(document.getElementById('vo_wall'));
+      wc.draw(wview, {
+        title : 'VO usage on SMSCG Grid',
+        isStacked: true,
+        width: 1100,
+        height: 400,
+        vAxis: {title: "Walltime [hours]", 
+                logScale: false},
+        hAxis: {title: "Date"}
+      }); 
+
+        // pie-charts
+        jsum_view.hideRows(_hidden_vos); 
+        wsum_view.hideRows(_hidden_vos); 
+        
+        var jsumc = new google.visualization.PieChart(document.getElementById('pie_jobs_sum'));
+        jsumc.draw(jsum_view, {width: 450, height: 300, title: 'Jobs per VO'});
+        var wsumc = new google.visualization.PieChart(document.getElementById('pie_wall_sum'));
+        wsumc.draw(wsum_view, {width: 450, height: 300, title: 'Walltime per VO'});
+
+    }
+
+
+    google.setOnLoadCallback(drawVisualization);
+
+    </script>
+
+
+
+
+
+
+%if c.form_error:
+    <p>
+    <b style='color:red;'> Form error: ${c.form_error}</b></br>
+</p>
+
+%endif
+
+<form name="get_gridadmin_stats" method="post" action="/gridadmin/statistics/sgas">
+<table border=1 width='750'>
+<tr class="table_head2"> 
+    <th>Time Intervall and Resolution</th>
+    <th>Display Selection </th>
+</tr>
+<tr>
+    <td rowspan=2>
+    <div id="inlinetable">
+        <div> 
+            <div class="cell_left"> From: </div>
+            <div class="cell_right"> 
+                <input id='start_t_from' type="text" name='start_t_str' size='8'value="${c.start_t_str}"/>  
+                <button id="fromBtn" type="button">change</button>
+                <div id="fromContainer" style='display:none'></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> To: </div>
+            <div class="cell_right"> 
+                <input id='end_t' type="text" name='end_t_str' size='8'value="${c.end_t_str}"/>
+                <button id="toBtn" type="button">change</button>
+                <div id="toContainer"></div> 
+            </div>
+        </div>
+        <div>
+            <div class="cell_left"> Resolution:</div>
+            <div class="cell_right"> 
+                <select name="resolution" size="1">
+                     <option value="86400"> 1 day </option>
+                     <option value="604800" 
+
+%if c.resolution == 604800:
+SELECTED
+%endif
+/> 1 week </option>
+                     <option value="2419200"
+%if c.resolution == 2419200:
+SELECTED
+%endif
+/> 
+4 weeks </option>
+</select>
+            <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+        </div>
+    </div>
+    </td>
+
+    <td>
+    <input type="radio" name="plotORtable" value="plot" 
+    % if c.plot:
+    checked
+    %endif
+    />
+            Plots <br/>
+    <input type="radio" name="plotORtable" value="table"
+    % if c.table:
+    checked
+    %endif
+    />
+            Table(s) NOT YET IMPLEMENTED<br/>
+    </td>
+</tr>
+<tr>
+<td> <input type="submit" value="Fetch Statistics"></td>
+</tr>
+</table>
+</form>
+
+<!-- DISPLAY STARTING HERE -->
+
+Adding controls here </p>
+        <form name='vos'>
+%for i in xrange( 1, len(c.key_order)):
+    <input type="checkbox" name='index' value=${i} checked onclick="drawVisualization()"/> ${c.key_order[i]}
+%endfor
+        </form>
+
+
+ <table>
+        <tr> <td>
+            <div id="vo_jobs" style="width: 1100px; height: 400px;"></div></td>
+            <td>
+            <div id="pie_jobs_sum" style="width: 1100px; height: 400px;"></div></td>
+            </tr>
+        <tr> <td><div id="vo_wall" style="width: 1100px; height: 400px;"></div></td>
+            <td>
+            <div id="pie_wall_sum" style="width: 1100px; height: 400px;"></div></td>
+            </tr>
+ </table>
+
+
+
+
+<!-- some YUI stuff -->
+<script type="text/javascript">
+        var from_to_calendars 
+
+ </script>
+<script type="text/javascript">
+    YAHOO.util.Event.onDOMReady(YAHOO.smscg.calendar.init('inlinetable', '1.1.2010','${c.end_t_str_max}'));
+    
+</script>
+
+<script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+</script>
+
+
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.css_link('/css/yui/build/fonts/fonts-min.css', 'screen')}
+    ${self.css_link('/css/yui/build/calendar/assets/skins/sam/calendar.css', 'screen')}
+</%def>
+
+<%def name="js()">
+    ${parent.js()}
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="/js/select.js"></script>
+    <script type="text/javascript" src="/js/calendar.js"></script>
+    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
+    <script type="text/javascript" src="/js/yui//build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/js/yui/build/calendar/calendar-min.js"></script>
+</%def>
+
+

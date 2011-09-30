@@ -107,7 +107,6 @@ gridmonitor/model/sft/__init__.py
 gridmonitor/model/sft/name_mapping.py
 gridmonitor/model/statistics/__init__.py
 gridmonitor/model/statistics/series.py
-gridmonitor/public/css/.monitor.css.swp
 gridmonitor/public/css/LC_prototypes.css
 gridmonitor/public/css/menu.css
 gridmonitor/public/css/monitor.css
@@ -235,7 +234,6 @@ gridmonitor/public/img/logo.png
 gridmonitor/public/img/pie_thumb.png
 gridmonitor/public/img/sft_user.png
 gridmonitor/public/img/start_switch_logo.gif
-gridmonitor/public/js/.nagios_stats.js.swp
 gridmonitor/public/js/LC_prototypes-min.js
 gridmonitor/public/js/LC_prototypes.js
 gridmonitor/public/js/cluster_load.js
@@ -321,8 +319,8 @@ gridmonitor/templates/derived/public/rrdplots.html
 gridmonitor/templates/derived/public/summary.html
 gridmonitor/templates/derived/siteadmin/clusters/index.html
 gridmonitor/templates/derived/siteadmin/error/access_denied.html
+gridmonitor/templates/derived/siteadmin/jobs/.index.html.swp
 gridmonitor/templates/derived/siteadmin/jobs/index.html
-gridmonitor/templates/derived/siteadmin/overview/.index.html.swp
 gridmonitor/templates/derived/siteadmin/overview/index.html
 gridmonitor/templates/derived/siteadmin/overview/nagios.html
 gridmonitor/templates/derived/siteadmin/overview/report.html

@@ -1,158 +1,143 @@
 <%inherit file="/base/siteadmin.html"/>
 
-<% clusters_bag_keys = c.clusters_bag.keys() %>  
-<% cbk_len = len(clusters_bag_keys) %>
-<% no_queue_clusters =[ y for (x,y) in c.no_queue_clusters] %>
-
-%if cbk_len > 0:
-    %if clusters_bag_keys[0] in no_queue_clusters:
-        <h2 class="error" id="h2_name_0" style="display:''"> User/Job Distribution on ${clusters_bag_keys[0]} (no queue)</h2>
-    %else:
-        <h2  id="h2_name_0" style="display:''"> User/Job Distribution on ${clusters_bag_keys[0]}</h2>
-    %endif
-    <% count=1 %>
-    %for cluster in clusters_bag_keys[1:]:
-        %if clusters_bag_keys[count] in no_queue_clusters:
-        <h2 class="error" id="h2_name_${count}" style="display:none">User/Job Distribution on ${clusters_bag_keys[count]} (no queue)</h2> \
-        %else:
-        <h2 id="h2_name_${count}" style="display:none">User/Job Distribution on ${clusters_bag_keys[count]}</h2> \
-        %endif 
-        <% count +=1 %>
-    %endfor
-%else:
-<h2>No Cluster(s) available.  </h2>
-
-%endif
-% if cbk_len > 1:
-<form action="">
-  <p>
-     <select name="cluster" size="${cbk_len}" onchange="showCluster(${cbk_len},this.form.cluster.options[this.form.cluster.selectedIndex].value)">
-    
-    <option value="cluster_0">${clusters_bag_keys[0]}</option>\
-    <% count= 1 %>
-     %for cl in clusters_bag_keys[1:]:  
-        <option value="cluster_${count}">${cl}</option>\
-        <% count +=1 %>
-     %endfor
-    </select>
-  </p>
-</form>
-%endif
-
-<% cluster_count=0 %>
-%for cluster_hostname in clusters_bag_keys:
-    <% cluster_bag = c.clusters_bag[cluster_hostname] %>
-    %if cluster_count == 0:    
-    <div id="cluster_${cluster_count}" style="display:''">   
-    %else:
-    <div id="cluster_${cluster_count}" style="display:none">   
-    %endif 
-        <table style="border-collapse:collapse; border:none;">
-        <tr><td>
-            <table width=550>
-                <tr class="table_head3">
-                    <th> User</th>
-                    <th> FIN </th>
-                    <th> FAIL</th>
-                    <th> KIL</th>
-                    <th> DEL</th>
-                    <th> FTCH</th>
-                    <th> RUN</th>
-                    <th> other</th>
-                    <th> total </th>
-                </tr>
-                <% count=0 %>
-                %for user in cluster_bag['users_bag'].keys():
-                    <% count +=1 %>
-                    <% user_cn = user.split("/CN=")[-1] %>
-                    %if ((count%2) == 1):
-                        <tr>
-                    %else:
-                        <tr class="table_row_odd">
-                    %endif
-                    %if user in cluster_bag['orphan_list']:
-                        <td class='warn'>
-                        (orphaned)
-                    %else: 
-                        <td>
-                    %endif:
-                        ${user_cn}</td>
-                    
-                    <td>${cluster_bag['users_bag'][user]['FINISHED']}</td>
-                    <td>${cluster_bag['users_bag'][user]['FAILED']}</td>
-                    <td>${cluster_bag['users_bag'][user]['KILLED']}</td>
-                    <td>${cluster_bag['users_bag'][user]['DELETED']}</td>
-                    <td>${cluster_bag['users_bag'][user]['FETCHED']}</td>
-                    <td>${cluster_bag['users_bag'][user]['INLRMS: R']}</td>
-                    <td>${cluster_bag['users_bag'][user]['other']}</td>
-                    <td class="table_cell_emph">${cluster_bag['users_bag'][user]['total']}</td>
-                    </tr>
-                %endfor
-                <!-- SUMMARY -->
-                    <tr style="border-top-style: double;" class="table_row_emph">
-                    <td>total</td>
-                    % for value in cluster_bag['job_stat_summary']:
-                    <td>${value}</td>
-                    %endfor
-                </tr>
-                </table>
-        </td><td>
-<%chart_height = len(cluster_bag['users_bag']) *30 + 35 %>
-<img src="http://chart.apis.google.com/chart?
-chs=320x${chart_height}
-&amp;chco=4D89F9
-&amp;chxt=x,t,y
-&amp;chxl=${cluster_bag['userjobs_bar_chxl']}
-&amp;chds=0,${cluster_bag['max_tot_jobs']}
-&amp;chd=${cluster_bag['userjobs_bar_chd']}
-&amp;cht=bhs"
-alt="Jobs per User"/>
-</td>
-</tr>
-<tr>
-<td align="center">
-<% mxst = cluster_bag['max_status_value'] %>
-<% mxst2 = cluster_bag['max_status_value']/2 %>
-<img src="http://chart.apis.google.com/chart?
-chs=250x150
-&amp;chco=4D89F9
-&amp;chxt=x,t,y,r
-&amp;chxl=0:|FIN||KIL||FTCH||other|1:||FAIL||DEL||RUN|2:||${mxst2}|${mxst}|3:|0|${mxst2}|${mxst}
-&amp;chds=0,${mxst}
-&amp;chd=${cluster_bag['job_bar_chd']}
-&amp;cht=bvs"
-alt="Job Status'"/>
-        </td>
-        <td>
-        <h3> Legend </h3>
-        <ul>
-<li>FIN:  FINISHED</li>
-<li>FAIL: FAILED</li>
-<li>KIL:  KILLED</li>
-<li>DEL:  DELETED</li>
-<li>FTCH: FETCHED</li>
-<li>RUN:  RUNNING</li>
-<li>other: all other states</li>
-</ul>
-</td>
-
-        </td>
+<table> 
+    %for hostname in c.siteadmin_clusters:
+        <%
+        tag_prefix = hostname.replace('.','-1-')
+        jobs_tag = tag_prefix + '_jobs'
+        table_tag = tag_prefix + '_table'
+        %> 
+        <tr class='nohover table_row_emph' align='center'> 
+            <td colspan=2> ${hostname}</td> 
+        </tr> 
+        <tr class='nohover'>
+            <td>
+                <div id='${table_tag}'> </div>
+            </td>
+            <td> 
+                <div id='${jobs_tag}'> </div>
+            </td> 
         </tr>
-        </table>
-    </div>
-    <%cluster_count +=1 %>
-%endfor
+    %endfor 
+</table>
+
+<script language="javascript" type="text/javascript">
+    
+google.load("visualization", "1", {packages:["corechart"]});
+    
+function drawClusterUserJobs( hostname, id_tag){
+        var data, options, chart, _e, _height;
+        var _url = '/json/jobs/gc_cuj_states/' + hostname;
+    
+        var json_str = $.ajax({
+            url : _url,
+            type : 'post',
+            dataType: 'text',
+            async: false
+            }).responseText;
+
+        data = new google.visualization.DataTable(json_str, 0.6);
+        
+        // some black-magic for plot heigh estimation
+        _e  = json_str.length - 400 ;
+        _height = ((_e - _e % 125) / 125) * 30 + 40 ;
 
 
-<h3> Wish-List </h3>
-<ul>
-<li> possibilty to view job details (clarify if there are any privacy issues to respect)</li>
-<li> ... </li>
-</ul> 
+        options = {
+            colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
+            axisTitlesPosition : 'out',
+            backgroundColor : '#ffffff',
+            width : 500,
+            height: _height, 
+            hAxis : {
+                baseline: 0
+            },
+            chartArea: {left: 60},
+            isStacked : true,
+            legend: 'top',
+            title: 'User Jobs on ' + hostname
+        };
+
+    chart = new google.visualization.BarChart(document.getElementById(id_tag));
+    chart.draw(data, options);
+}
+
+
+
+var generateLoadTable = function(hostname, id_tag){
+    /* hostname - name of host to query
+       id_tag - id of html tag to which to 'dump' generated table. 
+    */
+
+    var _html;
+    var _zebra = false;
+    var _url = '/json/jobs/get_cuj_states/' + hostname;
+
+    $.ajax({
+        url: _url,
+        type: 'POST',
+        dataType: 'json',
+        success: function(data){
+            _html = '<table width="500"> ' + 
+                    '<tr class="table_head2"> <th> User</th>' + 
+                    '<th> FIN</th> '+ 
+                    '<th> FAIL </th> ' + 
+                    '<th> KIL </th>' + 
+                    '<th> DEL</th>' + 
+                    '<th> FTCH</th>' + 
+                    '<th> RUN</th>' + 
+                    '<th> other </th>' + 
+                    '<th> orph </th>' + 
+                    '<th> total </th></tr>';
+            
+            for (var user in data){
+                 if (_zebra){
+                    _html +="<tr class='odd'>";
+                    _zebra = false;
+                }
+                else{
+                    _html +="<tr class='even'>";
+                    _zebra = true;
+                }
+                _html += '<td>' + user.split('CN=')[1] + '</td>' ;
+                _html += '<td>' + data[user].FINISHED + '</td>' ;
+                _html += '<td>' + data[user].FAILED + '</td>' ;
+                _html += '<td>' + data[user].KILLED + '</td>' ;
+                _html += '<td>' + data[user].DELETED + '</td>' ;
+                _html += '<td>' + data[user].FETCHED + '</td>' ;
+                _html += '<td>' + data[user].RUN + '</td>' ;
+                _html += '<td>' + data[user].other + '</td>' ;
+                _html += '<td>' + data[user].orphaned + '</td>' ;
+                _html += '<td>' + data[user].total + '</td></tr>' ;
+            }
+            _html += '</table>' ;
+            $('#'+id_tag).html(_html);
+        }
+    });
+
+}
+
+$(document).ready(function(){
+    var cls = ${c.siteadmin_clusters} ;
+    var hostname, tag_prefix, jobs_tag, table_tag ;
+
+    for(var i = cls.length -1; i>=0; i--){
+        hostname = cls[i] ;
+        tag_prefix = hostname.replace( /\./g , '-1-');  // replacing '.' with '-1-'
+        jobs_tag = tag_prefix + '_jobs';
+        table_tag = tag_prefix + '_table';
+
+        generateLoadTable(hostname, table_tag) ;
+        drawClusterUserJobs(hostname, jobs_tag);
+    };
+});
+
+</script>
+
+
 
 <%def name="js()">
     ${parent.js()}
-    <script type="text/javascript" src="/js/select.js"></script>
+    ${self.js_link("https://www.google.com/jsapi")}
 </%def>
-
 

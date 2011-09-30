@@ -17,74 +17,25 @@ class SiteadminClustersController(SiteadminController):
     def index(self):
         c.title = "Monitoring System: Site Admin View"
         c.menu_active = "Your Cluster(s)"
-        c.heading = "Your Cluster(s)"  
+        c.heading = "Clusters  %s %s has siteadmin (view) permissions." % (c.user_name, c.user_surname)
+
         
         if not self.authorized:
             c.heading= "Your Cluster(s)"
             return render('/derived/siteadmin/error/access_denied.html')
         
-        # vars for cluster and queue bar charts
-        c.cl_bar_chart = list()  # [(displayname,grid_running,running,cpu),...]
-        c.cl_qbar_chart = dict() # {displayname : (chart_data,)}
-        c.cl_detailstats = dict() # {displayname: {q_name:(grid_running,running,gridqd,localqd,plrmsqd)},..}
-        
-        for cluster in c.cluster_menu:
-            hostname = cluster[1].split('/')[-1] # stripping hostname from url
-            display_name = cluster[0]
-            c.cl_detailstats[display_name]=dict()
+        actives = h.get_cluster_names('active')[0]
+        c.siteadmin_clusters =  [ hn for hn in self.clusters if hn in actives]
 
-            cpus = g.get_cluster_stats(hostname,'stats_cpus')
 
-            # populate cluster bar-chart and statistics for cluster 'detail' displaying
-            grid_running = g.get_cluster_stats(hostname,'stats_grid_running')
-            running = g.get_cluster_stats(hostname,'stats_running')
-            totaljobs = g.get_cluster_stats(hostname,'stats_totaljobs')
-            usedcpus = g.get_cluster_stats(hostname,'stats_usedcpus')
-            c.cl_bar_chart.append((display_name,grid_running,running,cpus,totaljobs,usedcpus))
+        dps ={}
+        for hn in c.siteadmin_clusters:
+            dps[hn] = h.get_cluster_displayname(hn)
 
-            # populate queue bar-chart(s)
-            queues_names = g.get_cluster_queues_names(hostname)
-            # handle case of no queues 
-            if not queues_names:
-                c.cl_qbar_chart[hostname]=(None,None,None,0)
-            else:
-                grid_queued = list()
-                local_queued = list()
-                prelrms_queued = list()
-                chart_xlabels="1:|gridqueued|localqueued|lrmsqueued|2:"
-                for qname in queues_names:
-                    gqd = g.get_queue_stats(hostname,qname,'stats_grid_queued')
-                    lqd= g.get_queue_stats(hostname,qname,'stats_local_queued')
-                    plrms = g.get_queue_stats(hostname,qname,'stats_prelrms_queued')
-                    run = g.get_queue_stats(hostname,qname,'stats_running')
-                    grun = g.get_queue_stats(hostname,qname,'stats_grid_running')
-
-                    grid_queued.append(gqd)
-                    local_queued.append(lqd)
-
-                    prelrms_queued.append(plrms)
-
-                    c.cl_detailstats[display_name][qname]=(grun,run,gqd,lqd,plrms)
-
-                    qlen = len(qname)
-                    if qlen <= QUEUE_NAME_LEN:
-                        pass
-                    else: # too long
-                        qname = qname[:QUEUE_NAME_LEN-3] + "..."
-                    chart_xlabels+= "|"+qname
-
-                grid_queued.reverse()
-                local_queued.reverse()
-                prelrms_queued.reverse()
-
-                chart_data="t:%s|%s|%s" % (h.list2string(grid_queued),h.list2string(local_queued),h.list2string(prelrms_queued))
-                c1 = max(grid_queued)
-                c2 = max(local_queued)
-                c3 = max(prelrms_queued)
-                chart_scaling= c1+c2+c3
-                c.cl_qbar_chart[display_name]=(chart_data,chart_scaling,chart_xlabels,len(queues_names))
+        c.display_names = dps
 
         return render('/derived/siteadmin/clusters/index.html')
+        
 
     def show(self, id, queue =None):
         """id - cannonized display name of cluster"""

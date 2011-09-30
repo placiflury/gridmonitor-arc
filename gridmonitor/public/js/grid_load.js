@@ -76,6 +76,8 @@ function drawQueueChart() {
 
 var generateLoadTable = function(){
     var  _url = '/json/grid/get_grid_load';
+    var _html; 
+ 
     $.ajax({
         url: _url,
         type: 'POST',

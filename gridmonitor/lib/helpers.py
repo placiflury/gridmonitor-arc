@@ -96,7 +96,15 @@ def get_cluster_details(hostname):
 
     return meta
 
- 
+def get_cluster_displayname(hostname):
+    """
+        returns display-name of cluster
+    """ 
+    cl_obj = g.get_cluster(hostname) 
+    if not cl_obj:
+        return ''
+    else: 
+        return cl_obj.get_alias()
 
 
 def str_cannonize(str):

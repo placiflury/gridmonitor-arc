@@ -1,129 +1,206 @@
 <%inherit file="/base/siteadmin.html"/>
+<table id="grid_siteadmin_summary" cellspacing="0" summary="An summary of the 
+        Grid computational resources the site admin ${c.user_name} ${c.user_surname}  may be
+        allowed to access">
+            <caption>
+                ${config['gridname']} Information about clusters of site administrator ${c.user_name} ${c.user_surname}.
+            </caption>
+            <tr>
+                <th class="corner_left corner_right" colspan=3 scope="col" align=center > Information about cluster(s) on which you have
+         siteadmin (view) permission.</th>
+            </tr>
 
-<table width="900">
-<tr class="table_head"><th colspan="3"> Load on Your Clusters</th></tr>
-<tr class="table_head"> <td>Cluster</td><td>Queues</td><td>Details</td> </tr>
-
-%for cluster in c.cl_bar_chart:
+% for hostname in c.siteadmin_clusters:
 <% 
-cluster_name = cluster[0] 
-grid_running = cluster[1]
-running = cluster[2]
-num_cpus = cluster[3]
-total_jobs = cluster[4]
-used_cpus = cluster[5]
-
-queue_stats=c.cl_detailstats[cluster_name]
-
-if c.cl_qbar_chart.has_key(cluster_name):
-    q_data = c.cl_qbar_chart[cluster_name][0]
-    q_scaling=c.cl_qbar_chart[cluster_name][1]
-    if q_scaling < 10:
-        q_scaling = 10
-
-    q_labels=c.cl_qbar_chart[cluster_name][2]
-    num_queues =c.cl_qbar_chart[cluster_name][3]
-else:
-    continue
+id_tag = hostname.replace('.','-1-')
+first = True
 %>
+    %if first == True:
+        <tr class='nohover table_row_emph' align='center'>
+    %else:
+        <tr class= 'nohover table_row_emph' style="border-top-style: double;" >
+        <% first = False %>
+    %endif
+        <td colspan=3> ${c.display_names[hostname]} (${hostname}) </td>
+        </tr>
 
-<tr>
-<td>
-<img src="http://chart.apis.google.com/chart?
-chs=250x90
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=t:${grid_running}|${running}|${num_cpus}&chds=0,${num_cpus}
-&amp;chdh=20
-&amp;chxt=x,x
-&amp;chxr=0,0,${num_cpus}
-&amp;chxl=
-1:|gridrunning|running|cpus
-&amp;chxp=50,${num_cpus}
-&amp;chtt='${cluster_name}'"
-alt="Number of (grid) jobs on ${cluster_name}"/>
-    </td>
-
-<td>
-<img src="http://chart.apis.google.com/chart?
-%if num_queues == 1:
-chs=250x80
-%elif num_queues == 2:
-chs=250x110
-%elif num_queues == 3:
-chs=250x140
-%elif num_queues == 4:
-chs=250x170
-%elif num_queues == 5:
-chs=250x190
-%else:
-chs=250x220
-%endif
-&amp;cht=bhs
-&amp;chco=FF9000,5D7CBA,95B9C7
-&amp;chd=${q_data}
-&amp;chds=0,${q_scaling}
-&amp;chdh=20
-&amp;chxt=x,x,y
-&amp;chxr=0,0,${q_scaling}
-&amp;chxl=${q_labels}"
-alt="Queue(s) status for ${cluster_name}"/>
-</td>
-<td>
-<a name="${h.str_cannonize(cluster_name)}"> </a>
-<!-- DETAILS -->
-<table width="350"> 
-<tr class="table_head3">
-<td>Name</td><td>Gridrun</td> <td>Run</td><td>Gridq</td><td>Localq</td><td>Lrmsq</td>
-</tr>
-%for qname in queue_stats.keys():
-    <tr>
-    <td>
-    <!-- queue name-->
-    ${qname}
-    </td>
-    <!-- Gridrunning-->
-    <td> ${queue_stats[qname][0]}</td>
-    <!-- running-->
-    <td> ${queue_stats[qname][1]}</td>
-    <!-- queued-->
-    <td> ${queue_stats[qname][2]}</td>
-    <!-- localqueued-->
-    <td> ${queue_stats[qname][3]}</td>
-    <!-- lrmsqueued-->
-    <td> ${queue_stats[qname][4]}</td>
-</tr>
-%endfor
-<tr style="border-top-style:double">
-<td colspan="3">running: ${running}</td>
-<td colspan="3">gridrunning: ${grid_running}</td>
-</tr>
-<tr> 
-<td colspan="3"> total jobs: ${running}/${total_jobs} </td>
-<td colspan="3"> used cpus: ${used_cpus}/${num_cpus} </td>
-</tr>
+        <tr class='nohover' id="${id_tag}" >
+        <!-- CPU load -->
+        <td><div id= "${id_tag + '_cpu'}"></div></td>
+        <!-- Queue load -->
+        <td><div id= "${id_tag + '_queue'}"></div></td>
+        <td id= "${id_tag + '_table'}"></td>
+    </tr>
+    <tr class='nohover'> 
+        <td colspan=3> 
+            <a href="/public/rrd/${hostname}" target="_blank">
+            <img src="/rrd/${hostname}stats_ch24.png" alt="CPU/Cores usage on ${hostname}"> </a>
+        </td>
+    </tr>
+    <tr class='nohover'> 
+        <td colspan=3>
+            <a href="/public/rrd/${hostname}" target="_blank">
+             <img src="/rrd/${hostname}stats_qh24.png" alt="Queue backlog on ${hostname}"> </a>
+        </td> 
+    </tr>
+    <tr class='nohover'>
+        <td colspan=3>
+            <a href="/public/rrd/${hostname}" target="_blank">
+            <img src="/rrd/${hostname}_h24r.png" alt="Response time of GRIS: ${hostname}">
+            <img src="/rrd/${hostname}_h24p.png" alt="Processing time of GRIS: ${hostname}"> </a>
+        </td>
+    </tr>
+% endfor 
+            
 </table>
-<!-- END DETAILS -->
-</td></tr>
-%endfor
 
 
-%for cluster in c.cluster_menu:
-<% hostname = cluster[1].split('/')[-1] %>
 
-<tr>
- <td colspan=3>
-    <img src="/rrd/${hostname}stats_ch24.png" alt="${cluster[1]} (${hostname}) CPU load (last 24 hours)">
-    </td>
-</tr>
-<tr>
- <td colspan=3>
-    <img src="/rrd/${hostname}stats_qh24.png" alt="${cluster[1]} (${hostname}) Queue backog (last 24 hours)">
-    </td>
-</tr>
+<script language="javascript"  type="text/javascript">
+
+google.load("visualization", "1", {
+            packages : ["corechart"]
+});
+
+function drawCPUChart(hostname, tag) {
+    var data, options, chart;
+
+    var json_str = $.ajax({        
+        url : '/json/cluster/gc_cpu_load/'+ hostname,
+        type : 'post',
+        dataType: 'text',
+        async: false
+    }).responseText;
 
 
-%endfor
+    if (json_str === 'SchedduledDown'){
+       $('#' + tag).html('<div class="ok_status"> Scheduled Downtime </div>');
+    }
+    else{
+        data = new google.visualization.DataTable(json_str, 0.6);
 
-</table>
+        options = {
+            axisTitlesPosition : 'none',
+            backgroundColor : '#ffffff',
+            colors : ['#ffa500', '#055670', '#4682b4'],
+            width : 250,
+            height : 75,
+            chartArea:{left:2},
+
+            hAxis : {
+                baseline: 0,
+            },
+            isStacked : true,
+            legend : 'none',
+            title: 'CPU Usage of ' + hostname
+        };
+
+        chart = new google.visualization.BarChart(document.getElementById(tag));
+        chart.draw(data, options);
+    }
+}
+
+function drawQueueChart(hostname, tag) {
+    var data, options, chart;
+
+
+    var json_str = $.ajax({
+        url : '/json/cluster/gc_queue_load/' + hostname,
+        type : 'post',
+        dataType: 'text',
+        async: false
+    }).responseText;
+
+    if (json_str === 'NoQueueError'){
+       $('#' + tag).html('<div class="error_status"> No Queue </div>');
+    }
+    else if (json_str === 'SchedduledDown'){
+       $('#' + tag).html('<div class="ok_status"> Scheduled Downtime </div>');
+    }
+    else{
+        data = new google.visualization.DataTable(json_str, 0.6);
+
+        var options = {
+            axisTitlesPosition : 'none',
+            backgroundColor : '#ffffff',
+            colors : ['#ffa500', '#055670', '#4682b4'],
+            width : 250,
+            height : 75,
+            chartArea:{left:45},
+            hAxis:{
+                baseline: 0
+            },
+            isStacked : true,
+            legend : 'none',
+            title: 'Queue backlog on ' + hostname
+        };
+
+        var chart = new google.visualization.BarChart(document.getElementById(tag));
+        chart.draw(data, options);
+    }
+}
+   
+
+var generateLoadTable = function(hostname, tag){
+    var  _url = '/json/cluster/get_cluster_load/' + hostname;
+    $.ajax({
+        url: _url,
+        type: 'POST',
+        dataType: 'json',
+        success: function(data){
+            // build table
+            _html = '<table summary="Cluster load infobox" class="load_infobox" >' +
+                    '<tbody> <tr class="load_infobox"> <th scope ="col">Name</th>' +                 
+                   '<th scope="col">Gridrun</th>' +
+                    '<th scope="col" >Run</th>' +
+                    '<th scope="col" >Gridq</th>' +
+                    '<th scope="col" >Localq</th>' +
+                    '<th scope="col" >Lrmsq</th> </tr>';
+
+            // for each queue
+            for(var qname in data['q']){
+                _html += '<tr> <td>' + qname  + '</td>' +
+                         '<td> ' + data['q'][qname]['grid_running'] + '</td>' +
+                         '<td> ' + data['q'][qname]['running'] + '</td>' +
+                         '<td> ' + data['q'][qname]['grid_queued'] + '</td>' +
+                         '<td> ' + data['q'][qname]['local_queued'] + '</td>' +
+                         '<td> ' + data['q'][qname]['prelrms_queued'] + '</td></tr>';
+            }
+
+            // sum of jobs
+            _html += '<tr style="border-top-style: double;">' +
+                    ' <td colspan="3">running:' +  data['cl']['cl_running'] + '</td>' +
+                    ' <td colspan="3">gridrunning:' +  data['cl']['cl_grid_running'] + '</td> </tr>' +
+                    ' <tr> <td colspan="3"> total jobs:'+  data['cl']['cl_running'] +'/'+ data['cl']['cl_totaljobs'] + '</td>'+
+                    ' <td colspan="3"> used cpus:' +  data['cl']['cl_usedcpus'] +'/' + data['cl']['cl_totalcpus'] + '</td></tr></tbody></table>';
+           $('td#'+tag).html(_html);
+        }
+    });
+}
+ 
+
+function cpuQueueLoadCallback(){
+    $('table#grid_siteadmin_summary tr[id]').each(function(){
+        var _id = $(this).attr('id');
+        var hostname = _id.replace(/-1-/g, '.');  // replacing '-1-' with '.'
+        var cpu_tag = _id + '_cpu';
+        var queue_tag = _id + '_queue';
+        var table_tag = _id + '_table';
+    
+        drawCPUChart(hostname, cpu_tag);
+        drawQueueChart(hostname, queue_tag);
+        generateLoadTable(hostname, table_tag);
+    });
+}
+
+$(document).ready(function() {
+        cpuQueueLoadCallback();
+});
+        
+</script>
+
+<%def name="js()">        
+    ${parent.js()}
+    ${self.js_link("https://www.google.com/jsapi")}
+</%def>
 

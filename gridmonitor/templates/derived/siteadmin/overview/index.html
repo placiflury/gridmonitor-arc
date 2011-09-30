@@ -120,7 +120,7 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
                  <span class="emph"> (info age: ${'%0.2f' % info_age} minutes)</span> </td>
             <td> Response Time: ${clo.get_response_time()}</td>
             <td> Processing Time: ${clo.get_processing_time()}</td>
-            <td> (details) </td>
+            <td align='center'> <a href="/public/rrd/${hostname}" target="_blank">details </a></td>
         </tr>
         <tr>
             <td colspan=2> 
@@ -136,7 +136,7 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
                         valid for ${'%.3f' % c_days_left} more days. </span>
                 % endif
             </td>
-            <td> (details) </td>
+            <td align='center'> ${h.link('/siteadmin/clusters/show/'+ hostname,'details')}</td>
         </tr>
     %endfor
     

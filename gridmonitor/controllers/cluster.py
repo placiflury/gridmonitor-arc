@@ -31,6 +31,7 @@ class ClusterController(BaseController):
                         1 : 'warn_status',
                         2 : 'error_status'}
 
+    
     def get_clusters(self):
         """
             returns a json object, which is
