@@ -29,7 +29,7 @@ if session.has_key('user_client_dn'):
     dn =  session['user_client_dn'] 
     ca = session['user_client_ca'] 
 elif session.has_key('user_slcs_obj'):
-    slc_obj = session['user_slcs_obj']
+    slcs_obj = session['user_slcs_obj']
     dn = slcs_obj.get_dn() 
     ca = slcs_obj.get_ca() 
 else:

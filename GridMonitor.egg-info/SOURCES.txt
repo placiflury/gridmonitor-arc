@@ -41,7 +41,6 @@ gridmonitor/controllers/jobs.py
 gridmonitor/controllers/monadmin.py
 gridmonitor/controllers/monadmin_acl.py
 gridmonitor/controllers/monadmin_sft.py
-gridmonitor/controllers/ptest.py
 gridmonitor/controllers/public_summary.py
 gridmonitor/controllers/siteadmin.py
 gridmonitor/controllers/siteadmin_clusters.py
@@ -319,7 +318,6 @@ gridmonitor/templates/derived/public/rrdplots.html
 gridmonitor/templates/derived/public/summary.html
 gridmonitor/templates/derived/siteadmin/clusters/index.html
 gridmonitor/templates/derived/siteadmin/error/access_denied.html
-gridmonitor/templates/derived/siteadmin/jobs/.index.html.swp
 gridmonitor/templates/derived/siteadmin/jobs/index.html
 gridmonitor/templates/derived/siteadmin/overview/index.html
 gridmonitor/templates/derived/siteadmin/overview/nagios.html
