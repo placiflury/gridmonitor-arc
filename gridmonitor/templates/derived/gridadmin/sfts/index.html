@@ -9,7 +9,7 @@
         <th>Last Executed</th> 
         <th>Test details</th> 
     </tr>
-    <% state_map={'OK': 'ok', 'FAILED': 'critical', 'OTHER': 'unknown', 'INLRMS': 'ok', 'DELETED': 'unknown'} %>
+    <% state_map={'OK': 'ok_status', 'FAILED': 'error_status', 'OTHER': 'undef_status', 'INLRMS': 'ok_status', 'DELETED': 'undef_status'} %>
     <% count=0 %>
     % for cluster_name in c.ordered_cluster_names:
         <% sft_test_names = c.sft_jobs_summary[cluster_name].keys() %>

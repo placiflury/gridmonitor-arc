@@ -47,16 +47,11 @@ class BaseController(WSGIController):
 
             # 1. check whether Shibboleth enabled
             if request.environ.has_key(config['shib_given_name']):
-                """
+                # utf-8 for special characters...
                 user_name = unicode(request.environ[config['shib_given_name']], 'utf-8')
                 user_surname = unicode(request.environ[config['shib_surname']], 'utf-8')
                 home_org = unicode(request.environ[config['shib_home_org']], "utf-8")
                 unique_id = unicode(request.environ[config['shib_unique_id']], "utf-8")
-                """
-                user_name = request.environ[config['shib_given_name']]
-                user_surname = request.environ[config['shib_surname']]
-                home_org = request.environ[config['shib_home_org']]
-                unique_id = request.environ[config['shib_unique_id']]
                 
                 session['user_home_org'] = home_org
                 session['user_unique_id'] = unique_id
