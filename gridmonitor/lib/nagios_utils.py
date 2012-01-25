@@ -92,15 +92,21 @@ def get_nagios_service_statuses(hostname, dates2utc = False):
                         output = host.status[0].output, 
                         last_check = last_check)
         for service_obj in meta.Session.query(servicetables.Service).filter_by(host_object_id = host_id).all():
-            if dates2utc:
-                last_check = tu.datetime2utcstring(service_obj.status[0].last_check)
-            else:
-                last_check = service_obj.status[0].last_check
+            if service_obj.status:
+                if dates2utc:
+                    last_check = tu.datetime2utcstring(service_obj.status[0].last_check)
+                else:
+                    last_check = service_obj.status[0].last_check
 
-            services[service_obj.display_name] = dict(status = service_obj.status[0].current_state, 
-                output = service_obj.status[0].output,
-                perfdata = service_obj.status[0].perfdata,
-                last_check = last_check)
+                services[service_obj.display_name] = dict(status = service_obj.status[0].current_state, 
+                    output = service_obj.status[0].output,
+                    perfdata = service_obj.status[0].perfdata,
+                    last_check = last_check)
+            else:
+                services[service_obj.display_name] = dict(status = 3, 
+                    output= 'not available yet',
+                    perfdata = '',
+                    last_check= datetime.utcfromtimestamp(0))
 
     return  services
         

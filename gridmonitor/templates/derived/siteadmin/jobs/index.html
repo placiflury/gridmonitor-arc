@@ -79,16 +79,16 @@ var generateLoadTable = function(hostname, id_tag){
         dataType: 'json',
         success: function(data){
             _html = '<table width="500"> ' + 
-                    '<tr class="table_head2"> <th> User</th>' + 
-                    '<th> FIN</th> '+ 
-                    '<th> FAIL </th> ' + 
-                    '<th> KIL </th>' + 
-                    '<th> DEL</th>' + 
-                    '<th> FTCH</th>' + 
-                    '<th> RUN</th>' + 
-                    '<th> other </th>' + 
-                    '<th> orph </th>' + 
-                    '<th> total </th></tr>';
+                    '<tr class="table_head2"> <th class="gm"> User</th>' + 
+                    '<th class="gm"> FIN</th> '+ 
+                    '<th class="gm"> FAIL </th> ' + 
+                    '<th class="gm"> KIL </th>' + 
+                    '<th class="gm"> DEL</th>' + 
+                    '<th class="gm"> FTCH</th>' + 
+                    '<th class="gm"> RUN</th>' + 
+                    '<th class="gm"> other </th>' + 
+                    '<th class="gm"> orph </th>' + 
+                    '<th class="gm"> total </th></tr>';
             
             for (var user in data){
                  if (_zebra){

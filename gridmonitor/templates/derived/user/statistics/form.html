@@ -18,8 +18,8 @@
 <form name="get_user_stats" method="post" action="/user/statistics">
 <table border=1 width='750'>
 <tr class="table_head2"> 
-    <th>Output Selection</th>
-    <th colspan=2>Variables </th>
+    <th class="gm">Output Selection</th>
+    <th class="gm"colspan=2>Variables </th>
 </tr>
 <tr>
     <td rowspan=2>
@@ -116,9 +116,9 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
 %if c.table_only:
     <table border=1 width='750'>
     <tr class="table_head"> 
-        <th>Date/Time</th>
+        <th class="gm">Date/Time</th>
         % for k in sks:
-            <th> ${series_display_name[k]}</th>
+            <th class="gm"> ${series_display_name[k]}</th>
         %endfor 
     </tr>
     <!-- stats summary row -->
@@ -205,7 +205,7 @@ series_display_name = {'A_n_jobs': 'Number of Jobs',
     %if c.series:
         <table>
         <tr class="table_head"> 
-        <th> Variable</th> <th> Box Plot </th> <th> Series Plot </th> </tr>
+        <th class="gm"> Variable</th> <th class="gm"> Box Plot </th> <th class="gm"> Series Plot </th> </tr>
         
         %for i  in xrange(0,len(sks),2):
             <%
@@ -298,8 +298,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.n_job_series}|${c.major_page_faults_series}
-&amp;chds=0,${'%0.2f' % (float(c.series['A_n_jobs'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['B_major_page_faults'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series['A_n_jobs'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['B_major_page_faults'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series['A_n_jobs'].get_max()) * 1.1)},0,${'%0.2f' % (float(c.series['B_major_page_faults'].get_max()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['A_n_jobs'].get_max()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['B_major_page_faults'].get_max()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -326,8 +326,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.cpu_duration_series}|${c.wall_duration_series}
-&amp;chds=0,${'%0.2f' % (float(c.series['C_cpu_duration'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['D_wall_duration'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series['C_cpu_duration'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['D_wall_duration'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series['C_cpu_duration'].get_max()) * 1.1)},0,${'%0.2f' % (float(c.series['D_wall_duration'].get_max()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['C_cpu_duration'].get_max()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['D_wall_duration'].get_max()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -354,8 +354,8 @@ cht=bvg
 &amp;chco=4682B4,055670
 &amp;chf=bg,lg,0,F5FFFA
 &amp;chd=t:${c.user_time_series}|${c.kernel_time_series}
-&amp;chds=0,${'%0.2f' % (float(c.series['E_user_time'].get_max().to_eng_string()) * 1.1)},0,${'%0.2f' % (float(c.series['F_kernel_time'].get_max().to_eng_string()) * 1.1)}
-&amp;chxr=1,0,${'%0.2f'% (float(c.series['E_user_time'].get_max().to_eng_string()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['F_kernel_time'].get_max().to_eng_string()) * 1.1)}
+&amp;chds=0,${'%0.2f' % (float(c.series['E_user_time'].get_max()) * 1.1)},0,${'%0.2f' % (float(c.series['F_kernel_time'].get_max()) * 1.1)}
+&amp;chxr=1,0,${'%0.2f'% (float(c.series['E_user_time'].get_max()) * 1.1)}|2,0,${'%0.2f' % (float(c.series['F_kernel_time'].get_max()) * 1.1)}
 &amp;chbh=4,1,4
 &amp;chxt=x,y,r
 &amp;chxl=0:|${c.dates}
@@ -395,7 +395,7 @@ alt="User and Kernel Time Chart"
 &amp;chxt=x
 &amp;chxr=0,0,${float(max_2) * 1.1}
 &amp;chds=0,${float(max_2) * 1.1}
-&amp;chdh=20
+&amp;chdh=20"
 &amp;alt="Box-Plot of ${dname_2} time series."/>
                 %endif
                 </td>
@@ -406,86 +406,13 @@ alt="User and Kernel Time Chart"
 %endif <!-- else of table_only -->
 
 
-<script type="text/javascript">
-    YAHOO.namespace("smscg.calendar");
-    var Dom = YAHOO.util.Dom
-    
-    var inEl = Dom.get('inlinetable')
-    
-    YAHOO.smscg.calendar.init = function() {
-    
-        function handleSelectFrom(type,args,obj) {
-            var dates = args[0]; 
-            var date = dates[0];
-            var year = date[0], month = date[1], day = date[2];
-            
-            var txtfrom = document.getElementById("start_t_from");
-            txtfrom.value = day + "." + month + "." + year;
-        }
-        
-        function handleSelectTo(type,args,obj) {
-            var dates = args[0]; 
-            var date = dates[0];
-            var year = date[0], month = date[1], day = date[2];
-            
-            var txtto = document.getElementById("end_t");
-            txtto.value = day + "." + month + "." + year;
-        }
-        
-        function hideme(e) {
-            var el = YAHOO.util.Event.getTarget(e);
-            if (el != inEl && !Dom.isAncestor(inEl, el)) {
-                document.getElementById("fromContainer").style.display='none';
-                document.getElementById("toContainer").style.display='none';
-            }
-        }
-
-        YAHOO.util.Event.addListener(document, "click", hideme);
-
-
-        YAHOO.smscg.calendar.cal1 = new YAHOO.widget.Calendar("fromBtn","fromContainer", { 
-                                    title:"Starting from:", close:true});
-
-        // Correct formats for Germany: dd.mm.yyyy, dd.mm, mm.yyyy
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
-
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_DAY_POSITION", 1);
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_MONTH_POSITION", 2);
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("MDY_YEAR_POSITION", 3);
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("mindate", '1.1.2009');
-        YAHOO.smscg.calendar.cal1.cfg.setProperty("maxdate", '${c.end_t_str_max}');
-
-
-        YAHOO.smscg.calendar.cal1.selectEvent.subscribe(handleSelectFrom, YAHOO.smscg.calendar.cal1, true);
-        YAHOO.smscg.calendar.cal1.render();
-        
-        
-        YAHOO.smscg.calendar.cal2 = new YAHOO.widget.Calendar("toBtn","toContainer", { title:"Until:", close:true} );
-        
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("DATE_FIELD_DELIMITER", ".");
-
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_DAY_POSITION", 1);
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_MONTH_POSITION", 2);
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("MDY_YEAR_POSITION", 3);
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("mindate", '1.1.2009');
-        YAHOO.smscg.calendar.cal2.cfg.setProperty("maxdate", '${c.end_t_str_max}');
-
-        YAHOO.smscg.calendar.cal2.selectEvent.subscribe(handleSelectTo, YAHOO.smscg.calendar.cal2, true);
-        YAHOO.smscg.calendar.cal2.render();
-
-        // Listener to show the 1-up Calendar when the button is clicked
-        YAHOO.util.Event.addListener("fromBtn", "click", YAHOO.smscg.calendar.cal1.show, YAHOO.smscg.calendar.cal1, true);
-        YAHOO.util.Event.addListener("toBtn", "click", YAHOO.smscg.calendar.cal2.show, YAHOO.smscg.calendar.cal2, true);
-        
-        
+<script language="javascript" type="text/javascript"> 
+    function _init_call(){
+        YAHOO.smscg.calendar.init('1.1.2009', '${c.end_t_str_max}');
     }
-    YAHOO.util.Event.onDOMReady(YAHOO.smscg.calendar.init);
-    
+    $(document).ready(_init_call);
 </script>
-<script type="text/javascript">
-    // Hide Calendar if we click anywhere in the document other than the calendar
 
-</script>
 
 <%def name="css()">
     ${parent.css()}
@@ -493,13 +420,11 @@ alt="User and Kernel Time Chart"
     ${self.css_link('/css/yui/build/calendar/assets/skins/sam/calendar.css', 'screen')}
 </%def>
 
+
 <%def name="js()">
     ${parent.js()}
-    <script type="text/javascript" src="/js/yui/build/paginator/paginator-min.js"></script>
-    <script type="text/javascript" src="/js/yui//build/yahoo-dom-event/yahoo-dom-event.js"></script>
-    <script type="text/javascript" src="/js/yui/build/calendar/calendar-min.js"></script>
+    ${self.js_link("/js/yui/build/paginator/paginator-min.js")}
+    ${self.js_link("/js/yui//build/yahoo-dom-event/yahoo-dom-event.js")}
+    ${self.js_link("/js/yui/build/calendar/calendar-min.js")}
+    ${self.js_link("/js/calendar.js")}
 </%def>
-
-
-
-

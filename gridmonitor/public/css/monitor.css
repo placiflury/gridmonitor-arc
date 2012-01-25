@@ -23,7 +23,7 @@ tr:hover {
 }
 
 
-th {
+th.gm {
     font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica;
     #font: bold 11px "Eurostyle", Helvetica,sans-serif;
     color: #FFFFFF;
@@ -108,6 +108,10 @@ td.plot{
     color: #e41b00;
     font: italic 11px eurostyle,tahoma, sans-serif;
  
+}
+
+div.ui-datepicker{
+    font-size:80%;
 }
 
 /*

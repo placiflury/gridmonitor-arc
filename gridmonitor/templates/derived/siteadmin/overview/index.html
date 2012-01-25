@@ -15,157 +15,157 @@ This page displays the<span class="emph"> tactical overview </span> for a site a
     </caption>
     
     <tr> 
-        <th class="corner_left" scope="col">Service/Performance</th> 
-        <th scope="col" colspan=2>(Services) Status</th>
-        <th class="corner_right" scope="col">Details</th> 
-    </tr>
+    <th class="gm corner_left" scope="col">Service/Performance</th> 
+    <th class="gm" scope="col" colspan=2>(Services) Status</th>
+    <th class="gm corner_right" scope="col">Details</th> 
+</tr>
 
-    <tr>
-        <td> Core Services </td>
-        <td colspan=2 id='site_cores'> 
-            Hosts: 
-            <div class="ok_status" status = 'host_up'> </div>
-            <div class="ok_status"  status= 'host_sdown'> </div>
-            <div class="error_status" status = 'host_down'> </div>
-            <div class="undef_status" status= 'host_unknown'>no info yet </div>
-            <br />
-            Plugins: 
-            <div class="ok_status" status='plugins_ok'>  </div>
-            <div class="warn_status" status = 'plugins_warn'>  </div>
-            <div class="error_status" status ='plugins_crit'>  </div>
-            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
-        </td>        
-        <td align='center'> ${h.link('/siteadmin/overview/nagios#core','details')}</td>
-    </tr>
+<tr>
+    <td> Core Services </td>
+    <td colspan=2 id='site_cores'> 
+        Hosts: 
+        <div class="ok_status" status = 'host_up'> </div>
+        <div class="ok_status"  status= 'host_sdown'> </div>
+        <div class="error_status" status = 'host_down'> </div>
+        <div class="undef_status" status= 'host_unknown'>no info yet </div>
+        <br />
+        Plugins: 
+        <div class="ok_status" status='plugins_ok'>  </div>
+        <div class="warn_status" status = 'plugins_warn'>  </div>
+        <div class="error_status" status ='plugins_crit'>  </div>
+        <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+    </td>        
+    <td align='center'> ${h.link('/siteadmin/overview/nagios#core','details')}</td>
+</tr>
 
-    <tr>
-        <td> Computing Elements (Services) </td>
-        <td colspan=2 id='site_ces'> 
-            Hosts: 
-            <div class="ok_status" status = 'host_up'></div>
-            <div class="ok_status"  status= 'host_sdown'> </div>
-            <div class="error_status" status = 'host_down'> </div>
-            <div class="undef_status" status= 'host_unknown'>no info yet </div>
-            <br />
-            Plugins: 
-            <div class="ok_status" status='plugins_ok'>  </div>
-            <div class="warn_status" status = 'plugins_warn'>  </div>
-            <div class="error_status" status ='plugins_crit'>  </div>
-            <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
-        </td>        
-        <td align='center'> ${h.link('/siteadmin/overview/nagios#ces','details')}</td>
-    </tr>
-    
-    <!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will NOT  be dynamically updated! -->
-    %if c.no_queue_clusters:
-    <tr>
-        <td>Cluster(s) with Queue problem</td>
-        <td colspan=2>
-            % for (display_name, hostname) in c.no_queue_clusters:
-                <% cpath =  '/user/clusters/show/' +  hostname %>
-                ${h.link(cpath, display_name)} 
-                %if hostname not in c.now_scheduled_down:
-                    <span class="error_status"> 
-                    (NO QUEUE)
-                    </span><br/>
-                %else:
-                    scheduled downtime
-                %endif
-            %endfor
-        </td>
-        <td align='center'> ${h.link(cpath, 'details')}</td>
-    </tr>
-    %endif    
+<tr>
+    <td> Computing Elements (Services) </td>
+    <td colspan=2 id='site_ces'> 
+        Hosts: 
+        <div class="ok_status" status = 'host_up'></div>
+        <div class="ok_status"  status= 'host_sdown'> </div>
+        <div class="error_status" status = 'host_down'> </div>
+        <div class="undef_status" status= 'host_unknown'>no info yet </div>
+        <br />
+        Plugins: 
+        <div class="ok_status" status='plugins_ok'>  </div>
+        <div class="warn_status" status = 'plugins_warn'>  </div>
+        <div class="error_status" status ='plugins_crit'>  </div>
+        <div class="undef_status" status = 'plugins_unknown'> no info yet </div>
+    </td>        
+    <td align='center'> ${h.link('/siteadmin/overview/nagios#ces','details')}</td>
+</tr>
 
-
-
-    <!-- DOWNTIME/MAINTENANCE-->
-    %if c.down_time_items: 
-    <tr class="table_row_emph" align="center"> 
-    <td colspan=4>
-    <span class="emph"> Scheduled Downtimes</span>
+<!-- IF ANY CLUSTER HAS NO_QUEUE report it here. Will NOT  be dynamically updated! -->
+%if c.no_queue_clusters:
+<tr>
+    <td>Cluster(s) with Queue problem</td>
+    <td colspan=2>
+        % for (display_name, hostname) in c.no_queue_clusters:
+            <% cpath =  '/user/clusters/show/' +  hostname %>
+            ${h.link(cpath, display_name)} 
+            %if hostname not in c.now_scheduled_down:
+                <span class="error_status"> 
+                (NO QUEUE)
+                </span><br/>
+            %else:
+                scheduled downtime
+            %endif
+        %endfor
     </td>
-    </tr>
+    <td align='center'> ${h.link(cpath, 'details')}</td>
+</tr>
+%endif    
 
-    %for host in  c.down_time_items.keys():
-    <tr> 
-    <td>
-        <b>Host</b>: ${host} <br />
-        %if c.down_time_items[host]['services']: # i.e. list not empty
-            <b>Services</b>: 
-            %for service in c.down_time_items[host]['services']:
-                '${service}' &nbsp;
-            %endfor
-        %endif
-    </td>
-    <td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to ${c.down_time_items[host]['end_t']}  <br/>
-        Reason: ${c.down_time_items[host]['reason']}
-    </td>
-    </tr>
-    %endfor
+
+
+<!-- DOWNTIME/MAINTENANCE-->
+%if c.down_time_items: 
+<tr class="table_row_emph" align="center"> 
+<td colspan=4>
+<span class="emph"> Scheduled Downtimes</span>
+</td>
+</tr>
+
+%for host in  c.down_time_items.keys():
+<tr> 
+<td>
+    <b>Host</b>: ${host} <br />
+    %if c.down_time_items[host]['services']: # i.e. list not empty
+        <b>Services</b>: 
+        %for service in c.down_time_items[host]['services']:
+            '${service}' &nbsp;
+        %endfor
     %endif
+</td>
+<td colspan="3"> Will be down from: ${c.down_time_items[host]['start_t']} to ${c.down_time_items[host]['end_t']}  <br/>
+    Reason: ${c.down_time_items[host]['reason']}
+</td>
+</tr>
+%endfor
+%endif
 
-    <! -- CLUSTER DETAILS -->
-    %for hostname in c.clusters_details.keys():
-        <% 
-            clo = c.clusters_details[hostname]
-            age = t_now - clo.get_db_lastmodified() 
-            info_age = (age.days * 84600 + age.seconds) / 60.0
-            cdl = clo.get_hostexpiration_date() - t_now
-            c_days_left = cdl.days + cdl.seconds * (1.0/84600)
-        %> 
-        <tr>
-            <td rowspan=2>
-                ${hostname} <br />
-                 <span class="emph"> (info age: ${'%0.2f' % info_age} minutes)</span> </td>
-            <td> Response Time: ${clo.get_response_time()}</td>
-            <td> Processing Time: ${clo.get_processing_time()}</td>
-            <td align='center'> <a href="/public/rrd/${hostname}" target="_blank">details </a></td>
-        </tr>
-        <tr>
-            <td colspan=2> 
-                %if (c_days_left < 0):
-                    <span class="error_status"> Grid hostcertificate 
-                    has expired ${abs(c_days_left)} day(s) ago. </span>
-                %elif (c_days_left < 7): 
-                    <span class="warn_status"> Grid hostcertificate will 
-                        expire in ${'%.3f' % c_days_left } day(s). Please renew it before. 
-                    </span>
-                %else:
-                    <span class="ok_status"> Grid hostcertificate is 
-                        valid for ${'%.3f' % c_days_left} more days. </span>
-                % endif
-            </td>
-            <td align='center'> ${h.link('/siteadmin/clusters/show/'+ hostname,'details')}</td>
-        </tr>
-    %endfor
-    
-    <! -- CLUSTER ABOUT WHICH CACHE CONTAINS NO INF -->
-    %for hostname in c.no_info_clusters:
-        <tr>
-            <td>${hostname}</td> 
-            <td colspan=2><span class="undef_status"> Grid information system has no data about this cluster.</span> <td>
-        </tr>
-    %endfor
+<! -- CLUSTER DETAILS -->
+%for hostname in c.clusters_details.keys():
+    <% 
+        clo = c.clusters_details[hostname]
+        age = t_now - clo.get_db_lastmodified() 
+        info_age = (age.days * 84600 + age.seconds) / 60.0
+        cdl = clo.get_hostexpiration_date() - t_now
+        c_days_left = cdl.days + cdl.seconds * (1.0/84600)
+    %> 
+    <tr>
+        <td rowspan=2>
+            ${hostname} <br />
+             <span class="emph"> (info age: ${'%0.2f' % info_age} minutes)</span> </td>
+        <td> Response Time: ${clo.get_response_time()}</td>
+        <td> Processing Time: ${clo.get_processing_time()}</td>
+        <td align='center'> <a href="/public/rrd/${hostname}" target="_blank">details </a></td>
+    </tr>
+    <tr>
+        <td colspan=2> 
+            %if (c_days_left < 0):
+                <span class="error_status"> Grid hostcertificate 
+                has expired ${abs(c_days_left)} day(s) ago. </span>
+            %elif (c_days_left < 7): 
+                <span class="warn_status"> Grid hostcertificate will 
+                    expire in ${'%.3f' % c_days_left } day(s). Please renew it before. 
+                </span>
+            %else:
+                <span class="ok_status"> Grid hostcertificate is 
+                    valid for ${'%.3f' % c_days_left} more days. </span>
+            % endif
+        </td>
+        <td align='center'> ${h.link('/siteadmin/clusters/show/'+ hostname,'details')}</td>
+    </tr>
+%endfor
 
-    <!-- Charts of Jobs + states  per Cluster --> 
-    <tr> 
-        <td colspan=4> 
-            <div id='jobs_per_cluster_chart'> </div>
-        </td>
+<! -- CLUSTER ABOUT WHICH CACHE CONTAINS NO INF -->
+%for hostname in c.no_info_clusters:
+    <tr>
+        <td>${hostname}</td> 
+        <td colspan=2><span class="undef_status"> Grid information system has no data about this cluster.</span> <td>
     </tr>
-    <tr class="nohover"> 
-        <td colspan=4> 
-            <div id='jobs_per_cluster_table'> </div>
-        </td>
-    </tr>
-    <!-- SFT SUMMARY -->
+%endfor
 
-    <tr> 
-        <td colspan=4> 
-            <span class='undef_status'> Summary on SFT tests for site clusters (TODO) </span>
-        </td>
-    </tr>
+<!-- Charts of Jobs + states  per Cluster --> 
+<tr> 
+    <td colspan=4> 
+        <div id='jobs_per_cluster_chart'> </div>
+    </td>
+</tr>
+<tr class="nohover"> 
+    <td colspan=4> 
+        <div id='jobs_per_cluster_table'> </div>
+    </td>
+</tr>
+<!-- SFT SUMMARY -->
+
+<tr> 
+    <td colspan=4> 
+        <span class='undef_status'> Summary on SFT tests for site clusters (TODO) </span>
+    </td>
+</tr>
 
 </table>
 
@@ -175,70 +175,70 @@ _height  = len(c.site_ces) * 25 + 80
 %>
 
 <script language="javascript" type="text/javascript">
-    google.load("visualization", "1", {packages:["corechart"]});
+google.load("visualization", "1", {packages:["corechart"]});
 
-    function drawJobsPerCluster(){
-        var data, options, chart;
+function drawJobsPerCluster(){
+    var data, options, chart;
+
+    var json_str = $.ajax({
+        data: {'hostlist': ${c.site_ces}} ,
+        url : '/json/jobs/gc_cj_states',
+        type : 'post',
+        dataType: 'text',
+        async: false
+        }).responseText;
+
+    data = new google.visualization.DataTable(json_str, 0.6);
     
-        var json_str = $.ajax({
-            data: {'hostlist': ${c.site_ces}} ,
-            url : '/json/jobs/gc_cj_states',
-            type : 'post',
-            dataType: 'text',
-            async: false
-            }).responseText;
+    options = {
+        colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
+        axisTitlesPosition : 'out',
+        backgroundColor : '#ffffff',
+        width : 820,
+        height : '${_height}',
+        hAxis : {
+            baseline: 0
+        },
+        chartArea: {left: 130},
+        isStacked : true,
+        legend: 'top',
+        title: 'Jobs per Cluster'
+    };
 
-        data = new google.visualization.DataTable(json_str, 0.6);
-        
-        options = {
-            colors: ['#4e9258', '#e41b00', '#993333', '#828282', '#6D98AB', '#EEF66C','#666699','#ffa500'],
-            axisTitlesPosition : 'out',
-            backgroundColor : '#ffffff',
-            width : 820,
-            height : '${_height}',
-            hAxis : {
-                baseline: 0
-            },
-            chartArea: {left: 130},
-            isStacked : true,
-            legend: 'top',
-            title: 'Jobs per Cluster'
-        };
-
-    chart = new google.visualization.BarChart(document.getElementById('jobs_per_cluster_chart'));
-    chart.draw(data, options);
-    }
+chart = new google.visualization.BarChart(document.getElementById('jobs_per_cluster_chart'));
+chart.draw(data, options);
+}
 
 </script>
 
 
 <script language="javascript" type="text/javascript">
-    
+
 function jobsPerClusterTable(cluster_list){
-    
-    var _url = '/json/jobs/get_cj_states';
-    $.ajax({
-        url: _url,
-        type: 'POST',
-        data: {'hostlist': cluster_list} ,
-        dataType: 'json',
-        success: function(data){
-            var n = cluster_list.length;
-            var hostname;
-            /* table head */
-            var  _html = ' <table width="800"> <tr class="table_head2">  <th> Cluster\Jobstatus</th>' +
-                        '<th> FIN</th> <th> FAIL </th> <th> KIL </th> <th> DEL</th> <th> FTCH</th>' +
-                        ' <th> RUN</th> <th> other </th>';
 
-            if (data.summary.orphaned > 0){
-                _html += '<th> orph </th>';
-            }
-            _html += '<th> total </th></tr>';
+var _url = '/json/jobs/get_cj_states';
+$.ajax({
+    url: _url,
+    type: 'POST',
+    data: {'hostlist': cluster_list} ,
+    dataType: 'json',
+    success: function(data){
+        var n = cluster_list.length;
+        var hostname;
+        /* table head */
+        var  _html = ' <table width="800"> <tr class="table_head2">  <th class="gm" > Cluster\Jobstatus</th>' +
+                    '<th class="gm"> FIN</th> <th class="gm"> FAIL </th> <th class="gm"> KIL </th> <th class="gm"> DEL</th> <th class="gm" > FTCH</th>' +
+                    ' <th class="gm"> RUN</th> <th class="gm"> other </th>';
 
-            /* table body */
-            
-            for (var i= 0; i < n; i++) {
-                hn = cluster_list[i];
+        if (data.summary.orphaned > 0){
+            _html += '<th class="gm"> orph </th>';
+        }
+        _html += '<th class="gm"> total </th></tr>';
+
+        /* table body */
+        
+        for (var i= 0; i < n; i++) {
+            hn = cluster_list[i];
                 _html += '<tr> <td>' + hn + '</td>';
                 _html += '<td>' + data[hn]['FINISHED'] +'</td>';
                 _html+='<td>'+ data[hn]['FAILED'] +'</td>';          
@@ -295,7 +295,7 @@ $(document).ready(function() {
     _nagiosSummary();
     drawJobsPerCluster();
     jobsPerClusterTable(${c.site_ces});
-    refreshCallback()
+    refreshCallback();
 });
 </script>
 

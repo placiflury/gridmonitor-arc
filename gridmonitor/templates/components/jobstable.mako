@@ -6,12 +6,12 @@ again for the job, what isn't very efficient O(n)-->
 <table id="${dn}_jobstable">
     <thead>
         <tr>
-          <th>Cluster</th>
-          <th>Queue</th>
-          <th>Status</th>
-          <th>Job</th>
-          <th>Id</th>
-           <th>Exit Code<th>
+          <th class="gm">Cluster</th>
+          <th class="gm">Queue</th>
+          <th class="gm">Status</th>
+          <th class="gm">Job</th>
+          <th class="gm">Id</th>
+          <th class="gm">Exit Code<th>
         </tr>
     </thead>
     <tbody>

@@ -18,13 +18,12 @@ more specific details please, click on the 'details' links on the right.
     <caption>
         Tactical Overview
     </caption>
-    
     <tr> 
-        <th class="corner_left" scope="col">Service/Performance</th> 
-        <th scope="col" colspan=2>(Services) Status</th>
-        <th class="corner_right" scope="col">Details</th> 
+        <th class="gm corner_left" scope="col">Service/Performance</th> 
+        <th class="gm" scope="col" colspan=2>(Services) Status</th>
+        <th class="gm corner_right" scope="col">Details</th> 
     </tr>
-
+    
     <tr>
         <td> Core Services </td>
         <td colspan=2 id='cores'> 
@@ -209,7 +208,6 @@ $(document).ready(function() {
 
 <%def name="js()">
     ${parent.js()}
-    ${self.js_link("/js/jquery-1.5.min.js")}
     ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
     ${self.js_link("/js/nagios_stats.js")}
     ${self.js_link("https://www.google.com/jsapi")}

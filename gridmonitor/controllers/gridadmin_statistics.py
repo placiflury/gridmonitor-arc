@@ -3,7 +3,6 @@ import time
 import calendar
 from datetime import datetime
 
-from decimal import Decimal
 from sqlalchemy import and_
 
 from pylons import tmpl_context as c
@@ -26,33 +25,20 @@ log = logging.getLogger(__name__)
 class GridadminStatisticsController(GridadminController):
 
     NO_VO = 'No_VO' # string to use if no VO info required but not available
-    
-    def index(self):
-        c.title = "Monitoring System: VO/Grid Admin Statistics"
-        c.menu_active = "Grid Statistics"
-        c.heading = "VO/Grid Statistics"
-        
-        return render('/derived/gridadmin/statistics/index.html')
 
 
-    def vo(self, ctype = None):
-        """ display accounting data per VO """
+    def __init__(self):
         
-        c.title = "Monitoring System VO Usage Statistics"
-        c.menu_active = "VO Usage"
-        c.form_error = None
-      
-        c.plots = True  # XXX maybe obsolete in final implementation
-        c.table = False
-        
+
+        GridadminController.__init__(self)
+
         resolution = 86400
- 
-        if not self.authorized:
-            return render('/derived/gridadmin/error/access_denied.html')
-
+   
+        c.form_error = None
+        
         if not request.params.has_key('start_t_str'): # setting defaults
-            _end_t = int(time.time())  # now
-            _start_t = _end_t - 28 * 86400  # 4 weeks back (including ending day)
+            _end_t= int(time.time())  # now
+            _start_t = _end_t - 28 * 86400  # 4 weeks back (including endding day)
         else: 
             start_t_str = request.params['start_t_str'] 
             end_t_str = request.params['end_t_str'] 
@@ -67,108 +53,50 @@ class GridadminStatisticsController(GridadminController):
                     _start_t = t
             except:
                 c.form_error = "Please enter dates in 'dd.mm.yyyy' format"
-                return render('/derived/gridadmin/statistics/vo_form.html')
+                return render('/derived/gridadmin/statistics/form.html')
+     
  
-        start_t, end_t = helpers.get_sampling_interval(_start_t, _end_t, resolution) # incl. ending day
+        start_t, end_t = helpers.get_sampling_interval(_start_t, _end_t, resolution) # incl. endding day
         
         c.resolution = resolution
         c.end_t_str_max = time.strftime("%d.%m.%Y", time.gmtime())
         c.start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t))        
         c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t))  
         
-        c.heading = "VO usage numbers from (%s - %s)" % (c.start_t_str, c.end_t_str)
 
-
-        # vars for column/bar/area plots
-        vo_matrix_jobs = []
-        vo_matrix_wall = []
-        key_order = ['utctime']
-        _schema = dict(utctime=('UTC Time', 'string'))
-
-
-        # vars  for pie-chart plots
-        pie_key_order =['vo_name','sum']
-        pie_schema = dict(vo_name = ('VO name','string'), sum = ('Sum','number'))
-        vo_sum_jobs = []
-        vo_sum_wall = []
-
-        _vos = helpers.get_vo_names()
-        for vo in _vos:
-            if not vo:
-                vo = GridadminStatisticsController.NO_VO
-            key_order.append(vo)
-            _schema[vo]=(vo,'number')
-
-
-        # init column containers
-        ts = range(start_t + resolution - 1, end_t + resolution - 1, resolution)
-        for t in ts:
-            _row = [None] * (len(_vos) + 1) # init 
-            _row[0] = datetime.utcfromtimestamp(t + resolution).strftime("%d/%m/%Y")
-            vo_matrix_jobs.append(_row)
-            vo_matrix_wall.append(_row[:])
-
-        # populate matrix
-        j = 1
-        for vo in _vos:
-            _vo_sum_jobs = 0
-            _vo_sum_wall = 0
-            for rec in helpers.get_vo_acrecords(vo, start_t, end_t, resolution):
-                i = ts.index(rec.t_epoch)
-                vo_matrix_jobs[i][j] = rec.n_jobs
-                vo_matrix_wall[i][j] = int(rec.wall_duration)/3600 # hours
-
-                _vo_sum_jobs += rec.n_jobs
-                _vo_sum_wall += rec.wall_duration
-
-            vo_sum_jobs.append([vo,_vo_sum_jobs])
-            vo_sum_wall.append([vo, int(_vo_sum_wall)/3600])
-
-            j += 1
-
-        # XXX error handling (i.e. catch exepctions etc.))
-        dt_jobs = charts_table.DataTable(_schema, key_order)
-        dt_wall = charts_table.DataTable(_schema, key_order)
-
-        for row in vo_matrix_jobs:
-            dt_jobs.add_row(row)
-
-        for row in vo_matrix_wall:
-            dt_wall.add_row(row)
-
-        dt_sum_jobs = charts_table.DataTable(pie_schema, pie_key_order)
-        dt_sum_wall = charts_table.DataTable(pie_schema, pie_key_order)
-
-        for row in vo_sum_jobs:
-            dt_sum_jobs.add_row(row)
-        for row in vo_sum_wall:
-            dt_sum_wall.add_row(row)
-
-
-        if ctype == 'column_jobs':
-            return dt_jobs.get_json()
-        if ctype == 'column_wall':
-            return dt_wall.get_json()
-        if ctype == 'pie_jobs':
-            return dt_sum_jobs.get_json()
-        if ctype == 'pie_wall':
-            return dt_sum_wall.get_json()
-
+    
+    def index(self):
+        c.title = "Monitoring System: VO/Grid Admin Statistics"
+        c.menu_active = "Grid Statistics"
+        c.heading = "VO/Grid Statistics"
         
-        c.json_vo_jobs = dt_jobs.get_json()
-        c.json_vo_wall = dt_wall.get_json()
-        c.json_sum_jobs = dt_sum_jobs.get_json()
-        c.json_sum_wall = dt_sum_wall.get_json()
-        c.key_order = key_order
+        
+        return render('/derived/gridadmin/statistics/index.html')
+
+
+    def vo(self):
+        """ display accounting data per VO """
+        
+        c.title = "Monitoring System VO Usage Statistics"
+        c.menu_active = "VO Usage"
+        c.heading = "VO/Grid Statistics"
+        
+        resolution = 'day'
+        
+ 
+        if not self.authorized:
+            return render('/derived/gridadmin/error/access_denied.html')
+
+        c.resolution = resolution
             
-        return render('/derived/gridadmin/statistics/vo_form.html')
+        return render('/derived/gridadmin/statistics/vo_stats.html')
  
 
 
     def sgas(self):
         """ display statistics from SGAS accouting records """
 
-        SCALING_FACTOR = Decimal(1)/Decimal(3600) # 1/60 minutes, 1/3600 hours  
+        SCALING_FACTOR = 1/3600.0 # 1/60 minutes, 1/3600 hours  
         
         c.title = "Monitoring System: VO/Grid Admin Statistics -- Usage Tables --"
         c.menu_active = "Usage Tables"
@@ -213,20 +141,14 @@ class GridadminStatisticsController(GridadminController):
         
         vo_series = dict()
         vos = list()
-        for arec in sgascache_session.Session.query(ag_schema.Vo.vo_name).distinct():
-            vo = arec.vo_name
+        
+        for vo in helpers.get_vo_names():
             vos.append(vo)   # i.e. vo can be  NULL/None
 
             vo_series[vo] = dict()
             vo_series[vo]['n_jobs'] = Series('n_jobs', start_t, end_t, resolution)
             vo_series[vo]['wall_duration'] = Series('wall_duration', start_t, end_t, resolution)
-       
-            for rec in sgascache_session.Session.query(ag_schema.Vo).filter(and_(
-                ag_schema.Vo.t_epoch >= start_t,
-                ag_schema.Vo.t_epoch < end_t,
-                ag_schema.Vo.vo_name == vo,
-                ag_schema.Vo.resolution == resolution)):
-           
+            for rec in helpers.get_vo_acrecords(vo, start_t, end_t, resolution):
                 vo_series[vo]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
                 vo_series[vo]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
                 vo_series[vo]['wall_duration'].set_scaling_factor(SCALING_FACTOR)
@@ -385,7 +307,6 @@ class GridadminStatisticsController(GridadminController):
                         ag_schema.VoMachine.vo_name == vo,
                         ag_schema.VoMachine.machine_name == hostname,
                         ag_schema.VoMachine.resolution == resolution)):
-                   
                         vo_cluster_series[hostname][vo]['n_jobs'].add_sample(rec.t_epoch, rec.n_jobs)
                         vo_cluster_series[hostname][vo]['wall_duration'].add_sample(rec.t_epoch, rec.wall_duration)
 

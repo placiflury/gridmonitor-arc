@@ -6,7 +6,7 @@
                 ${config['gridname']} Information about clusters of site administrator ${c.user_name} ${c.user_surname}.
             </caption>
             <tr>
-                <th class="corner_left corner_right" colspan=3 scope="col" align=center > Information about cluster(s) on which you have
+                <th class=" gm corner_left corner_right" colspan=3 scope="col" align=center > Information about cluster(s) on which you have
          siteadmin (view) permission.</th>
             </tr>
 
@@ -16,12 +16,12 @@ id_tag = hostname.replace('.','-1-')
 first = True
 %>
     %if first == True:
-        <tr class='nohover table_row_emph' align='center'>
+        <tr class='table_row_emph' align='center'>
     %else:
-        <tr class= 'nohover table_row_emph' style="border-top-style: double;" >
+        <tr class= 'table_row_emph' style="border-top-style: double;" >
         <% first = False %>
     %endif
-        <td colspan=3> ${c.display_names[hostname]} (${hostname}) </td>
+        <td  colspan=3> ${c.display_names[hostname]} (${hostname}) </td>
         </tr>
 
         <tr class='nohover' id="${id_tag}" >
@@ -150,12 +150,12 @@ var generateLoadTable = function(hostname, tag){
         success: function(data){
             // build table
             _html = '<table summary="Cluster load infobox" class="load_infobox" >' +
-                    '<tbody> <tr class="load_infobox"> <th scope ="col">Name</th>' +                 
-                   '<th scope="col">Gridrun</th>' +
-                    '<th scope="col" >Run</th>' +
-                    '<th scope="col" >Gridq</th>' +
-                    '<th scope="col" >Localq</th>' +
-                    '<th scope="col" >Lrmsq</th> </tr>';
+                    '<tbody> <tr class="load_infobox"> <th class="gm" scope ="col">Name</th>' +                 
+                    '<th class="gm" scope="col">Gridrun</th>' +
+                    '<th class="gm" scope="col" >Run</th>' +
+                    '<th class="gm" scope="col" >Gridq</th>' +
+                    '<th class="gm" scope="col" >Localq</th>' +
+                    '<th class="gm" scope="col" >Lrmsq</th> </tr>';
 
             // for each queue
             for(var qname in data['q']){

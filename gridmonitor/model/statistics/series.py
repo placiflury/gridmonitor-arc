@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import logging
-from decimal import Decimal, getcontext
 from datetime import datetime
 
 log = logging.getLogger(__name__)
 
-getcontext.prec=4
 
 class Series(object):
     """
@@ -60,13 +58,13 @@ class Series(object):
         self.series = dict()
 
         self.stats_ready = False  # flag
-        self.sum = Decimal(0)
+        self.sum = 0
         self.min = None
         self.max = None
         self.time_avg = None
         self.avg = None
         self.median = None
-        self.scale_factor = Decimal(1) # 
+        self.scale_factor = 1.0 
 
     def set_scaling_factor(self, f):
         """ Sets a scale factor, which get's 
@@ -74,12 +72,12 @@ class Series(object):
             of series (like min, max etc.). The
             original data of the series is kept unchanged.
             
-            input: f, either str or Decimal 
+            input: f, either str or float 
         """
-        if type(f) is Decimal:
-            self.scale_factor= f
+        if type(f) is float:
+            self.scale_factor = f
         elif type(f) is str:
-            self.scale_factor = Decimal(f)
+            self.scale_factor = float(f)
 
     def get_name(self):
         return self.name
@@ -110,7 +108,7 @@ class Series(object):
         
         self.stats_ready = False
 
-    def get_sample(self,t):
+    def get_sample(self, t):
         """
         t: sample epoch time
         returns  utc_date, value pair  - if sample exists
@@ -139,8 +137,8 @@ class Series(object):
     
         max_samples = int((self.end_t - self.start_t)/ self.resolution)
 
-        self.time_avg = self.sum/max_samples  # expecting self.sum to be of type Decimal or float
-        self.avg = self.sum/n_samples
+        self.time_avg = self.sum/float(max_samples)  # expecting self.sum integer or float
+        self.avg = self.sum/float(n_samples)
             
 
     def get_min(self):
@@ -198,8 +196,7 @@ class Series(object):
             return values[N-1] * self.scale_factor
        
         pos = int(n) - 1
-        #d = (n%1)
-        d = Decimal(str(n%1))  #  
+        d = (n % 1)
         val = values[pos] + d * (values[pos+1] - values[pos])
         return val * self.scale_factor       
         
@@ -239,8 +236,8 @@ class Series(object):
         res['uquartile'] = self.get_percentile(75)
             
         iqr = res['uquartile'] - res['lquartile']
-        lower_outliner_thresh = res['lquartile'] - Decimal('1.5') *iqr
-        upper_outliner_thresh = res['uquartile'] + Decimal('1.5') *iqr
+        lower_outliner_thresh = res['lquartile'] - 1.5 *iqr
+        upper_outliner_thresh = res['uquartile'] + 1.5 *iqr
         
         lnot_outliner = res['lquartile']
         unot_outliner = res['uquartile']
@@ -322,36 +319,53 @@ class Series(object):
                         
         return str
             
+    def get_padded_series(self, ref_dates):
+        """
+            returns an array with the time series
+            values of given reference date (ref_dates). If there 
+            is not a value for a given reference date, the value
+            will be set to None.
+            Notice, the reference dates will not be re-ordered (e.g. sorted)
+        """
+        ret = []
+        series = self.get_series() 
+        for date in ref_dates:
+            if series.has_key(date):
+                ret.append(series[date])
+            else:
+                ret.append(None)
+        return ret
         
+ 
         
 if __name__ == '__main__':
 
     LOG_FILENAME = 'example.log'
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
+    logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 
 
-    ser = Series("test", 123, Decimal('234'))
-    ser.add_sample(123, Decimal('0'))
-    ser.add_sample(126, Decimal('0'))
-    ser.add_sample(127, Decimal('0'))
-    ser.add_sample(124, Decimal('0'))
-    ser.add_sample(133, Decimal('0'))
-    ser.add_sample(124, Decimal('4'))
-    ser.add_sample(125, Decimal('12'))
-    ser.add_sample(128, Decimal('11'))
-    ser.add_sample(129, Decimal('2'))
-    ser.add_sample(132, Decimal('8'))
-    ser.add_sample(232, Decimal('577'))
-    ser.add_sample(149, Decimal('40'))
-    ser.add_sample(151, Decimal('12'))
-    ser.add_sample(152, Decimal('20'))
-    ser.add_sample(153, Decimal('10'))
-    ser.add_sample(154, Decimal('5'))
+    ser = Series("test", 123, 234)
+    ser.add_sample(123, 0.0)
+    ser.add_sample(126, 0)
+    ser.add_sample(127, 0)
+    ser.add_sample(124, 0)
+    ser.add_sample(133, 0)
+    ser.add_sample(124, 4)
+    ser.add_sample(125, 12)
+    ser.add_sample(128, 11.0)
+    ser.add_sample(129, 2)
+    ser.add_sample(132, 8)
+    ser.add_sample(232, 577)
+    ser.add_sample(149, 40)
+    ser.add_sample(151, 12)
+    ser.add_sample(152, 20)
+    ser.add_sample(153, 10)
+    ser.add_sample(154, 5)
     ser2 = Series("test", 119, 230)
-    ser2.add_sample(119, Decimal('-2'))
-    ser2.add_sample(123, Decimal('-3'))
-    ser2.add_sample(125, Decimal(5))
-    ser2.add_sample(128, Decimal(7))
+    ser2.add_sample(119, -2.0)
+    ser2.add_sample(123, -3)
+    ser2.add_sample(125, 5.00)
+    ser2.add_sample(128, 7.12)
     
     ser.merge(ser2)
     print 'min',  ser.get_min()
@@ -366,11 +380,11 @@ if __name__ == '__main__':
     print 'avg', ser.get_average()
     print 'box-plot data', ser.get_box_plot()
     print ser.get_series2str()
-    ser.set_scaling_factor(Decimal(1)/Decimal(60))
+    ser.set_scaling_factor(1/60.0)
     print ser.get_series2str()
     
-    dates = range(120,234,1)
-    ser.set_scaling_factor('0.5')
+    dates = range(120, 234, 1)
+    ser.set_scaling_factor(0.5)
     print 'min',  ser.get_min()
     print 'max', ser.get_max()
     print 'median', ser.get_median()
@@ -383,6 +397,8 @@ if __name__ == '__main__':
         print 'avg', ser.get_average()
     print 'box-plot data', ser.get_box_plot()
     print ser.get_series2str(dates)
-    ser.set_scaling_factor('0.5')
+    ser.set_scaling_factor(0.5)
     print ser.get_series()
     print ser.get_series2str(dates)
+    print 'PADDED SERIES'
+    print ser.get_padded_series(dates)

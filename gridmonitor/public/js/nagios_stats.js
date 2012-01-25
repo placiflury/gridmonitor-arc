@@ -77,7 +77,7 @@ var nagiosSummary = function (tag, hlist){
             
             if (n > 0){
                 _html = n + ' OK';
-                _details = '<table> <tr> <th>Hostname</th> <th> Last Check </th> <th> Performance </th></tr>';
+                _details = '<table> <tr> <th class="gm">Hostname</th> <th class="gm"> Last Check </th> <th class="gm"> Performance </th></tr>';
                 _title = 'Details for Up Hosts'; 
                 /* for obj in data.host_summary.up' */
                 for(i = 0; i < n; i++){
@@ -94,7 +94,7 @@ var nagiosSummary = function (tag, hlist){
             _details= '';
             if (n > 0){
                 _html = n + ' SCHED. DOWN';
-                _details = '<table> <tr> <th> Hostname </th> <th> Scheduled Downtime </th></tr>';
+                _details = '<table> <tr> <th class="gm"> Hostname </th> <th class="gm"> Scheduled Downtime </th></tr>';
                 _title = 'Details for Scheduled Downtime Hosts'; 
                 for(i = 0; i < n; i++){
                     _details += '<tr class="ok_status"><td>' + data.host_summary.scheduleddown[i].hostname + '</td>';
@@ -110,7 +110,7 @@ var nagiosSummary = function (tag, hlist){
             if (n > 0){
                 _html = n + ' DOWN';
                 _title = 'Details for DOWN hosts'; 
-                _details = '<table> <tr> <th>Hostname</th> <th> Last Check </th> <th> Performance </th></tr>';
+                _details = '<table> <tr> <th class="gm">Hostname</th> <th class="gm"> Last Check </th> <th class="gm"> Performance </th></tr>';
                 for(i = 0; i < n; i++){
                     _details += '<tr class="error_status"><td>' + data.host_summary.down[i].hostname + '</td>';
                     _details += '<td>' + data.host_summary.down[i].date + '</td>' ;
@@ -126,7 +126,7 @@ var nagiosSummary = function (tag, hlist){
             if (n > 0){
                 _html = n+ ' UNKNOWN';
                 _title = 'Details for UNKNOWN hosts'; 
-                _details = '<table> <tr> <th>Hostname</th> <th> Last Check </th> <th> Performance </th></tr>';
+                _details = '<table> <tr> <th class="gm">Hostname</th> <th class="gm"> Last Check </th> <th class="gm"> Performance </th></tr>';
                 for(i = 0; i < n; i++){
                     _details += '<tr class="undef_status"><td>' + data.host_summary.unknown[i].hostname + '</td>';
                     _details += '<td>' + data.host_summary.unknown[i].date + '</td>' ;
@@ -144,7 +144,7 @@ var nagiosSummary = function (tag, hlist){
             _html = n + ' OK';
             _title = 'Services in OK status';
 
-            _details = '<table> <tr> <th>Hostname</th><th>Service</th> <th> Last Check </th> <th> Output</th></tr>';
+            _details = '<table> <tr> <th class="gm">Hostname</th><th class="gm">Service</th> <th class="gm"> Last Check </th> <th class="gm"> Output</th></tr>';
             for(i = 0; i < n; i++){
                 host = data.plugins_summary.ok.hs[i][0];
                 service = data.plugins_summary.ok.hs[i][1];
@@ -163,7 +163,7 @@ var nagiosSummary = function (tag, hlist){
         if (n > 0){
             _html = n + ' WARN';
             _title = 'Services in WARN status';
-            _details = '<table> <tr> <th>Hostname</th><th>Service</th> <th> Last Check </th> <th> Output</th></tr>';
+            _details = '<table> <tr> <th class="gm">Hostname</th><th class="gm">Service</th> <th class="gm"> Last Check </th> <th class="gm"> Output</th></tr>';
             for(i = 0; i < n; i++){
                 host = data.plugins_summary.warn.hs[i][0];
                 service = data.plugins_summary.warn.hs[i][1];
@@ -181,7 +181,7 @@ var nagiosSummary = function (tag, hlist){
         if (n > 0){
             _html = n + ' CRIT';
             _title = 'Services in CRTITICAL status';
-            _details = '<table> <tr> <th>Hostname</th><th>Service</th> <th> Last Check </th> <th> Output</th></tr>';
+            _details = '<table> <tr> <th class="gm">Hostname</th><th class="gm">Service</th> <th class="gm"> Last Check </th> <th class="gm"> Output</th></tr>';
             for(i = 0; i < n; i++){
                 host = data.plugins_summary.critical.hs[i][0];
                 service = data.plugins_summary.critical.hs[i][1];
@@ -199,7 +199,7 @@ var nagiosSummary = function (tag, hlist){
         if (n > 0){
             _html = n + ' UNKNOWN';
             _title = 'Services in UNKNOWN status';
-            _details = '<table> <tr> <th>Hostname</th><th>Service</th> <th> Last Check </th> <th> Output</th></tr>';
+            _details = '<table> <tr> <th class="gm">Hostname</th><th class="gm">Service</th> <th class="gm"> Last Check </th> <th class="gm"> Output</th></tr>';
             for(i = 0; i < n; i++){
                 host = data.plugins_summary.unknown.hs[i][0];
                 service = data.plugins_summary.unknown.hs[i][1];

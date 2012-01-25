@@ -85,12 +85,12 @@ var generateLoadTable = function(){
         success: function(data){
             // build table
             _html = '<table summary="Cluster load infobox" class="load_infobox" >' + 
-                    '<tbody> <tr class="load_infobox"> <th scope ="col">#Clusters</th>' + 
-                    '<th scope="col" >Gridrun</th>' + 
-                    '<th scope="col" >Run</th>' +
-                    '<th scope="col" >Gridq</th>' + 
-                    '<th scope="col" >Localq</th>' +
-                    '<th scope="col" >Lrmsq</th> </tr>';
+                    '<tbody> <tr class="load_infobox"> <th class="gm" scope ="col">#Clusters</th>' + 
+                    '<th class="gm" scope="col" >Gridrun</th>' + 
+                    '<th class="gm" scope="col" >Run</th>' +
+                    '<th class="gm" scope="col" >Gridq</th>' + 
+                    '<th class="gm" scope="col" >Localq</th>' +
+                    '<th class="gm" scope="col" >Lrmsq</th> </tr>';
     
             _html += '<tr> <td>' + data['num_clusters']  + '</td>' + 
                      '<td> ' + data['grid_running'] + '</td>' + 

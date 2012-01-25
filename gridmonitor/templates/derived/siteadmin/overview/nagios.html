@@ -29,11 +29,11 @@ response time.
 <table width="920" id="nagios_core_services" summary="Display of nagios checks for Grid core services and hosts">
     <caption> Core Services of ${config['gridname']}</caption>
     <tr> 
-        <th> Host</th> <!--Host checktime and performance display by qTip --> 
-        <th> Service</th>
-        <th> Last Check </th>
-        <th> Plugin Output</th>
-        <th> Performance Data</th>
+    <th class="gm"> Host</th> <!--Host checktime and performance display by qTip --> 
+    <th class="gm"> Service</th>
+        <th class="gm"> Last Check </th>
+        <th class="gm"> Plugin Output</th>
+        <th class="gm"> Performance Data</th>
     </tr>
 
 %for status in ['scheduleddown','down','up','unknown']:
@@ -92,11 +92,11 @@ response time.
 <table width="920" id="nagios_ces_services" summary="Display of nagios checks for all moniotre Grid Computing element  services and hosts">
     <caption> Grid Computing Elements  Services of ${config['gridname']}</caption>
     <tr> 
-        <th> Host</th> <!--Host checktime and performance display by qTip --> 
-        <th> Service</th>
-        <th> Last Check </th>
-        <th> Plugin Output</th>
-        <th> Performance Data</th>
+        <th class="gm"> Host</th> <!--Host checktime and performance display by qTip --> 
+        <th class="gm"> Service</th>
+        <th class="gm"> Last Check </th>
+        <th class="gm"> Plugin Output</th>
+        <th class="gm"> Performance Data</th>
     </tr>
 
 %for status in ['scheduleddown','down','up','unknown']:

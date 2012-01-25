@@ -117,6 +117,7 @@ def make_map(config):
     map.connect(None, '/json/jobs/{action}', controller='jobs')
     map.connect(None, '/json/jobs/{action}/{arg1}', controller='jobs')
     map.connect(None, '/json/jobs/{action}/{arg1}/{arg2}', controller='jobs')
+    map.connect(None, '/json/statistics/{action}', controller='statistics')
 
  
     # help 

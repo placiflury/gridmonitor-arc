@@ -3,9 +3,9 @@
 
     <table width="860">
     <% entries = False %>
-    <tr class="table_head"> <th colspan="2"> VO membership associated with your ${type} certificate </th> </tr>
+    <tr class="table_head"> <th class="gm"colspan="2"> VO membership associated with your ${type} certificate </th> </tr>
 
-    <tr class="table_head2"> <td colspan="2">DN: <span class="code">${dn}</span></td> </tr>
+    <tr class="table_head2"> <td  colspan="2">DN: <span class="code">${dn}</span></td> </tr>
     <tr class="table_head2"> <td colspan="2"> CA: <span class="code">${ca}</span></td> </tr>
     % for vo in vo_list:
         <% user_groups = voms_connector.listUserGroups(vo) %>

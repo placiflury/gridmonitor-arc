@@ -26,11 +26,11 @@
                     ${config['gridname']} Resources Overview for ${c.user_name} ${c.user_surname}.
                 </caption>
                 <tr>
-                    <th class="corner_left" scope="col">Cluster</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">CPU Load</th>
-                    <th scope="col">Queue Load</th>
-                    <th scope="col">Load Table 
+                    <th class="gm corner_left" scope="col">Cluster</th>
+                    <th class="gm" scope="col">Status</th>
+                    <th class="gm" scope="col">CPU Load</th>
+                    <th class="gm" scope="col">Queue Load</th>
+                    <th class="gm" scope="col">Load Table 
                      <span id="expand_table"> 
                         |&lt;- -&gt;|  
                      </span>
@@ -38,7 +38,7 @@
                         |-&gt;&lt;-| 
                     </span>
                     </th>
-                    <th scope="col">RRD</th>
+                    <th class="gm corner_right" scope="col">RRD</th>
                 </tr>
                 <% zebra_cnt = 0 %>
 
@@ -110,7 +110,6 @@
 
     <%def name="js()">        
         ${parent.js()}
-        ${self.js_link("/js/jquery-1.5.min.js")}
         ${self.js_link("/js/qtip/jquery.qtip-1.0.0-rc3.min.js")}
         ${self.js_link("https://www.google.com/jsapi")}
         ${self.js_link("/js/cluster_load.js")}

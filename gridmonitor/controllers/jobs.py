@@ -29,6 +29,25 @@ class JobsController(BaseController):
             'RUN',
             'orphaned',
             'other']
+ 
+    def _get_json_params(self):
+        """ extracts json parameters from 
+            request (used to get params sent
+            by ajax)
+        """
+
+        md = request.params  # UnicodeMultiDict
+        # convert to simple dict
+        params = {}
+        for k in md.keys():
+            if k[-2:] == '[]': # got list 
+                params[k[:-2]] = md.getall(k)
+            else:
+                params[k] = md.get(k)
+
+        log.debug("Got following json params: >%s<" % params)
+        return params
+
     
 
     def _get_ucj_states(self, dn, cluster_list = None):
@@ -327,7 +346,7 @@ class JobsController(BaseController):
         """
             Cluster-Job states.
             
-            param: arg1t - list of hostnames of the cluster front-end
+            param: arg1 - list of hostnames of the cluster front-end
                                 if no list is passed, hostnames of considered clusters
                                 expected to be passed via  http POST
 
@@ -338,9 +357,8 @@ class JobsController(BaseController):
         cluster_list = arg1
 
         if  not cluster_list:
-            ddict = request.POST # doubleDict
-            cluster_list = ddict.getall('hostlist[]') #  why did it got the '[]' suffix ???
-
+            args = self._get_json_params()
+            cluster_list = args['hostlist']
         ret = {}
         sum_cluster_jobs = 0
         
@@ -429,11 +447,11 @@ class JobsController(BaseController):
             unmodified to the google charts API. 
             
             cluster_list -- list of hostnames of considered clusters
-                             passed in http POST
+                             passed in by http POST
         """
-        ddict = request.POST # doubleDict
-        cluster_list = ddict.getall('hostlist[]') # why did it got the '[]' suffix ???
-       
+        args = self._get_json_params()
+        cluster_list = args['hostlist']
+        
         log.debug("Got cluster_list %r" % cluster_list) 
 
         key_order = ['cluster', 'fin', 'fail', 'kil', 'del', 'ftchd', 'run', 'other', 'orph']
