@@ -319,19 +319,22 @@ class Series(object):
                         
         return str
             
-    def get_padded_series(self, ref_dates):
+    def get_padded_series(self, ref_dates, precision = 2):
         """
             returns an array with the time series
             values of given reference date (ref_dates). If there 
             is not a value for a given reference date, the value
             will be set to None.
-            Notice, the reference dates will not be re-ordered (e.g. sorted)
+
+            params: 
+            ref_dates - reference dates (order kept)
+            precision - digits after period
         """
         ret = []
         series = self.get_series() 
         for date in ref_dates:
             if series.has_key(date):
-                ret.append(series[date])
+                ret.append( round(series[date], precision))
             else:
                 ret.append(None)
         return ret

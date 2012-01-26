@@ -88,8 +88,8 @@ class GridadminController(BaseController):
                     ('last year', '/gridadmin/infosys/show/y1')]
         
         statistics_menu =[('VO Usage', '/gridadmin/statistics/vo'),
-            ('RRD Plots', '/gridadmin/statistics/rrd'),
-            ('Usage Tables', '/gridadmin/statistics/sgas')]
+            ('Cluster Usage ', '/gridadmin/statistics/cluster'),
+            ('RRD Plots', '/gridadmin/statistics/rrd')]
         
         sfts = list()
         for sft in  sft_meta.Session.query(sft_schema.SFTTest).all():

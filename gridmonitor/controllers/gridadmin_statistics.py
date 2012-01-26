@@ -29,10 +29,9 @@ class GridadminStatisticsController(GridadminController):
 
     def __init__(self):
         
-
         GridadminController.__init__(self)
 
-        resolution = 86400
+        _secs_res = 86400
    
         c.form_error = None
         
@@ -43,7 +42,7 @@ class GridadminStatisticsController(GridadminController):
             start_t_str = request.params['start_t_str'] 
             end_t_str = request.params['end_t_str'] 
             resolution = int(request.params['resolution'])
-            log.debug('From %s to  %s at %d resolution' % (start_t_str, end_t_str, resolution))
+            log.debug('From %s to  %s at %d resolution' % (start_t_str, end_t_str, _secs_res))
             try:
                 _start_t = calendar.timegm(time.strptime(start_t_str,'%d.%m.%Y'))
                 _end_t = calendar.timegm(time.strptime(end_t_str,'%d.%m.%Y'))
@@ -53,12 +52,12 @@ class GridadminStatisticsController(GridadminController):
                     _start_t = t
             except:
                 c.form_error = "Please enter dates in 'dd.mm.yyyy' format"
-                return render('/derived/gridadmin/statistics/form.html')
+                return render('/derived/gridadmin/statistics/vo_stats.html')
      
  
-        start_t, end_t = helpers.get_sampling_interval(_start_t, _end_t, resolution) # incl. endding day
+        start_t, end_t = helpers.get_sampling_interval(_start_t, _end_t, _secs_res) # incl. endding day
         
-        c.resolution = resolution
+        c.resolution = 'day'
         c.end_t_str_max = time.strftime("%d.%m.%Y", time.gmtime())
         c.start_t_str = time.strftime("%d.%m.%Y", time.gmtime(start_t))        
         c.end_t_str = time.strftime("%d.%m.%Y", time.gmtime(end_t))  
@@ -79,19 +78,33 @@ class GridadminStatisticsController(GridadminController):
         
         c.title = "Monitoring System VO Usage Statistics"
         c.menu_active = "VO Usage"
-        c.heading = "VO/Grid Statistics"
-        
-        resolution = 'day'
-        
+        c.heading = "VO Statistics of entire Grid"
  
         if not self.authorized:
             return render('/derived/gridadmin/error/access_denied.html')
-
-        c.resolution = resolution
             
         return render('/derived/gridadmin/statistics/vo_stats.html')
+    
+    def cluster(self):
+        """ display accounting data per cluster """
+        
+        c.title = "Monitoring System: Cluster  Usage Statistics"
+        c.menu_active = "Cluster  Usage"
+        c.heading = "Cluster Statistics"
+        
+        if not self.authorized:
+            return render('/derived/gridadmin/error/access_denied.html')
+            
+        return render('/derived/gridadmin/statistics/cluster_stats.html')
  
+    def rrd(self):
+        c.title = "Monitoring System: VO/Grid Admin Statistics -- RRD PLOTS -- "
+        c.menu_active = "RRD Plots"
+        c.heading = "RRD plots of Grid Usage "
+        return render('/derived/gridadmin/statistics/rrd.html')
 
+    ##############################################
+    """ OBSOLETE STUFF BELOW -> DEPRECIATED """
 
     def sgas(self):
         """ display statistics from SGAS accouting records """
@@ -318,8 +331,3 @@ class GridadminStatisticsController(GridadminController):
 
             return render('/derived/gridadmin/statistics/form.html')
         
-    def rrd(self):
-        c.title = "Monitoring System: VO/Grid Admin Statistics -- RRD PLOTS -- "
-        c.menu_active = "RRD Plots"
-        c.heading = "RRD plots of Grid Usage "
-        return render('/derived/gridadmin/statistics/rrd.html')

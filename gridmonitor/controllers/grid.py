@@ -88,8 +88,10 @@ class GridController(BaseController):
 
         """
 
-        key_order = ['gridrun', 'run','cpus']
-        description = { 'gridrun': ('Grid Running', 'number'),
+        # notice the 'grid' key required for google bar charts
+        key_order = ['grid', 'gridrun', 'run','cpus']
+        description = {'grid': ('Gridname','string'),
+                    'gridrun': ('Grid Running', 'number'),
                     'run': ('Running','number'),
                     'cpus': ('Avail. Cores', 'number')}
 
@@ -100,8 +102,7 @@ class GridController(BaseController):
         run = g.get_grid_stats('stats_running') 
         cpus = g.get_grid_stats('stats_cpus')
 
-       
-        dt.add_row( gridrun, abs(run - gridrun), abs(cpus - run))
+        dt.add_row(None, gridrun, abs(run - gridrun), abs(cpus - run))
         
         return dt.get_json()
 
@@ -111,9 +112,10 @@ class GridController(BaseController):
             can be passed to the google charts API.
 
         """
-        key_order = ['gridqueued', 'localqueued','lrmsqueued']
-
-        description = {'gridqueued' : ('Grid Queued', 'number'),
+        # notice the 'grid' key required for google bar charts
+        key_order = ['grid', 'gridqueued', 'localqueued','lrmsqueued']
+        description = {'grid': ('Gridname','string'),
+                        'gridqueued' : ('Grid Queued', 'number'),
                         'localqueued' : ('Local Queued', 'number'),
                         'lrmsqueued' : ('Pre-LRMS Queued', 'number')}
 
@@ -122,7 +124,7 @@ class GridController(BaseController):
         locq = g.get_grid_stats('stats_local_queued')
         lrmsq = g.get_grid_stats('stats_prelrms_queued')
 
-        dt.add_row(abs(gridq), abs(locq), abs(lrmsq))
+        dt.add_row(None, abs(gridq), abs(locq), abs(lrmsq))
         
         return dt.get_json()
 
