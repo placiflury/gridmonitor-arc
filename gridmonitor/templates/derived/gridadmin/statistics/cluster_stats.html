@@ -1,134 +1,82 @@
 <%inherit file="/base/gridadmin.html"/>
+<%namespace name="dateResPickerForm" file="/components/dateResPicker.mako"/>
+
+${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!-- created datepicker and resolution form --> 
 
 <script language="javascript" type="text/javascript"> 
 
      google.load('visualization', '1', {packages: ['corechart']});
 
-    var req_params = {
-            modified: true,
-            start_t: "${c.start_t_str}",
-            end_t: "${c.end_t_str}",
-            resolution: "${c.resolution}",
-            resolution_map: {
-                'day': 86400,
-                'week': 604800,
-                'month': 2419200
-            }
-        };
-
-    $(function() {
-        var dates = $( "#from, #to" ).datepicker({
-            changeMonth: true,
-            numberOfMonths: 1,
-            dateFormat: 'dd.mm.yy',
-            onSelect: function( selectedDate ) {
-                var option = this.id == "from" ? "minDate" : "maxDate";
-                var instance = $( this ).data( "datepicker" );
-                var _date = $.datepicker.parseDate(
-                        instance.settings.dateFormat ||
-                        $.datepicker._defaults.dateFormat,
-                        selectedDate, instance.settings );
-                dates.not( this ).datepicker( "option", option, _date );
-            },
-            onClose: function(selectedDate) {
-                if (this.id == "from" && selectedDate != req_params.start_t){
-                    req_params.modified = true; 
-                    req_params.start_t = selectedDate;
-                } 
-                else if (this.id == 'to' && selectedDate != req_params.end_t){
-                    req_params.modified = true; 
-                    req_params.end_t = selectedDate;
-                }
-                /*
-                else{ 
-                    alert("XXX nothing changed");
-                }
-                */
-            }
-        });
-    });
-
-    $(function(){
-        $("#resolution" ).buttonset();
-        $("#resolution input").click(function() {
-            if (this.id != req_params.resolution){
-                req_params.modified = true; 
-                req_params.resolution = this.id;
-            }
-        });
-    })
+    function jobsWalltimePerClusterTable(){
+        var _url = '/json/statistics/gc_cluster_stats'; 
+        if (req_params.modified){
+            req_params.modified = false;
+            $.ajax({
+                url: _url,
+                type: 'POST',
+                data: {'start_t': req_params.start_t, 
+                        'end_t': req_params.end_t, 
+                        'resolution': req_params.resolution},
+                dataType: 'json',
+                success: function(data){
+                    var _html = "<h1> Accounting Records from " + data.eff_start_time + " - " + data.eff_end_time + "</h1>" ;
+                    
+                    var j_data = new google.visualization.DataTable(data.time_series_n_jobs, 0.6);
+                    var j_view = new google.visualization.DataView(j_data);
+                    var gvj = new google.visualization.ColumnChart(document.getElementById('cluster_jobs'));
+                    //var gvj = new google.visualization.AreaChart(document.getElementById('cluster_jobs'));
+                    
+                    var w_data = new google.visualization.DataTable(data.time_series_wall_duration, 0.6);
+                    var w_view = new google.visualization.DataView(w_data);
+                    var gvw = new google.visualization.ColumnChart(document.getElementById('cluster_wall'));
+                    //var gvw = new google.visualization.AreaChart(document.getElementById('cluster_wall'));
 
 
-function jobsWalltimePerClusterTable(){
-    var _url = '/json/statistics/gc_cluster_stats'; 
-    if (req_params.modified){
-        req_params.modified = false;
-        $.ajax({
-            url: _url,
-            type: 'POST',
-            data: {'start_t': req_params.start_t, 
-                    'end_t': req_params.end_t, 
-                    'resolution': req_params.resolution},
-            dataType: 'json',
-            success: function(data){
-                var _html = "<h1> Accounting Records from " + data.eff_start_time + " - " + data.eff_end_time + "</h1>" ;
-                
-                var j_data = new google.visualization.DataTable(data.time_series_n_jobs, 0.6);
-                var j_view = new google.visualization.DataView(j_data);
-                var gvj = new google.visualization.ColumnChart(document.getElementById('cluster_jobs'));
-                //var gvj = new google.visualization.AreaChart(document.getElementById('cluster_jobs'));
-                
-                var w_data = new google.visualization.DataTable(data.time_series_wall_duration, 0.6);
-                var w_view = new google.visualization.DataView(w_data);
-                var gvw = new google.visualization.ColumnChart(document.getElementById('cluster_wall'));
-                //var gvw = new google.visualization.AreaChart(document.getElementById('cluster_wall'));
+                    var pie_j_data = new google.visualization.DataTable(data.pie_n_jobs, 0.6);
+                    var pie_j_view = new google.visualization.DataView(pie_j_data);
+                    var gpiej = new google.visualization.PieChart(document.getElementById('pie_jobs'));
+
+                    var pie_w_data = new google.visualization.DataTable(data.pie_wall_duration, 0.6);
+                    var pie_w_view = new google.visualization.DataView(pie_w_data);
+                    var gpiew = new google.visualization.PieChart(document.getElementById('pie_wall'));
 
 
-                var pie_j_data = new google.visualization.DataTable(data.pie_n_jobs, 0.6);
-                var pie_j_view = new google.visualization.DataView(pie_j_data);
-                var gpiej = new google.visualization.PieChart(document.getElementById('pie_jobs'));
-
-                var pie_w_data = new google.visualization.DataTable(data.pie_wall_duration, 0.6);
-                var pie_w_view = new google.visualization.DataView(pie_w_data);
-                var gpiew = new google.visualization.PieChart(document.getElementById('pie_wall'));
-
-
-                $('#json_reply').html(_html);
-                $('#from').attr('value', data.eff_start_time);
-                $('#to').attr('value', data.eff_end_time);
-                
-                gvj.draw(j_view, {
-                title : 'Jobs per Cluster on Grid',
-                isStacked: true,
-                width: 1100,
-                height: 400,
-                vAxis: {title: "Number of Grid Jobs"},
-                hAxis: {title: "Date"}
-              });
-                
-                gvw.draw(w_view, {
-                title : 'Walltime per Cluster on Grid',
-                isStacked: true,
-                width: 1100,
-                height: 400,
-                vAxis: {title: "Walltime of Grid Jobs [hours]"},
-                hAxis: {title: "Date"}
-              });
-
-                gpiej.draw(pie_j_view, {
+                    $('#json_reply').html(_html);
+                    $('#from').attr('value', data.eff_start_time);
+                    $('#to').attr('value', data.eff_end_time);
+                    
+                    gvj.draw(j_view, {
                     title : 'Jobs per Cluster on Grid',
-                    width: 450,
-                    height: 300,
-                    });
+                    isStacked: true,
+                    width: 1100,
+                    height: 400,
+                    vAxis: {title: "Number of Grid Jobs"},
+                    hAxis: {title: "Date"}
+                  });
+                    
+                    gvw.draw(w_view, {
+                    title : 'Walltime per Cluster on Grid',
+                    isStacked: true,
+                    width: 1100,
+                    height: 400,
+                    vAxis: {title: "Walltime of Grid Jobs [hours]"},
+                    hAxis: {title: "Date"}
+                  });
 
-                gpiew.draw(pie_w_view, {
-                    title : 'Walltime of Grid Jobs [hours]',
-                    width: 450,
-                    height: 300,
-                    });
-            }
-        });
-    }
+                    gpiej.draw(pie_j_view, {
+                        title : 'Jobs per Cluster on Grid',
+                        width: 450,
+                        height: 300,
+                        });
+
+                    gpiew.draw(pie_w_view, {
+                        title : 'Walltime of Grid Jobs [hours]',
+                        width: 450,
+                        height: 300,
+                        });
+                }
+            });
+        }
 }
 
 
@@ -139,26 +87,6 @@ $(document).ready(function() {
 
 </script>
 
-
-
-<table id="ctrl_table">
-<tr class='nohover'> 
-    <td> <label for="from">From</label>
-    
-        <input type="text" id="from" name="from" size="12" value="${c.start_t_str}"/>
-        <label for="to">to</label>
-        <input type="text" id="to" name="to" size="12" value="${c.end_t_str}"/>
-    </td> 
-    <td>
-        <div id="resolution">
-        Resolution:
-                <input type="radio" id="day" name="resolution" checked="checked"/><label for="day">day</label>
-                <input type="radio" id="week" name="resolution" /><label for="week">week</label>
-                <input type="radio" id="month" name="resolution" /><label for="month">month</label>
-        </div>
-    </td>
-</tr>
-</table>
 
 <!-- FORM ERRORS --> 
 

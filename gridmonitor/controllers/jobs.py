@@ -142,7 +142,7 @@ class JobsController(BaseController):
                  now all clusters get selected (default).
         """
         dn = arg1
-        tag = arg2
+        # tag = arg2
 
         if dn:
             return json.dumps(self._get_ucj_states(dn))

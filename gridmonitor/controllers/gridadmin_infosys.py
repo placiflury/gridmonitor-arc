@@ -17,8 +17,7 @@ class GridadminInfosysController(GridadminController):
         GridadminController()
         query = meta.Session.query(schema.NGCluster)
         c.dbclusters = query.all()
-        c.blacklisted= query.filter_by(blacklisted = True).all()
-        # XXX also add blacklisted GIIS'es
+        c.blacklisted = query.filter_by(blacklisted = True).all()
 
         c.giises = meta.Session.query(schema.GiisMeta).all()
         c.title = "Monitoring System -- Infosys (GRIS/GIIS) Statistics --"
@@ -35,14 +34,14 @@ class GridadminInfosysController(GridadminController):
 
         c.menu_active = "GRIS/GIIS"
         c.heading = "Information System Details"
-        c.suffix= None 
+        c.suffix = None 
         
         query = meta.Session.query(schema.NGCluster)
         c.db_inactive_clusters = query.filter_by(status='inactive').all()
         return render('/derived/gridadmin/infosys/index.html')
 
     
-    def show(self,arg):
+    def show(self, arg):
         interval = arg
         if not interval:
             c.menu_active = "GRIS/GIIS"
@@ -50,15 +49,15 @@ class GridadminInfosysController(GridadminController):
             c.suffix = None
         elif interval == 'w1':
             c.menu_active = "last week"
-            c.suffix= '_w1p.png'
+            c.suffix = '_w1p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of current week."
         elif interval == 'y1':
             c.menu_active = "last year"
-            c.suffix= '_y1p.png'
+            c.suffix = '_y1p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of current  year."
         else:
             c.menu_active = "last 24 hours"
-            c.suffix= '_h24p.png'
+            c.suffix = '_h24p.png'
             c.heading = "Statistics about the Grid Information System (GRIS/GIIS) of last 24 hours."
             
         return render('/derived/gridadmin/infosys/index.html')

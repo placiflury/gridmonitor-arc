@@ -155,11 +155,11 @@ class ClusterController(BaseController):
 
         for q_name in g.get_cluster_queues_names(hostname):
             obj['q'][q_name] = {}
-            obj['q'][q_name]['grid_queued'] = g.get_queue_stats(hostname,q_name,'stats_grid_queued')
-            obj['q'][q_name]['local_queued'] = g.get_queue_stats(hostname,q_name,'stats_local_queued')
-            obj['q'][q_name]['prelrms_queued'] = g.get_queue_stats(hostname,q_name,'stats_prelrms_queued')
-            obj['q'][q_name]['running'] = g.get_queue_stats(hostname,q_name,'stats_running')
-            obj['q'][q_name]['grid_running'] = g.get_queue_stats(hostname,q_name,'stats_grid_running')
+            obj['q'][q_name]['grid_queued'] = g.get_queue_stats(hostname, q_name,'stats_grid_queued')
+            obj['q'][q_name]['local_queued'] = g.get_queue_stats(hostname, q_name,'stats_local_queued')
+            obj['q'][q_name]['prelrms_queued'] = g.get_queue_stats(hostname, q_name,'stats_prelrms_queued')
+            obj['q'][q_name]['running'] = g.get_queue_stats(hostname, q_name,'stats_running')
+            obj['q'][q_name]['grid_running'] = g.get_queue_stats(hostname, q_name,'stats_grid_running')
             
         return json.dumps(obj)
 
@@ -204,7 +204,7 @@ class ClusterController(BaseController):
         if hostname in h.get_cluster_names('downtime')[0]:
             return 'SchedduledDown'
 
-        key_order=['queue','gridqueued', 'localqueued','lrmsqueued']
+        key_order = ['queue', 'gridqueued', 'localqueued','lrmsqueued']
 
         description = {'queue': ('Queue','string'),
                         'gridqueued' : ('Grid Queued', 'number'),
@@ -215,9 +215,9 @@ class ClusterController(BaseController):
         no_queue_flag = True
         for q_name in g.get_cluster_queues_names(hostname):
             no_queue_flag = False
-            gridq = g.get_queue_stats(hostname,q_name,'stats_grid_queued')
-            locq = g.get_queue_stats(hostname,q_name,'stats_local_queued')
-            lrmsq =  g.get_queue_stats(hostname,q_name,'stats_prelrms_queued')
+            gridq = g.get_queue_stats(hostname, q_name,'stats_grid_queued')
+            locq = g.get_queue_stats(hostname, q_name,'stats_local_queued')
+            lrmsq =  g.get_queue_stats(hostname, q_name,'stats_prelrms_queued')
             dt.add_row(q_name, abs(gridq), abs(locq), abs(lrmsq))
         
         if no_queue_flag:

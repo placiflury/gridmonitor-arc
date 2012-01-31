@@ -1,4 +1,4 @@
-<%inherit file="/base/gridadmin.html"/>
+<%inherit file="/base/user.html"/>
 <%namespace name="dateResPickerForm" file="/components/dateResPicker.mako"/>
 
 ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!-- created datepicker and resolution form --> 
@@ -7,8 +7,8 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
 
      google.load('visualization', '1', {packages: ['corechart']});
 
-    function jobsWalltimePerVoTable(){
-        var _url = '/json/statistics/gc_vos_stats'; 
+    function userClusterJobsWalltime(){
+        var _url = '/json/statistics/gc_user_cluster_stats'; 
         if (req_params.modified){
             req_params.modified = false;
             $.ajax({
@@ -45,7 +45,7 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                     $('#to').attr('value', data.eff_end_time);
                     
                     gvj.draw(j_view, {
-                    title : 'Jobs per VO on SMSCG Grid',
+                    title : 'My Jobs per Cluster',
                     isStacked: true,
                     width: 1100,
                     height: 400,
@@ -54,7 +54,7 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                   });
                     
                     gvw.draw(w_view, {
-                    title : 'Walltime per VO  on SMSCG Grid',
+                    title : 'Walltime of My Jobs per Cluster',
                     isStacked: true,
                     width: 1100,
                     height: 400,
@@ -63,13 +63,13 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                   });
 
                     gpiej.draw(pie_j_view, {
-                        title : 'Jobs per VO on SMSCG Grid',
+                        title : 'My Jobs per Cluster',
                         width: 450,
                         height: 300,
                         });
 
                     gpiew.draw(pie_w_view, {
-                        title : 'Walltime of Grid Jobs [hours]',
+                        title : 'Walltime of My Jobs [hours] per Cluster',
                         width: 450,
                         height: 300,
                         });
@@ -80,8 +80,8 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
 
 
     $(document).ready(function() {
-        jobsWalltimePerVoTable();
-        $('#ctrl_table').click(jobsWalltimePerVoTable);
+        userClusterJobsWalltime();
+        $('#ctrl_table').click(userClusterJobsWalltime);
     });
 
     </script>

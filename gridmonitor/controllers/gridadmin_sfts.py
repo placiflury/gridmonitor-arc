@@ -95,11 +95,11 @@ class GridadminSftsController(GridadminController):
         c.sft_name = name 
 
         if cluster_name: 
-            c.sft_jobs= sft_meta.Session.query(sft_schema.SFTJob).\
+            c.sft_jobs = sft_meta.Session.query(sft_schema.SFTJob).\
                 filter(and_(sft_schema.SFTJob.sft_test_name == name, 
                  sft_schema.SFTJob.cluster_name == cluster_name)).order_by(desc(sft_schema.SFTJob.submissiontime))
         else: 
-            c.sft_jobs= sft_meta.Session.query(sft_schema.SFTJob).\
+            c.sft_jobs = sft_meta.Session.query(sft_schema.SFTJob).\
                 filter_by(sft_test_name = name).order_by(desc(sft_schema.SFTJob.submissiontime))
 
  
@@ -111,7 +111,7 @@ class GridadminSftsController(GridadminController):
         c.menu_active = name + '_detail'  # little hack..
         c.heading = "Details of %s Site Functional test." % name
         c.sft = None 
-        c.sft_vo_group= None
+        c.sft_vo_group = None
         c.sft_cluster_group = None
         c.sft_test_suit = None
         
@@ -161,7 +161,7 @@ class GridadminSftsController(GridadminController):
             browser_pwd = request.params['browser_dn_pwd']
             browser_pwd2 = request.params['browser_dn_pwd2']
             if not browser_pwd:
-                c.form_error= "You must enter a password for your '%s' certificate" % browser_dn
+                c.form_error = "You must enter a password for your '%s' certificate" % browser_dn
                 return render('/derived/gridadmin/sfts/form.html')
                 
             if browser_pwd != browser_pwd2:
@@ -178,7 +178,7 @@ class GridadminSftsController(GridadminController):
         
         if request.params.has_key('CB_slcs_dn'):
             slcs_dn = request.params['CB_slcs_dn']
-            slcs_pwd =request.params['slcs_dn_pwd']
+            slcs_pwd = request.params['slcs_dn_pwd']
             slcs_pwd2 = request.params['slcs_dn_pwd2']
 
             if not slcs_pwd:
@@ -188,9 +188,9 @@ class GridadminSftsController(GridadminController):
                 c.form_error = "Your passwords for your '%s' certificate are not identical." % slcs_dn
                 return render('/derived/gridadmin/sfts/form.html')
             
-            db_slcs_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN=slcs_dn).first()
+            db_slcs_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN = slcs_dn).first()
             if db_slcs_user:
-                up.reset_user_passwd(slcs_dn,slcs_pwd)
+                up.reset_user_passwd(slcs_dn, slcs_pwd)
                 c.slcs_msg =  "Password for '%s' has been changed successfully" % slcs_dn
             else:
                 up.add_user(slcs_dn, None,  slcs_pwd)

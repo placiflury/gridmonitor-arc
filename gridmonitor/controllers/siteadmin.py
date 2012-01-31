@@ -21,8 +21,8 @@ class SiteadminController(BaseController):
 
         self.admin = None
         self.authorized = False
-        self.clusters= list()  # hostname of clusters
-        self.cores= list()  # hostname of non-cluster services (core services)
+        self.clusters = list()  # hostname of clusters
+        self.cores = list()  # hostname of non-cluster services (core services)
         
         nagios_server = config['nagios']
         if nagios_server == 'localhost':
@@ -87,17 +87,16 @@ class SiteadminController(BaseController):
                     cluster_queues.append((name, cluster_path + '/' + h.str_cannonize(name)))
             c.cluster_menu.append((cluster_display_name, cluster_path, cluster_queues))
          
-        c.top_nav= session['top_nav_bar']
+        c.top_nav = session['top_nav_bar']
         
         c.menu = [('Overview', '/siteadmin/overview', overview),
-                ('Clusters','/siteadmin/clusters', c.cluster_menu),
+                ('My Clusters','/siteadmin/clusters', c.cluster_menu),
+                ('Site Statistics', '/siteadmin/statistics'),
                 ('Jobs','/siteadmin/jobs'),
                 ('Users','/siteadmin/users'),
-                ('Test Jobs', '/siteadmin/testjobs', test_jobs), 
-                ('Site Statistics', '/siteadmin/statistics'),
                 ('Nagios', nagios_server_url)]
 
-        c.top_nav_active="Site Admin"
+        c.top_nav_active = "Site Admin"
  
     def index(self):
         

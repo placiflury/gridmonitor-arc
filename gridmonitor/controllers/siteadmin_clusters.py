@@ -10,25 +10,25 @@ from siteadmin import SiteadminController
 
 log = logging.getLogger(__name__)
 
-QUEUE_NAME_LEN=11   # default len of queue names. Names will either be padded or cut to that size
+QUEUE_NAME_LEN = 11   # default len of queue names. Names will either be padded or cut to that size
 
 class SiteadminClustersController(SiteadminController):    
 
     def index(self):
         c.title = "Monitoring System: Site Admin View"
-        c.menu_active = "Your Cluster(s)"
+        c.menu_active = "My Clusters"
         c.heading = "Clusters  %s %s has siteadmin (view) permissions." % (c.user_name, c.user_surname)
 
         
         if not self.authorized:
-            c.heading= "Your Cluster(s)"
+            c.heading = "My Cluster(s)"
             return render('/derived/siteadmin/error/access_denied.html')
         
         actives = h.get_cluster_names('active')[0]
         c.siteadmin_clusters =  [ hn for hn in self.clusters if hn in actives]
 
 
-        dps ={}
+        dps = {}
         for hn in c.siteadmin_clusters:
             dps[hn] = h.get_cluster_displayname(hn)
 
@@ -54,9 +54,9 @@ class SiteadminClustersController(SiteadminController):
             c.queue_obj = g.get_queue(c.cluster_hostname, c.queue_name)
             if not c.queue_obj:
                 # XXX -> error message
-                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id,queue))
+                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id, queue))
                 return render("/derived/user/clusters/index.html")
-            c.heading = "Queue '%s' of cluster '%s'" % (queue,c.cluster_display_name)
+            c.heading = "Queue '%s' of cluster '%s'" % (queue, c.cluster_display_name)
             return render('/derived/user/clusters/show_queue.html')
 
 

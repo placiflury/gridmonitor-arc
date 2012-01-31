@@ -442,7 +442,7 @@ class MonadminSftController(MonadminController):
         return "ERROR;;;Unrecognized HTTP POST request."
     
         
-    def listclustergroups(self,id=None):
+    def listclustergroups(self, id=None):
         cluster_gr_list = self.sft_cluster_groups.list_groups()
         if not id:
             return self.__build_json__(cluster_gr_list, CLUSTER_GR_KEYMAP, CLUSTER_GR_KEYMAP_ORDER, { \

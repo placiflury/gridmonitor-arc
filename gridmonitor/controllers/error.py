@@ -24,7 +24,7 @@ class ErrorController(BaseController):
 
     def document(self):
         """Render the error document"""
-        my_template="""
+        my_template = """
         <html>
         <head><title>GridMonitor Error %(code)s</title></head>
         <body>

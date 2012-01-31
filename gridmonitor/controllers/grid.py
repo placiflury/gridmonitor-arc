@@ -137,9 +137,9 @@ class GridController(BaseController):
             with the minimal load on the grid.
         """
 
-        max_load_cluster=dict(name = None, cname = None,  tot_running = 0,
+        max_load_cluster = dict(name = None, cname = None,  tot_running = 0,
                 tot_cpus = 0, tot_queued = 0, relative_load = -1)
-        min_load_cluster=dict(name = None, cname = None, tot_running = 0,
+        min_load_cluster = dict(name = None, cname = None, tot_running = 0,
                 tot_cpus = 0, tot_queued = 0, relative_load = -1)
 
 
@@ -161,7 +161,7 @@ class GridController(BaseController):
             tot_queued = 0
             for qname in g.get_cluster_queues_names(hostname):
                 gqd = g.get_queue_stats(hostname, qname, 'stats_grid_queued')
-                lqd= g.get_queue_stats(hostname, qname, 'stats_local_queued')
+                lqd = g.get_queue_stats(hostname, qname, 'stats_local_queued')
                 plrms = g.get_queue_stats(hostname, qname, 'stats_prelrms_queued')
 
                 tot_queued = gqd + lqd + plrms

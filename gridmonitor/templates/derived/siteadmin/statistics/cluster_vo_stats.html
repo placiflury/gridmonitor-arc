@@ -1,0 +1,149 @@
+<%inherit file="/base/siteadmin.html"/>
+<%namespace name="dateResPickerForm" file="/components/dateResPicker.mako"/>
+
+${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!-- created datepicker and resolution form --> 
+
+<script language="javascript" type="text/javascript"> 
+ google.load('visualization', '1', {packages: ['corechart']});
+
+ function jobsWalltimePerClusterVoTable(){
+    var _url = '/json/statistics/gc_clusters_vos_stats'; 
+    if (req_params.modified){
+        req_params.modified = false;
+        $.ajax({
+            url: _url,
+            type: 'POST',
+            data: {'start_t': req_params.start_t, 
+                    'end_t': req_params.end_t, 
+                    'resolution': req_params.resolution,
+                     'cluster_list': "${c.cluster_names}"},
+            dataType: 'json',
+            success: function(data){
+                var _html = "<h1> Accounting Records from " + data.eff_start_time + " - " + data.eff_end_time + "</h1>" ;
+                
+                $('#json_reply').html(_html);
+                $('#from').attr('value', data.eff_start_time);
+                $('#to').attr('value', data.eff_end_time);
+
+                // cluster stats 
+                for (var i = data.clusters.length; i-- ;){
+                     
+                    var cid = data.clusters[i].replace(/\./g ,'_'); // replacing '.' with '_'
+                    if (cid == ''){
+                        continue;
+                    }
+                    var _data = data.cluster_container[cid];
+            
+                    var j_data = new google.visualization.DataTable(_data.time_series_n_jobs, 0.6);
+                    var j_view = new google.visualization.DataView(j_data);
+                    var gvj = new google.visualization.ColumnChart(document.getElementById(cid +'_cluster_jobs'));
+
+                    var w_data = new google.visualization.DataTable(_data.time_series_wall_duration, 0.6);
+                    var w_view = new google.visualization.DataView(w_data);
+                    var gvw = new google.visualization.ColumnChart(document.getElementById(cid + '_cluster_wall'));
+
+
+                    var pie_j_data = new google.visualization.DataTable(_data.pie_n_jobs, 0.6);
+                    var pie_j_view = new google.visualization.DataView(pie_j_data);
+                    var gpiej = new google.visualization.PieChart(document.getElementById(cid + '_pie_jobs'));
+                    var pie_w_data = new google.visualization.DataTable(_data.pie_wall_duration, 0.6);
+                    var pie_w_view = new google.visualization.DataView(pie_w_data);
+                    var gpiew = new google.visualization.PieChart(document.getElementById(cid  + '_pie_wall'));
+
+
+                    gvj.draw(j_view, {
+                        title : 'Jobs per VO for cluster ' + data.clusters[i],
+                        isStacked: true,
+                        width: 900,
+                        height: 400,
+                        vAxis: {title: "Number of Grid Jobs"},
+                        hAxis: {title: "Date"}
+                    });
+                    
+                    gvw.draw(w_view, {
+                        title : 'Walltimes per VO for cluster '  + data.clusters[i] + ' [hours]',
+                        isStacked: true,
+                        width: 900,
+                        height: 400,
+                        vAxis: {title: "Walltime of Grid Jobs [hours]"},
+                        hAxis: {title: "Date"}
+                    });
+
+                    gpiej.draw(pie_j_view, {
+                        title : 'Jobs per VO for cluster ' + data.clusters[i],
+                        width: 300,
+                        height: 280,
+                    });
+
+                    gpiew.draw(pie_w_view, {
+                        title : 'Walltimes per VO for cluster '  + data.clusters[i] + ' [hours]',
+                        width: 300,
+                        height: 280,
+                    });
+                } // endfor each cluster
+            }// success
+        }); // end ajax
+    }
+}
+
+
+$(document).ready(function() {
+    jobsWalltimePerClusterVoTable();
+    $('#ctrl_table').click(jobsWalltimePerClusterVoTable);
+});
+
+</script>
+
+<!-- FORM ERRORS --> 
+
+%if c.form_error:
+<div class="ui-widget">
+    <div style="padding: 0pt 0.7em;" class="ui-state-error ui-corner-all"> 
+        <p> <strong>Error:</strong> ${c.form_error} </p>
+    </div>
+</div>
+%endif
+
+
+<!-- REPLY -->
+<div id='json_reply'>waiting ... </div>
+<table>
+%for cluster in c.cluster_names:
+    <% cid = cluster.replace('.','_')%> 
+
+    <tr class='nohover'>
+        <td colspan=2>
+            <div id="${cid}_cluster_jobs" style="width: 900px; height: 400px;"></div>
+        </td>
+        <td>
+            <div id="${cid}_pie_jobs" style="width: 300px;"></div>
+        </td>
+    </tr>
+    <tr class='nohover'>
+        <td colspan = 2>
+        <div id="${cid}_cluster_wall" style="width: 900px; height: 400px;"></div>
+        </td>
+        <td>
+            <div id="${cid}_pie_wall" style="width: 300px;"></div>
+        </td>
+    </tr>
+%endfor
+</table>
+
+
+<%def name="css()">
+    ${parent.css()}
+    ${self.js_link("https://www.google.com/jsapi")}
+    ${self.css_link('/css/custom-theme/jquery-ui-1.8.16.custom.css', 'screen')}
+
+
+</%def>
+
+
+<%def name="js()">
+    ${parent.js()}
+    ${self.js_link("/js/jquery-ui-1.8.16.custom.min.js")}
+    
+</%def>
+
+

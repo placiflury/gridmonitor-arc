@@ -6,16 +6,19 @@
 #usermenuClusters.yuimenu{
     width: 110%;
 }
+#siteadminmenuMy_Clusters.yuimenu{
+    width: 110%;
+}
 #gridadminmenuVO_Usage.yuimenu{
     width: 110%;
 }
 #gridadminmenuClusters.yuimenu{
     width: 110%;
 }
-
-#siteadminmenuClusters.yuimenu{
-    width: 110%;
+#gridadminmenuGrid_Statistics.yuimenu{
+    width: 102%;
 }
+
 
 #monadminmenu.yuimenu{
     width: 96%;

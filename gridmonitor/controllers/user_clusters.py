@@ -64,10 +64,10 @@ class UserClustersController(UserController):
             c.queue_obj = g.get_queue(c.cluster_hostname, c.queue_name)
             if not c.queue_obj:
                 # XXX -> error message
-                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id,queue))
+                log.warn("Info about queue '%s' of cluster '%s' not available anymore." % (id, queue))
                 return render("/derived/user/clusters/index.html")
                 
-            c.heading = "Queue '%s' of cluster '%s'" % (queue,c.cluster_display_name)
+            c.heading = "Queue '%s' of cluster '%s'" % (queue, c.cluster_display_name)
             return render('/derived/user/clusters/show_queue.html')
 
       

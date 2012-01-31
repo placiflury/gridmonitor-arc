@@ -24,7 +24,7 @@ class SiteadminOverviewController(SiteadminController):
         c.heading = "<span class='warn_status'> You are not authorized to view the content of this page.</span>"  # default
         
         if not self.authorized:
-            c.heading= "Site Overview"
+            c.heading = "Site Overview"
             return render('/derived/siteadmin/error/access_denied.html')
 
         c.heading = "Tactical Overview on Your Services"

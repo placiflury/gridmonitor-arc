@@ -1,5 +1,4 @@
 import logging
-import json
 
 from pylons import tmpl_context as c
 from pylons.templating import render_mako as render
