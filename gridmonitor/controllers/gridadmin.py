@@ -9,8 +9,8 @@ import gridmonitor.lib.helpers as h
 from gridmonitor.lib.base import BaseController
 
 from gridmonitor.model.acl import meta, handler
-from sft.db import sft_meta
-from sft.db import sft_schema
+from sft.utils import helpers as helpers
+
 
 from gridmonitor.controllers.user import UserController
 
@@ -94,8 +94,7 @@ class GridadminController(BaseController):
             ('RRD Plots', '/gridadmin/statistics/rrd')]
         
         sfts = list()
-        for sft in  sft_meta.Session.query(sft_schema.SFTTest).all():
-            sft_name = sft.name
+        for sft_name in  helpers.get_all_sft_names():
             show_path = '/gridadmin/sfts/show/' + sft_name
             details = '/gridadmin/sfts/show_details/' + sft_name
             sfts.append((sft_name, show_path, [('details', details)]))

@@ -254,7 +254,6 @@ gridmonitor/public/js/LC_prototypes-min.js
 gridmonitor/public/js/LC_prototypes.js
 gridmonitor/public/js/cluster_load.js
 gridmonitor/public/js/cluster_status.js
-gridmonitor/public/js/datepicker.js
 gridmonitor/public/js/grid_load.js
 gridmonitor/public/js/job_states.js
 gridmonitor/public/js/jquery-1.6.2.min.js
@@ -320,7 +319,6 @@ gridmonitor/templates/derived/gridadmin/statistics/form.html
 gridmonitor/templates/derived/gridadmin/statistics/index.html
 gridmonitor/templates/derived/gridadmin/statistics/rrd.html
 gridmonitor/templates/derived/gridadmin/statistics/vo_stats.html
-gridmonitor/templates/derived/gridadmin/statistics/vo_stats.html.ORG
 gridmonitor/templates/derived/gridadmin/testjobs/form.html
 gridmonitor/templates/derived/gridadmin/testjobs/index.html
 gridmonitor/templates/derived/gridadmin/testjobs/test.html
@@ -338,7 +336,6 @@ gridmonitor/templates/derived/monadmin/sft/resources.html
 gridmonitor/templates/derived/monadmin/sft/sfts.html
 gridmonitor/templates/derived/public/rrdplots.html
 gridmonitor/templates/derived/public/summary.html
-gridmonitor/templates/derived/siteadmin/clusters/.index.html.swp
 gridmonitor/templates/derived/siteadmin/clusters/index.html
 gridmonitor/templates/derived/siteadmin/error/access_denied.html
 gridmonitor/templates/derived/siteadmin/jobs/index.html

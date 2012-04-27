@@ -11,12 +11,8 @@ from pylons.templating import render_mako as render
 
 from gridadmin import GridadminController
 
-
-from sft.db import sft_meta
-from sft.db import sft_schema
+from sft.utils import helpers 
 from sft.db.user_handler import UserPool
-
-
 
 log = logging.getLogger(__name__)
 
@@ -41,18 +37,17 @@ class GridadminSftsController(GridadminController):
         c.heading = "Site Functional Tests"
         
         summary = dict() # cluster_name: dict(sft_name, dict(status), sub_time)
-        
-        for job in sft_meta.Session.query(sft_schema.SFTJob).all():
-
+       
+        for job in helpers.get_all_jobs():
             if not job.cluster_name:
                 continue
 
             cl_name = job.cluster_name
             sf_name = job.sft_test_name
-            stat_ = job.status.lower()
-            if 'failed' in stat_:
+            stat_ = job.status.lower() # XXX PF. changes to be tested...
+            if stat_ in ['failed', 'fetched_failed']:
                 stat = 'FAILED'
-            elif 'fetched' in stat_:
+            elif stat_ in ['fetched','success']:
                 stat = 'OK'
             elif 'deleted' in stat_:
                 stat = "DELETED"
@@ -93,16 +88,8 @@ class GridadminSftsController(GridadminController):
             c.heading = "Site Functional Test %s" % name
         c.menu_active = name
         c.sft_name = name 
+        c.sft_jobs = helpers.get_all_sft_jobs(name, cluster_name = cluster_name)
 
-        if cluster_name: 
-            c.sft_jobs = sft_meta.Session.query(sft_schema.SFTJob).\
-                filter(and_(sft_schema.SFTJob.sft_test_name == name, 
-                 sft_schema.SFTJob.cluster_name == cluster_name)).order_by(desc(sft_schema.SFTJob.submissiontime))
-        else: 
-            c.sft_jobs = sft_meta.Session.query(sft_schema.SFTJob).\
-                filter_by(sft_test_name = name).order_by(desc(sft_schema.SFTJob.submissiontime))
-
- 
         return render('/derived/gridadmin/sfts/results.html')
     
     def show_details(self, name): 
@@ -114,27 +101,21 @@ class GridadminSftsController(GridadminController):
         c.sft_vo_group = None
         c.sft_cluster_group = None
         c.sft_test_suit = None
-        
-        c.sft = sft_meta.Session.query(sft_schema.SFTTest).\
-            filter_by(name = name).first()
-        if not  c.sft:
+        c.sft = helpers.get_job(name) 
+        if not c.sft:
             log.warn("SFT test '%s' does not exist anymore." % name)
         else:
-            c.sft_vo_group = sft_meta.Session.query(sft_schema.VOGroup).\
-                filter_by(name=c.sft.vo_group).first()
+            c.sft_vo_group = helpers.get_sft_vo_group(c.sft.vo_group)
             if not c.sft_vo_group:
                 log.warn("SFT test '%s' has no VOs specified." % name)
 
-            c.sft_cluster_group = sft_meta.Session.query(sft_schema.ClusterGroup).\
-                filter_by(name=c.sft.cluster_group).first()
+            c.sft_cluster_group = helpers.get_sft_cluster_group(c.sft.cluster_group)
             if not c.sft_cluster_group:
                 log.warn("SFT test '%s' has no clusters specified." % name)
 
-            c.sft_test_suit = sft_meta.Session.query(sft_schema.TestSuit).\
-                filter_by(name=c.sft.test_suit).first()
+            c.sft_test_suit = helpers.get_sft_suit(c.sft.test_suit)
             if not c.sft_test_suit:
                 log.warn("SFT test '%s' has no tests specified." % name)
-
 
         return render('/derived/gridadmin/sfts/show_details.html')
 
@@ -168,7 +149,8 @@ class GridadminSftsController(GridadminController):
                 c.form_error =  "Your passwords for your '%s' certificate are not identical." % browser_dn
                 return render('/derived/gridadmin/sfts/form.html')
         
-            db_browser_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN=browser_dn).first()
+            #db_browser_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN=browser_dn).first()
+            db_browser_user =  helpers.get_sft_user(browser_dn)
             if db_browser_user:
                 up.reset_user_passwd(browser_dn, browser_pwd)
                 c.browser_msg =  "Password for '%s' has been changed successfully" % browser_dn
@@ -188,7 +170,9 @@ class GridadminSftsController(GridadminController):
                 c.form_error = "Your passwords for your '%s' certificate are not identical." % slcs_dn
                 return render('/derived/gridadmin/sfts/form.html')
             
-            db_slcs_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN = slcs_dn).first()
+            #db_slcs_user =  sft_meta.Session.query(sft_schema.User).filter_by(DN = slcs_dn).first()
+            db_slcs_user =  helpers.get_sft_user(slcs_dn)
+
             if db_slcs_user:
                 up.reset_user_passwd(slcs_dn, slcs_pwd)
                 c.slcs_msg =  "Password for '%s' has been changed successfully" % slcs_dn
