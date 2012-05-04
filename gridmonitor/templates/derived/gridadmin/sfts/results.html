@@ -22,9 +22,9 @@
             <tbody>
             %for job in c.sft_jobs:
                 <tr>
-                % if job.status in ['failed','FAILED','fetched_failed']:
+                % if job.status in ['failed','FAILED','fetched_failed','fetch_failed', 'test_failed','timeout']:
                 <% stat='lerror'%>
-                % elif job.status == 'fetched':
+                % elif job.status in ['fetched','success']:
                 <% stat='lok'%>
                 %else:
                 <% stat='submitted'%>

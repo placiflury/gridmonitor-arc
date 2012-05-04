@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import datetime
-from sqlalchemy import desc
-from sqlalchemy import and_
 
 from pylons import tmpl_context as c
 from pylons import session
