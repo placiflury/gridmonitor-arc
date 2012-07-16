@@ -84,7 +84,7 @@ class JobsController(BaseController):
                 nkil = g.data_handler.get_num_user_jobs(dn, cluster, status = 'KILLED') 
                 ndel = g.data_handler.get_num_user_jobs(dn, cluster, status = 'DELETED') 
                 nftchd = g.data_handler.get_num_user_jobs(dn, cluster, status = 'FETCHED') 
-                nrun = g.data_handler.get_num_user_jobs(dn, cluster, status = 'INLRMS: R')
+                nrun = g.data_handler.get_num_user_jobs(dn, cluster, status = 'INLRMS:R')
                 norphaned = g.data_handler.get_num_user_jobs(dn, cluster, status = 'orphaned')
                 ntot  = g.data_handler.get_num_user_jobs(dn, cluster) 
                 nother = ntot - nfin - nfld - nkil - ndel - nftchd - norphaned -nrun
