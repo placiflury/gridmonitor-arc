@@ -264,7 +264,7 @@ class JobsController(BaseController):
             
             if _status in ['FINISHED', 'FAILED', 'KILLED']:
                 ret[_user][_status] += 1
-            elif _status == 'INRLMS: R':
+            elif _status == 'INLRMS:R':
                 ret[_user]['RUN'] += 1
             elif _status in JobApi.JOB_STATES_DEL:
                 ret[_user]['DELETED']  += 1 
@@ -401,7 +401,7 @@ class JobsController(BaseController):
                     nfld += 1 
                 elif _status == 'KILLED':
                     nkil += 1 
-                elif _status == 'INRLMS: R':
+                elif _status == 'INLRMS:R':
                     nrun += 1 
                 elif _status in JobApi.JOB_STATES_DEL:
                     ndel += 1 
