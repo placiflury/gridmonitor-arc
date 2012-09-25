@@ -63,6 +63,8 @@ class StatisticsController(BaseController):
             vos_series[vo_name]['n_job_tot']
             vos_series[vo_name]['wall_duration_series']
             vos_series[vo_name]['wall_duration_tot']
+            vos_series[vo_name]['cpu_duration_series']
+            vos_series[vo_name]['cpu_duration_tot']
         """
         if  not start_t:
             args = self._get_json_params()
@@ -102,16 +104,21 @@ class StatisticsController(BaseController):
             
             nj = Series('n_jobs', start_t, end_t, _secs_res)
             wd = Series('wall_duration', start_t, end_t, _secs_res)
+            cd = Series('cpu_duration', start_t, end_t, _secs_res)
+
             container[vo_name] = dict()
              
             for rec in helpers.get_vo_acrecords(vo, start_t, end_t, _secs_res):
                 nj.add_sample(rec.t_epoch, rec.n_jobs)
                 wd.add_sample(rec.t_epoch, rec.wall_duration)
+                cd.add_sample(rec.t_epoch, rec.cpu_duration)
        
             container[vo_name]['n_job_series'] = nj.get_series()
             container[vo_name]['wall_duration_series'] = wd.get_series()
+            container[vo_name]['cpu_duration_series'] = cd.get_series()
             container[vo_name]['n_job_tot'] = nj.get_sum()
             container[vo_name]['wall_duration_tot'] = wd.get_sum()
+            container[vo_name]['cpu_duration_tot'] = cd.get_sum()
         
         ret = {'eff_start_time': time.strftime("%d.%m.%Y", time.gmtime(start_t)),
                 'eff_end_time': time.strftime("%d.%m.%Y", time.gmtime(end_t)),
@@ -179,6 +186,7 @@ class StatisticsController(BaseController):
         
         ts_n_jobs = DataTable(descr, key_order)
         ts_wall_duration = DataTable(descr, key_order)
+        ts_cpu_duration = DataTable(descr, key_order)
         
         pkey_order = ['cluster_name','sum']
         pdescr = {'cluster_name': ('cluster', 'string'),
@@ -186,6 +194,7 @@ class StatisticsController(BaseController):
 
         pie_n_jobs = DataTable(pdescr, pkey_order)
         pie_wall_duration = DataTable(pdescr, pkey_order)
+        pie_cpu_duration = DataTable(pdescr, pkey_order)
 
         # create date series (shifted to fit 23:59:59 as stored in DB), still given in epoch time
         ref_start_t = start_t + _secs_res  - 1
@@ -198,20 +207,26 @@ class StatisticsController(BaseController):
             
             nj = Series('n_jobs', start_t, end_t, _secs_res)
             wd =  Series('wall_duration', start_t, end_t, _secs_res)
+            cd =  Series('cpu_duration', start_t, end_t, _secs_res)
             wd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
+            cd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
 
             container[cname] = dict()
             container[cname]['n_job_tot'] = 0
             container[cname]['wall_duration_tot'] = 0
+            container[cname]['cpu_duration_tot'] = 0
             for dn in dns: 
                 for rec in helpers.get_cluster_user_acrecords(cname, dn, start_t, end_t, _secs_res):
                     nj.add_sample(rec.t_epoch, rec.n_jobs)
                     wd.add_sample(rec.t_epoch, rec.wall_duration)
+                    cd.add_sample(rec.t_epoch, rec.cpu_duration)
       
             container[cname]['n_job_series'] = nj.get_padded_series(ref_dates)
             container[cname]['wall_duration_series'] = wd.get_padded_series(ref_dates)
+            container[cname]['cpu_duration_series'] = cd.get_padded_series(ref_dates)
             container[cname]['n_job_tot'] += nj.get_sum()
             container[cname]['wall_duration_tot'] += wd.get_sum()
+            container[cname]['cpu_duration_tot'] += cd.get_sum()
         
         # populate json container
         date_pos  = 0
@@ -220,26 +235,32 @@ class StatisticsController(BaseController):
             
             _jobs_row = [date_str]
             _wall_row = [date_str]
+            _cpu_row = [date_str]
             for cname in _key_order:
                 _jobs_row.append(container[cname]['n_job_series'][date_pos])
                 _wall_row.append(container[cname]['wall_duration_series'][date_pos])
+                _cpu_row.append(container[cname]['cpu_duration_series'][date_pos])
                 
             ts_n_jobs.add_row(_jobs_row)
             ts_wall_duration.add_row(_wall_row)
+            ts_cpu_duration.add_row(_cpu_row)
             date_pos += 1 
 
         # pie-charts 
         for cname in _key_order:
             pie_n_jobs.add_row(cname, round(container[cname]['n_job_tot'], 2))
             pie_wall_duration.add_row(cname, round(container[cname]['wall_duration_tot'], 2))
+            pie_cpu_duration.add_row(cname, round(container[cname]['cpu_duration_tot'], 2))
             
 
         ret = {'eff_start_time': time.strftime("%d.%m.%Y", time.gmtime(start_t)),
                 'eff_end_time': time.strftime("%d.%m.%Y", time.gmtime(end_t)),
                 'time_series_n_jobs': ts_n_jobs.get_json(),
                 'time_series_wall_duration': ts_wall_duration.get_json(),
+                'time_series_cpu_duration': ts_cpu_duration.get_json(),
                 'pie_n_jobs' : pie_n_jobs.get_json(),
-                'pie_wall_duration': pie_wall_duration.get_json()}
+                'pie_wall_duration': pie_wall_duration.get_json(),
+                'pie_cpu_duration': pie_cpu_duration.get_json()}
         
         return json.dumps(ret) 
     
@@ -310,6 +331,7 @@ class StatisticsController(BaseController):
         
         ts_n_jobs = DataTable(descr, key_order)
         ts_wall_duration = DataTable(descr, key_order)
+        ts_cpu_duration = DataTable(descr, key_order)
         
         pkey_order = ['vo_name','sum']
         pdescr = {'vo_name': ('VO', 'string'),
@@ -317,6 +339,7 @@ class StatisticsController(BaseController):
 
         pie_n_jobs = DataTable(pdescr, pkey_order)
         pie_wall_duration = DataTable(pdescr, pkey_order)
+        pie_cpu_duration = DataTable(pdescr, pkey_order)
 
         # create date series (shifted to fit 23:59:59 as stored in DB), still given in epoch time
         ref_start_t = start_t + _secs_res  - 1
@@ -332,20 +355,25 @@ class StatisticsController(BaseController):
             
             nj = Series('n_jobs', start_t, end_t, _secs_res)
             wd =  Series('wall_duration', start_t, end_t, _secs_res)
+            cd =  Series('cpu_duration', start_t, end_t, _secs_res)
             wd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
 
             container[vo_name] = dict()
             container[vo_name]['n_job_tot'] = 0
             container[vo_name]['wall_duration_tot'] = 0
+            container[vo_name]['cpu_duration_tot'] = 0
            
             for rec in helpers.get_vo_acrecords(vo, start_t, end_t, _secs_res):
                 nj.add_sample(rec.t_epoch, rec.n_jobs)
                 wd.add_sample(rec.t_epoch, rec.wall_duration)
+                cd.add_sample(rec.t_epoch, rec.cpu_duration)
       
             container[vo_name]['n_job_series'] = nj.get_padded_series(ref_dates)
             container[vo_name]['wall_duration_series'] = wd.get_padded_series(ref_dates)
+            container[vo_name]['cpu_duration_series'] = cd.get_padded_series(ref_dates)
             container[vo_name]['n_job_tot'] += nj.get_sum()
             container[vo_name]['wall_duration_tot'] += wd.get_sum()
+            container[vo_name]['cpu_duration_tot'] += cd.get_sum()
         
         # populate json container
         date_pos  = 0
@@ -354,26 +382,32 @@ class StatisticsController(BaseController):
             
             _jobs_row = [date_str]
             _wall_row = [date_str]
+            _cpu_row = [date_str]
             for _vo in _key_order:
                 _jobs_row.append(container[_vo]['n_job_series'][date_pos])
                 _wall_row.append(container[_vo]['wall_duration_series'][date_pos])
+                _cpu_row.append(container[_vo]['cpu_duration_series'][date_pos])
                 
             ts_n_jobs.add_row(_jobs_row)
             ts_wall_duration.add_row(_wall_row)
+            ts_cpu_duration.add_row(_cpu_row)
             date_pos += 1 
 
         # pie-charts
         for _vo in _key_order:
             pie_n_jobs.add_row(_vo, round(container[_vo]['n_job_tot'], 2))
             pie_wall_duration.add_row(_vo, round(container[_vo]['wall_duration_tot'], 2))
+            pie_cpu_duration.add_row(_vo, round(container[_vo]['cpu_duration_tot'], 2))
             
 
         ret = {'eff_start_time': time.strftime("%d.%m.%Y", time.gmtime(start_t)),
                 'eff_end_time': time.strftime("%d.%m.%Y", time.gmtime(end_t)),
                 'time_series_n_jobs': ts_n_jobs.get_json(),
                 'time_series_wall_duration': ts_wall_duration.get_json(),
+                'time_series_cpu_duration': ts_cpu_duration.get_json(),
                 'pie_n_jobs' : pie_n_jobs.get_json(),
-                'pie_wall_duration': pie_wall_duration.get_json()}
+                'pie_wall_duration': pie_wall_duration.get_json(),
+                'pie_cpu_duration': pie_cpu_duration.get_json()}
         
         return json.dumps(ret) 
     
@@ -430,6 +464,7 @@ class StatisticsController(BaseController):
         
         ts_n_jobs = DataTable(descr, key_order)
         ts_wall_duration = DataTable(descr, key_order)
+        ts_cpu_duration = DataTable(descr, key_order)
         
         pkey_order = ['cluster_name','sum']
         pdescr = {'cluster_name': ('cluster', 'string'),
@@ -437,6 +472,7 @@ class StatisticsController(BaseController):
 
         pie_n_jobs = DataTable(pdescr, pkey_order)
         pie_wall_duration = DataTable(pdescr, pkey_order)
+        pie_cpu_duration = DataTable(pdescr, pkey_order)
 
         # create date series (shifted to fit 23:59:59 as stored in DB), still given in epoch time
         ref_start_t = start_t + _secs_res  - 1
@@ -448,20 +484,26 @@ class StatisticsController(BaseController):
             
             nj = Series('n_jobs', start_t, end_t, _secs_res)
             wd =  Series('wall_duration', start_t, end_t, _secs_res)
+            cd =  Series('cpu_duration', start_t, end_t, _secs_res)
             wd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
-
+            cd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
+            
             container[cname] = dict()
             container[cname]['n_job_tot'] = 0
             container[cname]['wall_duration_tot'] = 0
+            container[cname]['cpu_duration_tot'] = 0
            
             for rec in helpers.get_cluster_acrecords(cname, start_t, end_t, _secs_res):
                 nj.add_sample(rec.t_epoch, rec.n_jobs)
                 wd.add_sample(rec.t_epoch, rec.wall_duration)
+                cd.add_sample(rec.t_epoch, rec.cpu_duration)
       
             container[cname]['n_job_series'] = nj.get_padded_series(ref_dates)
             container[cname]['wall_duration_series'] = wd.get_padded_series(ref_dates)
+            container[cname]['cpu_duration_series'] = cd.get_padded_series(ref_dates)
             container[cname]['n_job_tot'] += nj.get_sum()
             container[cname]['wall_duration_tot'] += wd.get_sum()
+            container[cname]['cpu_duration_tot'] += cd.get_sum()
         
         # populate json container
         date_pos  = 0
@@ -470,26 +512,32 @@ class StatisticsController(BaseController):
             
             _jobs_row = [date_str]
             _wall_row = [date_str]
+            _cpu_row = [date_str]
             for cname in _key_order:
                 _jobs_row.append(container[cname]['n_job_series'][date_pos])
                 _wall_row.append(container[cname]['wall_duration_series'][date_pos])
+                _cpu_row.append(container[cname]['cpu_duration_series'][date_pos])
                 
             ts_n_jobs.add_row(_jobs_row)
             ts_wall_duration.add_row(_wall_row)
+            ts_cpu_duration.add_row(_cpu_row)
             date_pos += 1 
 
         # pie-charts 
         for cname in _key_order:
             pie_n_jobs.add_row(cname, round(container[cname]['n_job_tot'], 2))
             pie_wall_duration.add_row(cname, round(container[cname]['wall_duration_tot'], 2))
+            pie_cpu_duration.add_row(cname, round(container[cname]['cpu_duration_tot'], 2))
             
 
         ret = {'eff_start_time': time.strftime("%d.%m.%Y", time.gmtime(start_t)),
                 'eff_end_time': time.strftime("%d.%m.%Y", time.gmtime(end_t)),
                 'time_series_n_jobs': ts_n_jobs.get_json(),
                 'time_series_wall_duration': ts_wall_duration.get_json(),
+                'time_series_cpu_duration': ts_cpu_duration.get_json(),
                 'pie_n_jobs' : pie_n_jobs.get_json(),
-                'pie_wall_duration': pie_wall_duration.get_json()}
+                'pie_wall_duration': pie_wall_duration.get_json(),
+                'pie_cpu_duration': pie_cpu_duration.get_json()}
         
         return json.dumps(ret) 
 
@@ -527,6 +575,7 @@ class StatisticsController(BaseController):
         
         ts_n_jobs = DataTable(descr, key_order)
         ts_wall_duration = DataTable(descr, key_order)
+        ts_cpu_duration = DataTable(descr, key_order)
         
         pkey_order = ['cluster_name','sum']
         pdescr = {'cluster_name': ('VO', 'string'),
@@ -534,12 +583,14 @@ class StatisticsController(BaseController):
 
         pie_n_jobs = DataTable(pdescr, pkey_order)
         pie_wall_duration = DataTable(pdescr, pkey_order)
+        pie_cpu_duration = DataTable(pdescr, pkey_order)
 
         _secs_res = StatisticsController.VALID_RESOLUTIONS[resolution]
         start_t, end_t = helpers.get_sampling_interval(start_t, end_t, _secs_res)
 
         nj = Series('n_jobs', start_t, end_t, _secs_res)
         wd =  Series('wall_duration', start_t, end_t, _secs_res)
+        cd =  Series('cpu_duration', start_t, end_t, _secs_res)
         
         # create date series (shifted to fit 23:59:59 as stored in DB), still given in epoch time
         ref_start_t = start_t + _secs_res  - 1
@@ -555,20 +606,26 @@ class StatisticsController(BaseController):
             
             nj = Series('n_jobs', start_t, end_t, _secs_res)
             wd =  Series('wall_duration', start_t, end_t, _secs_res)
+            cd =  Series('cpu_duration', start_t, end_t, _secs_res)
             wd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
+            cd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
 
             container[vo_name] = dict()
             container[vo_name]['n_job_tot'] = 0
             container[vo_name]['wall_duration_tot'] = 0
+            container[vo_name]['cpu_duration_tot'] = 0
 
             for rec in helpers.get_cluster_vo_acrecords(cluster_name, vo, start_t, end_t, _secs_res): 
                 nj.add_sample(rec.t_epoch, rec.n_jobs)
                 wd.add_sample(rec.t_epoch, rec.wall_duration)
+                cd.add_sample(rec.t_epoch, rec.cpu_duration)
       
             container[vo_name]['n_job_series'] = nj.get_padded_series(ref_dates)
             container[vo_name]['wall_duration_series'] = wd.get_padded_series(ref_dates)
+            container[vo_name]['cpu_duration_series'] = cd.get_padded_series(ref_dates)
             container[vo_name]['n_job_tot'] += nj.get_sum()
             container[vo_name]['wall_duration_tot'] += wd.get_sum()
+            container[vo_name]['cpu_duration_tot'] += cd.get_sum()
         
         # populate json container
         date_pos  = 0
@@ -577,24 +634,30 @@ class StatisticsController(BaseController):
             
             _jobs_row = [date_str]
             _wall_row = [date_str]
+            _cpu_row = [date_str]
             for _vo in _key_order:
                 _jobs_row.append(container[_vo]['n_job_series'][date_pos])
                 _wall_row.append(container[_vo]['wall_duration_series'][date_pos])
+                _cpu_row.append(container[_vo]['cpu_duration_series'][date_pos])
                 
             ts_n_jobs.add_row(_jobs_row)
             ts_wall_duration.add_row(_wall_row)
+            ts_cpu_duration.add_row(_cpu_row)
             date_pos += 1 
 
         # pie-charts
         for _vo in _key_order:
             pie_n_jobs.add_row(_vo, round(container[_vo]['n_job_tot'], 2))
             pie_wall_duration.add_row(_vo, round(container[_vo]['wall_duration_tot'], 2))
+            pie_cpu_duration.add_row(_vo, round(container[_vo]['cpu_duration_tot'], 2))
             
 
         ret = { 'time_series_n_jobs': ts_n_jobs.get_json(),
                 'time_series_wall_duration': ts_wall_duration.get_json(),
+                'time_series_cpu_duration': ts_cpu_duration.get_json(),
                 'pie_n_jobs' : pie_n_jobs.get_json(),
-                'pie_wall_duration': pie_wall_duration.get_json()}
+                'pie_wall_duration': pie_wall_duration.get_json(),
+                'pie_cpu_duration': pie_cpu_duration.get_json()}
         
         return ret 
     

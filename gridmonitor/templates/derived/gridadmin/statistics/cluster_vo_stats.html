@@ -42,14 +42,21 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                     var w_view = new google.visualization.DataView(w_data);
                     var gvw = new google.visualization.ColumnChart(document.getElementById(cid + '_cluster_wall'));
 
+                    var c_data = new google.visualization.DataTable(_data.time_series_cpu_duration, 0.6);
+                    var c_view = new google.visualization.DataView(c_data);
+                    var gvc = new google.visualization.ColumnChart(document.getElementById(cid + '_cluster_cpu'));
 
                     var pie_j_data = new google.visualization.DataTable(_data.pie_n_jobs, 0.6);
                     var pie_j_view = new google.visualization.DataView(pie_j_data);
                     var gpiej = new google.visualization.PieChart(document.getElementById(cid + '_pie_jobs'));
+
                     var pie_w_data = new google.visualization.DataTable(_data.pie_wall_duration, 0.6);
                     var pie_w_view = new google.visualization.DataView(pie_w_data);
                     var gpiew = new google.visualization.PieChart(document.getElementById(cid  + '_pie_wall'));
 
+                    var pie_c_data = new google.visualization.DataTable(_data.pie_cpu_duration, 0.6);
+                    var pie_c_view = new google.visualization.DataView(pie_c_data);
+                    var gpiec = new google.visualization.PieChart(document.getElementById(cid  + '_pie_cpu'));
                     
                     gvj.draw(j_view, {
                         title : 'Jobs per VO for cluster ' + data.clusters[i],
@@ -68,6 +75,15 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                         vAxis: {title: "Walltime of Grid Jobs [hours]"},
                         hAxis: {title: "Date"}
                     });
+                    
+                    gvc.draw(c_view, {
+                        title : 'CPU times per VO for cluster '  + data.clusters[i] + ' [hours]',
+                        isStacked: true,
+                        width: 900,
+                        height: 400,
+                        vAxis: {title: "CPU time of Grid Jobs [hours]"},
+                        hAxis: {title: "Date"}
+                    });
 
                     gpiej.draw(pie_j_view, {
                         title : 'Jobs per VO for cluster ' + data.clusters[i],
@@ -77,6 +93,12 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
 
                     gpiew.draw(pie_w_view, {
                         title : 'Walltimes per VO for cluster '  + data.clusters[i] + ' [hours]',
+                        width: 300,
+                        height: 280,
+                    });
+                    
+                    gpiec.draw(pie_c_view, {
+                        title : 'CPU times per VO for cluster '  + data.clusters[i] + ' [hours]',
                         width: 300,
                         height: 280,
                     });
@@ -125,6 +147,14 @@ $(document).ready(function() {
         </td>
         <td>
             <div id="${cid}_pie_wall" style="width: 300px;"></div>
+        </td>
+    </tr>
+    <tr class='nohover'>
+        <td colspan = 2>
+        <div id="${cid}_cluster_cpu" style="width: 900px; height: 400px;"></div>
+        </td>
+        <td>
+            <div id="${cid}_pie_cpu" style="width: 300px;"></div>
         </td>
     </tr>
 %endfor

@@ -306,7 +306,6 @@ gridmonitor/templates/derived/gridadmin/infosys/details.html
 gridmonitor/templates/derived/gridadmin/infosys/index.html
 gridmonitor/templates/derived/gridadmin/overview/index.html
 gridmonitor/templates/derived/gridadmin/overview/report.html
-gridmonitor/templates/derived/gridadmin/sfts/.results.html.swp
 gridmonitor/templates/derived/gridadmin/sfts/change.html
 gridmonitor/templates/derived/gridadmin/sfts/form.html
 gridmonitor/templates/derived/gridadmin/sfts/index.html
@@ -314,6 +313,7 @@ gridmonitor/templates/derived/gridadmin/sfts/nochange.html
 gridmonitor/templates/derived/gridadmin/sfts/results.html
 gridmonitor/templates/derived/gridadmin/sfts/sft.html
 gridmonitor/templates/derived/gridadmin/sfts/show_details.html
+gridmonitor/templates/derived/gridadmin/statistics/.cluster_vo_stats.html.swp
 gridmonitor/templates/derived/gridadmin/statistics/cluster_stats.html
 gridmonitor/templates/derived/gridadmin/statistics/cluster_vo_stats.html
 gridmonitor/templates/derived/gridadmin/statistics/form.html

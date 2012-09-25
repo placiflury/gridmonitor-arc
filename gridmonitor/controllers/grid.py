@@ -15,6 +15,23 @@ log = logging.getLogger(__name__)
 
 class GridController(BaseController):
     
+    def _get_json_params(self):
+        """ extracts json parameters from 
+            request (used to get params sent
+            by ajax)
+        """
+
+        md = request.params  # UnicodeMultiDict
+        # convert to simple dict
+        params = {}
+        for k in md.keys():
+            if k[-2:] == '[]': # got list 
+                params[k[:-2]] = md.getall(k)
+            else:
+                params[k] = md.get(k)
+
+        log.debug("Got following json params: >%s<" % params)
+        return params
 
     def get_nagios_cores_stats(self):
         """
@@ -45,15 +62,13 @@ class GridController(BaseController):
 
     def get_nagios_stats(self):
         """
-        Should allow to get nagios info for specifies 'hostlist[]', 
+        Should allow to get nagios info of 'hostlist', 
         which is passed by a POST request
 
         returns a json (dictionary) object
         """
-        ddict = request.POST # doubleDict
-        hlist = ddict.getall('hostlist[]') # XXX why did it got the '[]' suffix ???
-
-        return json.dumps(get_nagios_summary(hlist, dates2utc = True))
+        args = self._get_json_params()
+        return json.dumps(get_nagios_summary(args['hostlist'], dates2utc = True))
 
 
 

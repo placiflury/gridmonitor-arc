@@ -5,6 +5,9 @@ from datetime import datetime
 
 from pylons import tmpl_context as c
 from pylons import app_globals as g
+
+from sft.utils import helpers as sft_helpers
+
 import gridmonitor.lib.helpers as h
 
 from  gridmonitor.lib.nagios_utils import get_nagios_scheduleddowntime_items, get_nagios_service_statuses
@@ -70,7 +73,6 @@ class ClusterController(BaseController):
         _html = '<h2> ' + tag + '</h2> \n' +  \
                 '<table summary="Status Infobox">'  
 
- 
         if tag == 'Nagios':
             if not jstatus.has_key('nagios'):
                 _html += "<tr> <td colspan='2'> Cluster on (nagios) scheduled downtime </td> </tr>"
@@ -87,9 +89,24 @@ class ClusterController(BaseController):
                         css_class = ClusterController.CSS_STATUS_CLASS[_nagios[k]['status']]
                         _html += '<tr class="%s"> <td> %s</td> <td> %s </td></tr>' % (css_class, k, _nagios[k]['output'])
         elif tag == 'SFT':
-            pass
+            if jstatus['status'] == 'Downtime':
+                _html += '<tr> <td colspan=5> Scheduled downtime! SFTs not checked.</td></tr>'
+            else:
+                sft_info = jstatus['SFT']
+        
+                for sft_name, jobs_info  in sft_info.items():
+                    for job in jobs_info:
+                        _html += '<tr> <td>' + job['test_name'] + '</td>'
+                        _html += '<td>' + job['submission_time'] + '</td>'
+                        _html += '<td>' + job['status'] + '</td>'
+                        if job['error_type']:
+                            _html += '<td>' + job['error_type'] + '</td>'
+                            _html += '<td>' + job['error_msg'] + '</td> </tr> \n'
+                        else:
+                            _html += '<td></td><td></td></tr>\n'
+                 
         elif tag == 'Infosys':
-            if jstatus['status'] == 'Scheduled Downtime':
+            if jstatus['status'] == 'Downtime':
                 _html += '<tr> <td colspan=2> Scheduled downtime! Infosys not checked.</td></tr>'
             else:
                 _html += '<tr><td>Status</td> <td> %s </td> </tr>' % (jstatus['status']);
@@ -124,6 +141,33 @@ class ClusterController(BaseController):
             services = get_nagios_service_statuses(hostname, dates2utc = True)
             jstatus['nagios'] = services 
             
+
+        # sft information
+        _sft_status = dict(ok=0, warn=0, error=0, unknown=0)
+        if jstatus['status'] != 'Downtime':
+            sfts_summaries = {}
+            sfts= sft_helpers.get_cluster_last_sfts(hostname)
+            for sft_name, sft_jobs in  sfts.items():
+                sfts_summaries[sft_name] = []
+                for job in sft_jobs:
+                    _job = {}
+                    _job['test_name'] = job.test_name
+                    _job['submission_time'] = tu.datetime2utcstring(job.submissiontime)
+                    _job['status']  = job.status
+                    _job['error_type'] = job.error_type
+                    _job['error_msg'] = job.error_msg
+                    sfts_summaries[sft_name].append(_job)
+                    if 'success' in job.status:
+                        _sft_status['ok'] += 1
+                    elif 'failed' in job.status:
+                        _sft_status['error'] += 1
+                    elif 'timeout' in job.status:
+                        _sft_status['warn'] += 1
+                    else:
+                        _sft_status['unknown'] += 1
+                        
+            jstatus['SFT'] = sfts_summaries 
+            jstatus['sft_status'] = _sft_status
 
         # infosys information
         cluster = g.get_cluster(hostname)

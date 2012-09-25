@@ -7,7 +7,7 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
 
      google.load('visualization', '1', {packages: ['corechart']});
 
-    function jobsWalltimePerClusterTable(){
+    function jobsWallCPUtimePerClusterTable(){
         var _url = '/json/statistics/gc_cluster_stats'; 
         if (req_params.modified){
             req_params.modified = false;
@@ -30,6 +30,10 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                     var w_view = new google.visualization.DataView(w_data);
                     var gvw = new google.visualization.ColumnChart(document.getElementById('cluster_wall'));
                     //var gvw = new google.visualization.AreaChart(document.getElementById('cluster_wall'));
+                    
+                    var c_data = new google.visualization.DataTable(data.time_series_cpu_duration, 0.6);
+                    var c_view = new google.visualization.DataView(c_data);
+                    var gvc = new google.visualization.ColumnChart(document.getElementById('cluster_cpu'));
 
 
                     var pie_j_data = new google.visualization.DataTable(data.pie_n_jobs, 0.6);
@@ -40,6 +44,9 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                     var pie_w_view = new google.visualization.DataView(pie_w_data);
                     var gpiew = new google.visualization.PieChart(document.getElementById('pie_wall'));
 
+                    var pie_c_data = new google.visualization.DataTable(data.pie_cpu_duration, 0.6);
+                    var pie_c_view = new google.visualization.DataView(pie_c_data);
+                    var gpiec = new google.visualization.PieChart(document.getElementById('pie_cpu'));
 
                     $('#json_reply').html(_html);
                     $('#from').attr('value', data.eff_start_time);
@@ -62,6 +69,15 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                     vAxis: {title: "Walltime of Grid Jobs [hours]"},
                     hAxis: {title: "Date"}
                   });
+                    
+                gvc.draw(c_view, {
+                    title : 'CPU time per Cluster on Grid',
+                    isStacked: true,
+                    width: 1100,
+                    height: 400,
+                    vAxis: {title: "CPU time of Grid Jobs [hours]"},
+                    hAxis: {title: "Date"}
+                  });
 
                     gpiej.draw(pie_j_view, {
                         title : 'Jobs per Cluster on Grid',
@@ -74,6 +90,12 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
                         width: 450,
                         height: 300,
                         });
+                    
+                    gpiec.draw(pie_c_view, {
+                        title : 'CPU time of Grid Jobs [hours]',
+                        width: 450,
+                        height: 300,
+                        });
                 }
             });
         }
@@ -81,8 +103,8 @@ ${dateResPickerForm.dateResolution(c.start_t_str, c.end_t_str, c.resolution)} <!
 
 
 $(document).ready(function() {
-    jobsWalltimePerClusterTable();
-    $('#ctrl_table').click(jobsWalltimePerClusterTable);
+    jobsWallCPUtimePerClusterTable();
+    $('#ctrl_table').click(jobsWallCPUtimePerClusterTable);
 });
 
 </script>
@@ -113,11 +135,21 @@ $(document).ready(function() {
     </td>
 </tr>
 <tr class='nohover'>
+    <td colspan = 2>
+    <div id="cluster_cpu" style="width: 1100px; height: 400px;"></div>
+    </td>
+</tr>
+<tr class='nohover'>
     <td>
         <div id="pie_jobs" style="width: 450px; height: 300px;"></div>
     </td>
     <td>
         <div id="pie_wall" style="width: 450px; height: 300px;"></div>
+    </td>
+</tr>
+<tr class='nohover'>
+    <td colspan=2>
+        <div id="pie_cpu" style="width: 450px; height: 300px;"></div>
     </td>
 </tr>
 </table>

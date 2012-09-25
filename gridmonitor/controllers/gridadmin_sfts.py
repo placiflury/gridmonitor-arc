@@ -42,7 +42,7 @@ class GridadminSftsController(GridadminController):
 
             cl_name = job.cluster_name
             sf_name = job.sft_test_name
-            stat_ = job.status.lower() # XXX PF. changes to be tested...
+            stat_ = job.status.lower() 
             if stat_ in ['failed', 'fetched_failed']:
                 stat = 'FAILED'
             elif stat_ in ['fetched','success']:

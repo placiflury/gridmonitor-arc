@@ -54,6 +54,24 @@ var refreshClusterMeta = function(){
                         }
                     }
                     $(nagios_div).attr('class', _nagios_status);
+                    // qTIP for SFTs
+                    
+                    var _sft_status = data['sft_status'];
+                    var _sft_state = 'undef_status';
+                    
+                    if (_sft_status.error > 0){
+                        _sft_state = 'error_status';
+                    }
+                    else if (_sft_status.warn > 0){
+                        _sft_state = 'warn_status';
+                    }
+                    else if (_sft_status.ok > 0){
+                        _sft_state = 'ok_status';
+                    }
+                    else {
+                        _sft_state = 'undef_status';
+                    }
+                    $(sft_div).attr('class', _sft_state);    
 
                     //  qTIP for Infosys
                     switch(data['status']){

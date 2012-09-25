@@ -141,6 +141,13 @@ class Series(object):
         self.avg = self.sum/float(n_samples)
             
 
+
+    def num_samples(self):
+        """ returns the number of samples """
+        if not self.series:
+            return 0
+        return len(self.series.keys())
+
     def get_min(self):
         """ return minimal sample value."""
         if not self.stats_ready:
