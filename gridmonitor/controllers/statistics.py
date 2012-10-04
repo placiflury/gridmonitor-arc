@@ -357,6 +357,7 @@ class StatisticsController(BaseController):
             wd =  Series('wall_duration', start_t, end_t, _secs_res)
             cd =  Series('cpu_duration', start_t, end_t, _secs_res)
             wd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
+            cd.set_scaling_factor(StatisticsController.SCALING_FACTOR)
 
             container[vo_name] = dict()
             container[vo_name]['n_job_tot'] = 0
